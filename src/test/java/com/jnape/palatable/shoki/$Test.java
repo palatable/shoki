@@ -10,6 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.jnape.palatable.shoki.$.$;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class $Test {
 
@@ -51,5 +52,24 @@ public class $Test {
 
         assertEquals((Integer) 1, memoized.force());
         assertEquals(1, counter.get());
+    }
+
+    @Test
+    public void fmap() {
+        $<Integer> $ = $(() -> 1);
+        assertEquals((Integer) 2, $.fmap(x -> x + 1).force());
+    }
+
+    @Test
+    public void fmapDoesNotForce() {
+        $<Integer> $ = $(() -> {
+            throw new AssertionError();
+        });
+        $.fmap(x -> x + 1);
+    }
+
+    @Test
+    public void fmapOnMemoizedIsItselfMemoized() {
+        assertTrue($.memoize(() -> 1).fmap(n -> n + 1) instanceof $.Memoized);
     }
 }

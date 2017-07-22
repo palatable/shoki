@@ -1,8 +1,11 @@
 package com.jnape.palatable.shoki;
 
+import com.jnape.palatable.lambda.functor.Functor;
+
+import java.util.function.Function;
 import java.util.function.Supplier;
 
-public interface $<A> extends Supplier<A> {
+public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
 
     @Override
     default A get() {
@@ -10,6 +13,11 @@ public interface $<A> extends Supplier<A> {
     }
 
     A force();
+
+    @Override
+    default <B> $<B> fmap(Function<? super A, ? extends B> fn) {
+        return $(() -> fn.apply(force()));
+    }
 
     default $<A> memoize() {
         return new Memoized<>(this);
@@ -31,6 +39,11 @@ public interface $<A> extends Supplier<A> {
         private Memoized(Supplier<A> supplier) {
             this.supplier = supplier;
             computed = false;
+        }
+
+        @Override
+        public <B> Memoized<B> fmap(Function<? super A, ? extends B> fn) {
+            return new Memoized<>(() -> fn.apply(force()));
         }
 
         @Override

@@ -1,7 +1,7 @@
 Shōki (正気)
 ======
 [![Build Status](https://travis-ci.org/palatable/shoki.svg)](https://travis-ci.org/palatable/shoki)
-[![Lambda](https://img.shields.io/maven-central/v/com.jnape.palatable/shoki.svg)](http://search.maven.org/#search%7Cga%7C1%7Ccom.jnape.palatable.shoki)
+[![Shōki](https://img.shields.io/maven-central/v/com.jnape.palatable/shoki.svg)](http://search.maven.org/#search%7Cga%7C1%7Ccom.jnape.palatable.shoki)
 
 Purely functional data structures in Java based on Chris Okasaki's seminal thesis.
 

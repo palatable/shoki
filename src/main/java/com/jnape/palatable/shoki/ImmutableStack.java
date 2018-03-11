@@ -18,7 +18,7 @@ import static java.util.Arrays.asList;
  *
  * @param <A> the element type
  */
-public abstract class ImmutableStack<A> implements Stack<Integer, A, ImmutableStack<A>> {
+public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     private ImmutableStack() {
     }
@@ -29,25 +29,24 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A, ImmutableSt
      *
      * @return {@link Maybe} the head and tail of this {@link ImmutableStack}
      */
-    @Override
-    public abstract Maybe<Tuple2<A, ImmutableStack<A>>> shift();
+    public abstract Maybe<Tuple2<A, ImmutableStack<A>>> pop();
 
     /**
-     * Produce a new {@link ImmutableStack} instance with <code>a</code> added to the top. O(1).
+     * Produce a new {@link ImmutableStack} instance with <code>a</code> added to the front. O(1).
      *
      * @param a the element
      * @return the new {@link ImmutableStack}
      */
     @Override
-    public final ImmutableStack<A> unshift(A a) {
+    public final ImmutableStack<A> cons(A a) {
         return new Head<>(a, this);
     }
 
     /**
-     * If this {@link ImmutableStack} is not empty, return the top element wrapped in {@link Maybe}. Otherwise, return
+     * If this {@link ImmutableStack} is not empty, return the head element wrapped in {@link Maybe}. Otherwise, return
      * {@link Maybe#nothing()}. O(1).
      *
-     * @return {@link Maybe} the top element of this {@link ImmutableStack}
+     * @return {@link Maybe} the head element of this {@link ImmutableStack}
      */
     @Override
     public abstract Maybe<A> head();
@@ -136,18 +135,18 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A, ImmutableSt
      * Convenience static factory method to construct an {@link ImmutableStack} from an {@link Iterable} of elements.
      * O(n).
      *
-     * @param as  the {@link Iterable} of elements
+     * @param as  the {@link Iterable} of elements from back to front
      * @param <A> the {@link Iterable} and {@link ImmutableStack} element type
      * @return the new {@link ImmutableStack}
      */
     public static <A> ImmutableStack<A> of(Iterable<A> as) {
-        return foldLeft(ImmutableStack::unshift, empty(), as);
+        return foldLeft(ImmutableStack::cons, empty(), as);
     }
 
     /**
      * Convenience static factory method to construct an {@link ImmutableStack} from varargs elements. O(n).
      *
-     * @param as  the stack from bottom to top
+     * @param as  the elements from back to front
      * @param <A> the {@link ImmutableStack} element type
      * @return the new {@link ImmutableStack}
      */
@@ -170,7 +169,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A, ImmutableSt
         }
 
         @Override
-        public Maybe<Tuple2<A, ImmutableStack<A>>> shift() {
+        public Maybe<Tuple2<A, ImmutableStack<A>>> pop() {
             return just(tuple(head, tail));
         }
 
@@ -207,7 +206,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A, ImmutableSt
         }
 
         @Override
-        public Maybe<Tuple2<A, ImmutableStack<A>>> shift() {
+        public Maybe<Tuple2<A, ImmutableStack<A>>> pop() {
             return nothing();
         }
 

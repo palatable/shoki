@@ -37,13 +37,13 @@ public class ImmutableStackTest {
 
     @Test
     public void unshift() {
-        assertEquals(just(tuple(1, ImmutableStack.of(3, 2))), ImmutableStack.of(3, 2, 1).shift());
-        assertEquals(nothing(), ImmutableStack.empty().shift());
+        assertEquals(just(tuple(1, ImmutableStack.of(3, 2))), ImmutableStack.of(3, 2, 1).pop());
+        assertEquals(nothing(), ImmutableStack.empty().pop());
     }
 
     @Test
     public void iteratesLastInFirstOutIfNonEmpty() {
-        ImmutableStack<Integer> stack = ImmutableStack.<Integer>empty().unshift(3).unshift(2).unshift(1);
+        ImmutableStack<Integer> stack = ImmutableStack.<Integer>empty().cons(3).cons(2).cons(1);
 
         assertEquals(just(1), stack.head());
         assertEquals(just(2), stack.tail().head());
@@ -53,27 +53,27 @@ public class ImmutableStackTest {
 
     @Test
     public void nonEmptyStackIsNotEmpty() {
-        assertFalse(ImmutableStack.empty().unshift(1).isEmpty());
+        assertFalse(ImmutableStack.empty().cons(1).isEmpty());
     }
 
     @Test
     public void structureIsShared() {
         ImmutableStack<Integer> tail = ImmutableStack.of(3, 2);
-        ImmutableStack<Integer> stack = tail.unshift(1);
+        ImmutableStack<Integer> stack = tail.cons(1);
 
         assertSame(stack.tail(), tail);
     }
 
     @Test
     public void convenienceStaticFactoryMethod() {
-        assertEquals(ImmutableStack.empty().unshift(1).unshift(2).unshift(3), ImmutableStack.of(asList(1, 2, 3)));
-        assertEquals(ImmutableStack.empty().unshift(1).unshift(2).unshift(3), ImmutableStack.of(1, 2, 3));
+        assertEquals(ImmutableStack.empty().cons(1).cons(2).cons(3), ImmutableStack.of(asList(1, 2, 3)));
+        assertEquals(ImmutableStack.empty().cons(1).cons(2).cons(3), ImmutableStack.of(1, 2, 3));
     }
 
     @Test
     public void stackSafeEqualsAndHashCode() {
-        ImmutableStack<Integer> xs = foldLeft(ImmutableStack::unshift, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
-        ImmutableStack<Integer> ys = foldLeft(ImmutableStack::unshift, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
+        ImmutableStack<Integer> xs = foldLeft(ImmutableStack::cons, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
+        ImmutableStack<Integer> ys = foldLeft(ImmutableStack::cons, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
         assertEquals(xs, ys);
         assertEquals(xs.hashCode(), ys.hashCode());
         assertEquals(ImmutableStack.empty(), ImmutableStack.empty());
@@ -82,7 +82,7 @@ public class ImmutableStackTest {
     @Test
     @SuppressWarnings("ResultOfMethodCallIgnored")
     public void stackSafeHashCode() {
-        ImmutableStack<Integer> xs = foldLeft(ImmutableStack::unshift, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
+        ImmutableStack<Integer> xs = foldLeft(ImmutableStack::cons, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
         xs.hashCode();
     }
 

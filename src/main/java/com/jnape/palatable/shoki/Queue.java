@@ -5,6 +5,7 @@ package com.jnape.palatable.shoki;
  *
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type
+ * @see ImmutableQueue
  */
 public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A> {
 

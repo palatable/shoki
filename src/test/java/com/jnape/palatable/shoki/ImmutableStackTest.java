@@ -80,15 +80,8 @@ public class ImmutableStackTest {
     }
 
     @Test
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    public void stackSafeHashCode() {
-        ImmutableStack<Integer> xs = foldLeft(ImmutableStack::cons, ImmutableStack.<Integer>empty(), replicate(10_000, 1));
-        xs.hashCode();
-    }
-
-    @Test
     public void toStringImplementation() {
-        assertEquals("ImmutableStack[1, 2, 3]", ImmutableStack.of(3, 2, 1).toString());
         assertEquals("ImmutableStack[]", ImmutableStack.empty().toString());
+        assertEquals("ImmutableStack[1, 2, 3]", ImmutableStack.of(3, 2, 1).toString());
     }
 }

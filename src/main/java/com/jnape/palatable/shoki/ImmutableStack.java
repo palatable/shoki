@@ -4,6 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.SizeInfo.Known;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -25,14 +26,14 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     /**
      * If this {@link ImmutableStack} is not empty, return a {@link Tuple2} of the head and tail wrapped in {@link
-     * Maybe}. Otherwise, return {@link Maybe#nothing()}. O(1).
+     * Maybe}. Otherwise, return {@link Maybe#nothing()}. <code>O(1)</code>.
      *
      * @return {@link Maybe} the head and tail of this {@link ImmutableStack}
      */
     public abstract Maybe<Tuple2<A, ImmutableStack<A>>> pop();
 
     /**
-     * Produce a new {@link ImmutableStack} instance with <code>a</code> added to the front. O(1).
+     * Produce a new {@link ImmutableStack} instance with <code>a</code> added to the front. <code>O(1)</code>.
      *
      * @param a the element
      * @return the new {@link ImmutableStack}
@@ -44,7 +45,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     /**
      * If this {@link ImmutableStack} is not empty, return the head element wrapped in {@link Maybe}. Otherwise, return
-     * {@link Maybe#nothing()}. O(1).
+     * {@link Maybe#nothing()}. <code>O(1)</code>.
      *
      * @return {@link Maybe} the head element of this {@link ImmutableStack}
      */
@@ -53,7 +54,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     /**
      * The remaining elements after removing the head of this {@link ImmutableStack}, or {@link ImmutableStack#empty()}
-     * if there are no elements. O(1).
+     * if there are no elements. <code>O(1)</code>.
      *
      * @return the tail of this {@link ImmutableStack}
      */
@@ -61,7 +62,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     public abstract ImmutableStack<A> tail();
 
     /**
-     * Returns true if this {@link ImmutableStack} is empty; otherwise, returns false. O(1).
+     * Returns true if this {@link ImmutableStack} is empty; otherwise, returns false. <code>O(1)</code>.
      *
      * @return whether or not this {@link ImmutableStack} is empty
      */
@@ -69,14 +70,14 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     public abstract boolean isEmpty();
 
     /**
-     * @inheritDoc
+     * The {@link SizeInfo} of this {@link ImmutableStack}. <code>O(1)</code>.
      */
     @Override
     public abstract Known<Integer> sizeInfo();
 
     /**
      * Returns true if <code>other</code> is an {@link ImmutableStack} with exactly the same elements in the same order
-     * as this {@link ImmutableStack}; otherwise, returns false. O(n).
+     * as this {@link ImmutableStack}; otherwise, returns false. <code>O(n)</code>.
      *
      * @param other the reference object with which to compare
      * @return true if the compared to a value-equal {@link ImmutableStack}
@@ -85,22 +86,22 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     public final boolean equals(Object other) {
         if (other instanceof ImmutableStack) {
             ImmutableStack that = (ImmutableStack) other;
-            if (this.sizeInfo().equals(that.sizeInfo())) {
-                ImmutableStack next = this;
-                while (next instanceof Head) {
-                    if (!Objects.equals(((Head) next).head, ((Head) that).head))
-                        return false;
-                    next = next.tail();
-                    that = that.tail();
-                }
-                return true;
+            if (!sizeInfo().equals(that.sizeInfo()))
+                return false;
+
+            Iterator<?> xsIt = iterator();
+            Iterator<?> ysIt = that.iterator();
+            while (xsIt.hasNext()) {
+                if (!Objects.equals(xsIt.next(), ysIt.next()))
+                    return false;
             }
+            return true;
         }
         return false;
     }
 
     /**
-     * Provide a debug-friendly string representation of this {@link ImmutableStack}. O(n)
+     * Provide a debug-friendly string representation of this {@link ImmutableStack}. <code>O(n)</code>
      *
      * @return the string representation of this {@link ImmutableStack}
      */
@@ -123,7 +124,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     /**
      * The empty singleton instance of this {@link ImmutableStack}.
      *
-     * @param <A> the element type
+     * @param <A> the {@link ImmutableStack} element type
      * @return an empty stack
      */
     @SuppressWarnings("unchecked")
@@ -133,7 +134,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     /**
      * Convenience static factory method to construct an {@link ImmutableStack} from an {@link Iterable} of elements.
-     * O(n).
+     * <code>O(n)</code>.
      *
      * @param as  the {@link Iterable} of elements from back to front
      * @param <A> the {@link Iterable} and {@link ImmutableStack} element type
@@ -144,7 +145,8 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * Convenience static factory method to construct an {@link ImmutableStack} from varargs elements. O(n).
+     * Convenience static factory method to construct an {@link ImmutableStack} from varargs elements.
+     * <code>O(n)</code>.
      *
      * @param as  the elements from back to front
      * @param <A> the {@link ImmutableStack} element type

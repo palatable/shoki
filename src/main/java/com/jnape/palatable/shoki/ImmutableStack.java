@@ -4,7 +4,6 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.SizeInfo.Known;
 
-import java.util.Iterator;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -22,6 +21,16 @@ import static java.util.Arrays.asList;
 public abstract class ImmutableStack<A> implements Stack<Integer, A> {
 
     private ImmutableStack() {
+    }
+
+    /**
+     * Reverse this {@link ImmutableStack}. <code>O(n)</code>.
+     *
+     * @return this {@link ImmutableStack}, reversed
+     */
+    @Override
+    public ImmutableStack<A> reverse() {
+        return foldLeft(ImmutableStack::cons, ImmutableStack.empty(), this);
     }
 
     /**
@@ -84,20 +93,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
      */
     @Override
     public final boolean equals(Object other) {
-        if (other instanceof ImmutableStack) {
-            ImmutableStack that = (ImmutableStack) other;
-            if (!sizeInfo().equals(that.sizeInfo()))
-                return false;
-
-            Iterator<?> xsIt = iterator();
-            Iterator<?> ysIt = that.iterator();
-            while (xsIt.hasNext()) {
-                if (!Objects.equals(xsIt.next(), ysIt.next()))
-                    return false;
-            }
-            return true;
-        }
-        return false;
+        return other instanceof ImmutableStack && OrderedCollection.equals(this, (ImmutableStack) other);
     }
 
     /**

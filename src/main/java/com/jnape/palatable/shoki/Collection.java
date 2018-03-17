@@ -5,7 +5,7 @@ import com.jnape.palatable.shoki.SizeInfo.Known;
 /**
  * A known-sized {@link Sequence}.
  *
- * @param <Size> the fixed size {@link Number} type
+ * @param <Size> the known size {@link Number} type
  * @param <A>    the element type
  */
 public interface Collection<Size extends Number, A> extends Sequence<A>, Sizable {

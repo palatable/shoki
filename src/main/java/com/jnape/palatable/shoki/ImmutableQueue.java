@@ -4,7 +4,6 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.SizeInfo.Known;
 
 import java.util.Iterator;
-import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -20,6 +19,14 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
 
     private ImmutableQueue() {
     }
+
+    /**
+     * Reverse this {@link ImmutableQueue}. <code>O(1)</code>.
+     *
+     * @return this {@link ImmutableQueue}, reversed
+     */
+    @Override
+    public abstract ImmutableQueue<A> reverse();
 
     /**
      * Produce a new {@link ImmutableQueue} instance with <code>a</code> added to the back. <code>O(1)</code>.
@@ -58,20 +65,7 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
      */
     @Override
     public boolean equals(Object other) {
-        if (other instanceof ImmutableQueue) {
-            ImmutableQueue that = (ImmutableQueue) other;
-            if (!sizeInfo().equals(that.sizeInfo()))
-                return false;
-
-            Iterator<A> these = iterator();
-            Iterator those = that.iterator();
-            while (these.hasNext()) {
-                if (!Objects.equals(these.next(), those.next()))
-                    return false;
-            }
-            return true;
-        }
-        return false;
+        return other instanceof ImmutableQueue && OrderedCollection.equals(this, (ImmutableQueue) other);
     }
 
     /**
@@ -117,7 +111,8 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
     }
 
     /**
-     * Convenience static factory method to construct an {@link ImmutableQueue} from varargs elements. <code>O(n)</code>.
+     * Convenience static factory method to construct an {@link ImmutableQueue} from varargs elements.
+     * <code>O(n)</code>.
      *
      * @param as  the elements from front to back
      * @param <A> the {@link ImmutableQueue} element type
@@ -132,6 +127,11 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
         private static final Empty INSTANCE = new Empty();
 
         private Empty() {
+        }
+
+        @Override
+        public ImmutableQueue<A> reverse() {
+            return this;
         }
 
         @Override
@@ -176,6 +176,11 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
             this.incoming = incoming;
             sizeInfo = known(outgoing.sizeInfo().getSize() + incoming.sizeInfo().getSize());
             hashCode = 31 * outgoing.hashCode() + incoming.hashCode();
+        }
+
+        @Override
+        public ImmutableQueue<A> reverse() {
+            return new NonEmpty<>(incoming, outgoing);
         }
 
         @Override

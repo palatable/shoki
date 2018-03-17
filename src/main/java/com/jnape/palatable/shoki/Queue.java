@@ -6,7 +6,7 @@ package com.jnape.palatable.shoki;
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type
  */
-public interface Queue<Size extends Number, A> extends Collection<Size, A> {
+public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A> {
 
     /**
      * Add an element to the back of this {@link Queue}.
@@ -15,4 +15,16 @@ public interface Queue<Size extends Number, A> extends Collection<Size, A> {
      * @return this {@link Queue} with the element added to the back
      */
     Queue<Size, A> snoc(A a);
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    Queue<Size, A> tail();
+
+    /**
+     * @inheritDoc
+     */
+    @Override
+    Queue<Size, A> reverse();
 }

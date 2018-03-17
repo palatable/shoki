@@ -57,6 +57,12 @@ public class ImmutableStackTest {
     }
 
     @Test
+    public void reverse() {
+        assertEquals(ImmutableStack.of(3, 2, 1), ImmutableStack.of(1, 2, 3).reverse());
+        assertEquals(ImmutableStack.of(1, 2, 3), ImmutableStack.of(1, 2, 3).reverse().reverse());
+    }
+
+    @Test
     public void structureIsShared() {
         ImmutableStack<Integer> tail = ImmutableStack.of(3, 2);
         ImmutableStack<Integer> stack = tail.cons(1);

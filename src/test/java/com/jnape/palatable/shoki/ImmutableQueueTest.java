@@ -64,6 +64,13 @@ public class ImmutableQueueTest {
     }
 
     @Test
+    public void reverse() {
+        assertEquals(ImmutableQueue.of(3, 2, 1), ImmutableQueue.of(1, 2, 3).reverse());
+        assertEquals(ImmutableQueue.of(5, 4, 3, 2, 1), ImmutableQueue.of(2, 3).tail().snoc(4).snoc(5).cons(2).cons(1).reverse());
+        assertEquals(ImmutableQueue.of(1, 2, 3), ImmutableQueue.of(1, 2, 3).reverse().reverse());
+    }
+
+    @Test
     public void stackSafeEqualsAndHashCode() {
         ImmutableQueue<Integer> xs = foldLeft(ImmutableQueue::cons, ImmutableQueue.<Integer>empty(), replicate(10_000, 1));
         ImmutableQueue<Integer> ys = foldLeft(ImmutableQueue::cons, ImmutableQueue.<Integer>empty(), replicate(10_000, 1));

@@ -21,14 +21,6 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
     }
 
     /**
-     * Reverse this {@link ImmutableQueue}. <code>O(1)</code>.
-     *
-     * @return this {@link ImmutableQueue}, reversed
-     */
-    @Override
-    public abstract ImmutableQueue<A> reverse();
-
-    /**
      * Produce a new {@link ImmutableQueue} instance with <code>a</code> added to the back. <code>O(1)</code>.
      *
      * @param a the element
@@ -38,15 +30,6 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
     public abstract ImmutableQueue<A> snoc(A a);
 
     /**
-     * Produce a new {@link ImmutableQueue} instance with <code>a</code> added to the front. <code>O(1)</code>.
-     *
-     * @param a the element
-     * @return the new {@link ImmutableQueue}
-     */
-    @Override
-    public abstract ImmutableQueue<A> cons(A a);
-
-    /**
      * The remaining elements after removing the head of this {@link ImmutableQueue}, or {@link ImmutableQueue#empty()}
      * if there are no elements. Amortized <code>O(1)</code>.
      *
@@ -54,6 +37,23 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
      */
     @Override
     public abstract ImmutableQueue<A> tail();
+
+    /**
+     * Reverse this {@link ImmutableQueue}. <code>O(1)</code>.
+     *
+     * @return this {@link ImmutableQueue}, reversed
+     */
+    @Override
+    public abstract ImmutableQueue<A> reverse();
+
+    /**
+     * Produce a new {@link ImmutableQueue} instance with <code>a</code> added to the front. <code>O(1)</code>.
+     *
+     * @param a the element
+     * @return the new {@link ImmutableQueue}
+     */
+    @Override
+    public abstract ImmutableQueue<A> cons(A a);
 
     /**
      * Returns true if <code>other</code> is an {@link ImmutableQueue} with exactly the same elements in the same order

@@ -24,16 +24,6 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * Reverse this {@link ImmutableStack}. <code>O(n)</code>.
-     *
-     * @return this {@link ImmutableStack}, reversed
-     */
-    @Override
-    public ImmutableStack<A> reverse() {
-        return foldLeft(ImmutableStack::cons, ImmutableStack.empty(), this);
-    }
-
-    /**
      * If this {@link ImmutableStack} is not empty, return a {@link Tuple2} of the head and tail wrapped in {@link
      * Maybe}. Otherwise, return {@link Maybe#nothing()}. <code>O(1)</code>.
      *
@@ -53,15 +43,6 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * If this {@link ImmutableStack} is not empty, return the head element wrapped in {@link Maybe}. Otherwise, return
-     * {@link Maybe#nothing()}. <code>O(1)</code>.
-     *
-     * @return {@link Maybe} the head element of this {@link ImmutableStack}
-     */
-    @Override
-    public abstract Maybe<A> head();
-
-    /**
      * The remaining elements after removing the head of this {@link ImmutableStack}, or {@link ImmutableStack#empty()}
      * if there are no elements. <code>O(1)</code>.
      *
@@ -71,18 +52,37 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     public abstract ImmutableStack<A> tail();
 
     /**
-     * Returns true if this {@link ImmutableStack} is empty; otherwise, returns false. <code>O(1)</code>.
+     * Reverse this {@link ImmutableStack}. <code>O(n)</code>.
      *
-     * @return whether or not this {@link ImmutableStack} is empty
+     * @return this {@link ImmutableStack}, reversed
      */
     @Override
-    public abstract boolean isEmpty();
+    public ImmutableStack<A> reverse() {
+        return foldLeft(ImmutableStack::cons, ImmutableStack.empty(), this);
+    }
+
+    /**
+     * If this {@link ImmutableStack} is not empty, return the head element wrapped in {@link Maybe}. Otherwise, return
+     * {@link Maybe#nothing()}. <code>O(1)</code>.
+     *
+     * @return {@link Maybe} the head element of this {@link ImmutableStack}
+     */
+    @Override
+    public abstract Maybe<A> head();
 
     /**
      * The {@link SizeInfo} of this {@link ImmutableStack}. <code>O(1)</code>.
      */
     @Override
     public abstract Known<Integer> sizeInfo();
+
+    /**
+     * Returns true if this {@link ImmutableStack} is empty; otherwise, returns false. <code>O(1)</code>.
+     *
+     * @return whether or not this {@link ImmutableStack} is empty
+     */
+    @Override
+    public abstract boolean isEmpty();
 
     /**
      * Returns true if <code>other</code> is an {@link ImmutableStack} with exactly the same elements in the same order

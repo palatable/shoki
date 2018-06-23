@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import static com.jnape.palatable.shoki.$.$;
 
-public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Stream.Nil, Stream.Cons, Stream<A>> {
+public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Stream.Nil<A>, Stream.Cons<A>, Stream<A>> {
 
     private Stream() {
     }
@@ -46,7 +46,7 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
         }
 
         @Override
-        public <R> R match(Function<? super Nil, ? extends R> aFn, Function<? super Cons, ? extends R> bFn) {
+        public <R> R match(Function<? super Nil<A>, ? extends R> aFn, Function<? super Cons<A>, ? extends R> bFn) {
             return aFn.apply(this);
         }
     }
@@ -75,7 +75,7 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
         }
 
         @Override
-        public <R> R match(Function<? super Nil, ? extends R> aFn, Function<? super Cons, ? extends R> bFn) {
+        public <R> R match(Function<? super Nil<A>, ? extends R> aFn, Function<? super Cons<A>, ? extends R> bFn) {
             return bFn.apply(this);
         }
     }

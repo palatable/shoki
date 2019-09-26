@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
+import com.jnape.palatable.lambda.functions.Fn1;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -57,8 +58,8 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
         }
 
         @Override
-        public <R> R match(Function<? super Known<?>, ? extends R> aFn,
-                           Function<? super Unknown, ? extends R> bFn) {
+        public <R> R match(Fn1<? super Known<?>, ? extends R> aFn,
+                           Fn1<? super Unknown, ? extends R> bFn) {
             return aFn.apply(this);
         }
 
@@ -83,8 +84,8 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
         }
 
         @Override
-        public <R> R match(Function<? super Known<?>, ? extends R> aFn,
-                           Function<? super Unknown, ? extends R> bFn) {
+        public <R> R match(Fn1<? super Known<?>, ? extends R> aFn,
+                           Fn1<? super Unknown, ? extends R> bFn) {
             return bFn.apply(this);
         }
     }

@@ -13,9 +13,9 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.SizeInfo.known;
 import static java.lang.Math.abs;
+import static java.lang.Math.max;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static sun.swing.MenuItemLayoutHelper.max;
 
 /**
  * @param <A>
@@ -265,7 +265,7 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
         public boolean equals(Object other) {
             if (other instanceof Node) {
                 boolean sameValue = this.value.equals(((Node) other).value);
-                boolean sameLeft = this.left.equals(((Node) other).left);
+                boolean sameLeft  = this.left.equals(((Node) other).left);
                 boolean sameRight = this.right.equals(((Node) other).right);
 
                 return sameValue && sameLeft && sameRight;

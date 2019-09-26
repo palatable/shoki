@@ -1,8 +1,8 @@
 package com.jnape.palatable.shoki;
 
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functor.Functor;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
@@ -15,7 +15,7 @@ public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
     A force();
 
     @Override
-    default <B> $<B> fmap(Function<? super A, ? extends B> fn) {
+    default <B> $<B> fmap(Fn1<? super A, ? extends B> fn) {
         return $(() -> fn.apply(force()));
     }
 
@@ -42,7 +42,7 @@ public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
         }
 
         @Override
-        public <B> Memoized<B> fmap(Function<? super A, ? extends B> fn) {
+        public <B> Memoized<B> fmap(Fn1<? super A, ? extends B> fn) {
             return new Memoized<>(() -> fn.apply(force()));
         }
 

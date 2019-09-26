@@ -2,18 +2,10 @@ package com.jnape.palatable.shoki;
 
 import org.junit.Test;
 
-import java.util.HashSet;
 import java.util.Iterator;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.functions.builtin.fn1.Not.not;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Eq.eq;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Filter.filter;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Iterate.iterate;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Take.take;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.ToCollection.toCollection;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.ImmutableAvlTree.empty;
 import static com.jnape.palatable.shoki.ImmutableAvlTree.singleton;
 import static com.jnape.palatable.shoki.SizeInfo.known;
@@ -131,7 +123,7 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void balancingLeftHeavyWithSingleRotation() {
-        ImmutableAvlTree<Integer> leftHeavy = singleton(3).insert(2);
+        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).insert(2);
         ImmutableAvlTree<Integer> reBalanced = leftHeavy.insert(1);
 
         assertEquals(just(2), reBalanced.root());
@@ -141,7 +133,7 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void balancingLeftHeavyWithDoubleRotation() {
-        ImmutableAvlTree<Integer> leftHeavy = singleton(3).insert(1);
+        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).insert(1);
         ImmutableAvlTree<Integer> reBalanced = leftHeavy.insert(2);
 
         assertEquals(just(2), reBalanced.root());
@@ -163,7 +155,7 @@ public class ImmutableAvlTreeTest {
     public void subTrees() {
         assertEquals(emptyList(), empty().branches());
 
-        ImmutableAvlTree<Integer> tree = ImmutableAvlTree.of(1, 2, 3, 4, 5);
+        ImmutableAvlTree<Integer>           tree     = ImmutableAvlTree.of(1, 2, 3, 4, 5);
         Iterator<ImmutableAvlTree<Integer>> subTrees = tree.branches().iterator();
 
         assertEquals(tree.left(), subTrees.next());

@@ -56,7 +56,8 @@
     </developers>
 
     <properties>
-        <lambda.version>2.1.0</lambda.version>
+        <lambda.version>3.0.2</lambda.version>
+        <commons-lang3.version>3.1</commons-lang3.version>
     </properties>
 
     <dependencies>
@@ -73,6 +74,13 @@
             <artifactId>lambda</artifactId>
             <version>${lambda.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+            <version>${commons-lang3.version}</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>

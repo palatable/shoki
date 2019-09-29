@@ -4,7 +4,6 @@ import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.functions.Fn1;
 
 import java.util.Objects;
-import java.util.function.Function;
 
 /**
  * Algebraic data type representing the possible constructions of a {@link SizeInfo}.
@@ -71,6 +70,13 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
         @Override
         public int hashCode() {
             return Objects.hash(size);
+        }
+
+        @Override
+        public String toString() {
+            return "Known{" +
+                    "size=" + size +
+                    '}';
         }
     }
 

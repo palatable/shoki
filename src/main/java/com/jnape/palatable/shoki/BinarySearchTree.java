@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki;
 
-public interface BinarySearchTree<A extends Comparable<A>, BST extends BinarySearchTree<A, BST>> extends BinaryTree<A, BST> {
+public interface BinarySearchTree<A extends Comparable<A>, BST extends BinarySearchTree<A, BST>>
+        extends BinaryTree<A, BST> {
 
     @Override
     BST left();

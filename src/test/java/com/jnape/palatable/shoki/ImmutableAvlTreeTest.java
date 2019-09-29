@@ -21,30 +21,30 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void emptyTreeInsert() {
-        assertEquals(singleton(1), ImmutableAvlTree.<Integer>empty().insert(1));
+        assertEquals(singleton(1), ImmutableAvlTree.<Integer>empty().merge(1, (x, y) -> y));
     }
 
     @Test
     public void singleNodeInsert() {
-        ImmutableAvlTree<Integer> oneInsertZero = singleton(1).insert(0);
+        ImmutableAvlTree<Integer> oneInsertZero = singleton(1).merge(0, (x, y) -> y);
         assertEquals(singleton(0), oneInsertZero.left());
         assertEquals(empty(), oneInsertZero.right());
 
-        ImmutableAvlTree<Integer> oneInsertTwo = singleton(1).insert(2);
+        ImmutableAvlTree<Integer> oneInsertTwo = singleton(1).merge(2, (x, y) -> y);
         assertEquals(empty(), oneInsertTwo.left());
         assertEquals(singleton(2), oneInsertTwo.right());
 
-        ImmutableAvlTree<Integer> oneInsertOne = singleton(1).insert(1);
+        ImmutableAvlTree<Integer> oneInsertOne = singleton(1).merge(1, (x, y) -> y);
         assertEquals(singleton(1), oneInsertOne);
     }
 
     @Test
     public void treeInsert() {
-        ImmutableAvlTree<Integer> tree = singleton(3).insert(1).insert(2).insert(4);
+        ImmutableAvlTree<Integer> tree = singleton(3).merge(1, (x, y) -> y).merge(2, (x, y) -> y).merge(4, (x, y) -> y);
 
         assertEquals(just(2), tree.root());
         assertEquals(singleton(1), tree.left());
-        assertEquals(singleton(3).insert(4), tree.right());
+        assertEquals(singleton(3).merge(4, (x, y) -> y), tree.right());
     }
 
     @Test
@@ -60,11 +60,11 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void treeRemove() {
-        ImmutableAvlTree<Integer> tree = singleton(3).insert(1).insert(2).insert(4);
+        ImmutableAvlTree<Integer> tree = singleton(3).merge(1, (x, y) -> y).merge(2, (x, y) -> y).merge(4, (x, y) -> y);
 
-        assertEquals(singleton(2).insert(1).insert(4), tree.remove(3));
-        assertEquals(singleton(3).insert(2).insert(4), tree.remove(1));
-        assertEquals(singleton(3).insert(1).insert(4), tree.remove(2));
+        assertEquals(singleton(2).merge(1, (x, y) -> y).merge(4, (x, y) -> y), tree.remove(3));
+        assertEquals(singleton(3).merge(2, (x, y) -> y).merge(4, (x, y) -> y), tree.remove(1));
+        assertEquals(singleton(3).merge(1, (x, y) -> y).merge(4, (x, y) -> y), tree.remove(2));
     }
 
     //todo: stop unfolding when better Iterable impl for elements
@@ -86,7 +86,7 @@ public class ImmutableAvlTreeTest {
     public void sizeInfo() {
         assertEquals(known(0), empty().sizeInfo());
         assertEquals(known(1), singleton(1).sizeInfo());
-        assertEquals(known(4), singleton(1).insert(0).insert(3).insert(2).sizeInfo());
+        assertEquals(known(4), singleton(1).merge(0, (x, y) -> y).merge(3, (x, y) -> y).merge(2, (x, y) -> y).sizeInfo());
     }
 
     @Test
@@ -94,27 +94,27 @@ public class ImmutableAvlTreeTest {
         assertTrue(empty().isEmpty());
         assertFalse(singleton(1).isEmpty());
         assertFalse(ImmutableAvlTree.of(1).isEmpty());
-        assertFalse(ImmutableAvlTree.<Integer>empty().insert(1).isEmpty());
+        assertFalse(ImmutableAvlTree.<Integer>empty().merge(1, (x, y) -> y).isEmpty());
     }
 
     @Test
     public void contains() {
         assertFalse(ImmutableAvlTree.<Integer>empty().contains(1));
-        assertFalse(ImmutableAvlTree.<Integer>empty().insert(2).contains(1));
-        assertTrue(ImmutableAvlTree.<Integer>empty().insert(1).contains(1));
+        assertFalse(ImmutableAvlTree.<Integer>empty().merge(2, (x, y) -> y).contains(1));
+        assertTrue(ImmutableAvlTree.<Integer>empty().merge(1, (x, y) -> y).contains(1));
     }
 
     @Test
     public void height() {
         assertEquals(known((byte) 0), empty().height());
         assertEquals(known((byte) 1), singleton(1).height());
-        assertEquals(known((byte) 3), singleton(1).insert(0).insert(3).insert(2).height());
+        assertEquals(known((byte) 3), singleton(1).merge(0, (x, y) -> y).merge(3, (x, y) -> y).merge(2, (x, y) -> y).height());
     }
 
     @Test
     public void balancingRightHeavyWithSingleRotation() {
-        ImmutableAvlTree<Integer> rightHeavy = singleton(1).insert(2);
-        ImmutableAvlTree<Integer> reBalanced = rightHeavy.insert(3);
+        ImmutableAvlTree<Integer> rightHeavy = singleton(1).merge(2, (x, y) -> y);
+        ImmutableAvlTree<Integer> reBalanced = rightHeavy.merge(3, (x, y) -> y);
 
         assertEquals(just(2), reBalanced.root());
         assertEquals(singleton(1), reBalanced.left());
@@ -123,8 +123,8 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void balancingLeftHeavyWithSingleRotation() {
-        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).insert(2);
-        ImmutableAvlTree<Integer> reBalanced = leftHeavy.insert(1);
+        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).merge(2, (x, y) -> y);
+        ImmutableAvlTree<Integer> reBalanced = leftHeavy.merge(1, (x, y) -> y);
 
         assertEquals(just(2), reBalanced.root());
         assertEquals(singleton(1), reBalanced.left());
@@ -133,8 +133,8 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void balancingLeftHeavyWithDoubleRotation() {
-        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).insert(1);
-        ImmutableAvlTree<Integer> reBalanced = leftHeavy.insert(2);
+        ImmutableAvlTree<Integer> leftHeavy  = singleton(3).merge(1, (x, y) -> y);
+        ImmutableAvlTree<Integer> reBalanced = leftHeavy.merge(2, (x, y) -> y);
 
         assertEquals(just(2), reBalanced.root());
         assertEquals(singleton(1), reBalanced.left());
@@ -143,8 +143,8 @@ public class ImmutableAvlTreeTest {
 
     @Test
     public void balancingRightHeavyWithDoubleRotation() {
-        ImmutableAvlTree<Integer> rightHeavy = singleton(1).insert(3);
-        ImmutableAvlTree<Integer> reBalanced = rightHeavy.insert(2);
+        ImmutableAvlTree<Integer> rightHeavy = singleton(1).merge(3, (x, y) -> y);
+        ImmutableAvlTree<Integer> reBalanced = rightHeavy.merge(2, (x, y) -> y);
 
         assertEquals(just(2), reBalanced.root());
         assertEquals(singleton(1), reBalanced.left());
@@ -170,7 +170,7 @@ public class ImmutableAvlTreeTest {
     @Test
     public void root() {
         assertEquals(nothing(), empty().root());
-        assertEquals(just(1), ImmutableAvlTree.<Integer>empty().insert(1).root());
+        assertEquals(just(1), ImmutableAvlTree.<Integer>empty().merge(1, (x, y) -> y).root());
     }
 
     @Test

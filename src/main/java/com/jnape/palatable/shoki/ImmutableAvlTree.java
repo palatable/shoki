@@ -1,6 +1,8 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functions.Fn1;
+import com.jnape.palatable.lambda.functions.Fn2;
 import com.jnape.palatable.lambda.monoid.builtin.Concat;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -27,6 +29,8 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
 
     @Override
     public abstract Maybe<A> root();
+
+    public abstract ImmutableAvlTree<A> merge(A a, Fn2<? super A, ? super A, ? extends A> mergeFn);
 
     public abstract ImmutableAvlTree<A> insert(A a);
 
@@ -67,6 +71,8 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
     @Override
     public abstract boolean contains(A a);
 
+    public abstract Maybe<A> find(Fn1<? super A, ? extends SearchAnswer> predicate);
+
     public abstract SizeInfo.Known<Byte> height();
 
     @Override
@@ -90,7 +96,11 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
     }
 
     public static <A extends Comparable<A>> ImmutableAvlTree<A> from(Iterable<A> as) {
-        return foldLeft(ImmutableAvlTree::insert, empty(), as);
+        return foldLeft((tree, a) -> tree.merge(a, (x, y) -> y), empty(), as);
+    }
+
+    public enum SearchAnswer {
+        Found, Left, Right
     }
 
     private static final class Empty<A extends Comparable<A>> extends ImmutableAvlTree<A> {
@@ -101,6 +111,11 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
         @Override
         public Maybe<A> root() {
             return nothing();
+        }
+
+        @Override
+        public ImmutableAvlTree<A> merge(A a, Fn2<? super A, ? super A, ? extends A> mergeFn) {
+            return singleton(a);
         }
 
         @Override
@@ -116,6 +131,11 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
         @Override
         public boolean contains(A a) {
             return false;
+        }
+
+        @Override
+        public Maybe<A> find(Fn1<? super A, ? extends SearchAnswer> predicate) {
+            return nothing();
         }
 
         @Override
@@ -187,13 +207,25 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
         }
 
         @Override
+        public ImmutableAvlTree<A> merge(A a, Fn2<? super A, ? super A, ? extends A> mergeFn) {
+            int comparison = value.compareTo(a);
+            Node<A> inserted = comparison == 0
+                               ? new Node<>(mergeFn.apply(value, a), left, right)
+                               : (comparison > 0)
+                                 ? new Node<>(value, left.merge(a, (x, y) -> y), right)
+                                 : new Node<>(value, left, right.merge(a, (x, y) -> y));
+
+            return inserted.balance();
+        }
+
+        @Override
         public ImmutableAvlTree<A> insert(A a) {
             int comparison = value.compareTo(a);
             Node<A> inserted = comparison == 0
                                ? this
                                : (comparison > 0)
-                                 ? new Node<>(value, left.insert(a), right)
-                                 : new Node<>(value, left, right.insert(a));
+                                 ? new Node<>(value, left.merge(a, (x, y) -> y), right)
+                                 : new Node<>(value, left, right.merge(a, (x, y) -> y));
 
             return inserted.balance();
         }
@@ -225,6 +257,21 @@ public abstract class ImmutableAvlTree<A extends Comparable<A>> implements Sizab
         public boolean contains(A a) {
             int rootComparison = a.compareTo(value);
             return rootComparison == 0 || (rootComparison < 0 ? left.contains(a) : right.contains(a));
+        }
+
+
+        @Override
+        public Maybe<A> find(Fn1<? super A, ? extends SearchAnswer> predicate) {
+            SearchAnswer apply = predicate.apply(value);
+            switch (apply) {
+                case Found:
+                    return just(value);
+                case Left:
+                    return left.find(predicate);
+                case Right:
+                    return right.find(predicate);
+            }
+            throw new UnsupportedOperationException("this is why coproducts matter");
         }
 
         @Override

@@ -2,9 +2,11 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functor.Functor;
 import com.jnape.palatable.shoki.SizeInfo.Known;
 
 import java.util.Objects;
+import java.util.function.Function;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -58,7 +60,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
      */
     @Override
     public ImmutableStack<A> reverse() {
-        return foldLeft(ImmutableStack::cons, ImmutableStack.empty(), this);
+        return reverse(this);
     }
 
     /**
@@ -97,6 +99,16 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     }
 
     /**
+     * {@inheritDoc}
+     * Maps each element of the stack by applying the provided function and returns a new {@link ImmutableStack}
+     * with the mapped values in the same order as the original. Operates in <code>O(n)</code> time.
+     */
+    @Override
+    public <B> ImmutableStack<B> fmap(Function<? super A, ? extends B> function) {
+        return reverse(foldLeft((stack, element) -> stack.cons(function.apply(element)), empty(), this));
+    }
+
+    /**
      * Provide a debug-friendly string representation of this {@link ImmutableStack}. <code>O(n)</code>
      *
      * @return the string representation of this {@link ImmutableStack}
@@ -127,6 +139,11 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     public static <A> ImmutableStack<A> empty() {
         return Empty.INSTANCE;
     }
+
+    private static <A> ImmutableStack<A> reverse(ImmutableStack<A> stack) {
+        return foldLeft(ImmutableStack::cons, empty(), stack);
+    }
+
 
     /**
      * Convenience static factory method to construct an {@link ImmutableStack} from an {@link Iterable} of elements.

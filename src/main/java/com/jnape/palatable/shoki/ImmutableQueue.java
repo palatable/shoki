@@ -1,9 +1,11 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functor.Functor;
 import com.jnape.palatable.shoki.SizeInfo.Known;
 
 import java.util.Iterator;
+import java.util.function.Function;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -85,6 +87,16 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
         }
 
         return toString.append("]").toString();
+    }
+
+    /**
+     * {@inheritDoc}
+     * Maps each element of the queue by applying the provided function and returns a new {@link ImmutableQueue}
+     * with the mapped values in the same order as the original. Operates in <code>O(n)</code> time.
+     */
+    @Override
+    public <B> ImmutableQueue<B> fmap(Function<? super A, ? extends B> function) {
+        return foldLeft((queue, element) -> queue.snoc(function.apply(element)), empty(), this);
     }
 
     /**

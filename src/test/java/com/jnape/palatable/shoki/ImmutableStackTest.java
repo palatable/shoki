@@ -90,4 +90,32 @@ public class ImmutableStackTest {
         assertEquals("ImmutableStack[]", ImmutableStack.empty().toString());
         assertEquals("ImmutableStack[1, 2, 3]", ImmutableStack.of(3, 2, 1).toString());
     }
+
+    @Test
+    public void fmapAppliesAndPreservesOrder() {
+        ImmutableStack<Integer> input = ImmutableStack.of(2, 3, 4);
+        ImmutableStack<Integer> output = input.fmap(x -> x * x);
+        assertEquals(ImmutableStack.of(4, 9, 16), output);
+    }
+
+    @Test
+    public void fmapPreservesIdentity() {
+        ImmutableStack<Integer> input = ImmutableStack.empty();
+        ImmutableStack<Integer> output = input.fmap(x -> x * x);
+        assertEquals(ImmutableStack.empty(), output);
+    }
+
+    @Test
+    public void fmapPreservesComposition() {
+        ImmutableStack<Integer> input = ImmutableStack.of(2, 3, 4);
+
+        ImmutableStack<Integer> output1 = input
+                .fmap(x -> x + 1)
+                .fmap(x -> x * x);
+
+        ImmutableStack<Integer> output2 = input
+                .fmap(x -> (x + 1) * (x + 1));
+
+        assertEquals(output1, output2);
+    }
 }

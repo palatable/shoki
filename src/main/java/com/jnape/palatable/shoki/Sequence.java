@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functor.Functor;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -14,7 +15,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
  * @see ImmutableStack
  * @see ImmutableQueue
  */
-public interface Sequence<A> extends Iterable<A> {
+public interface Sequence<A> extends Iterable<A>, Functor<A, Sequence<?>> {
 
     /**
      * If this {@link Sequence} is not empty, return the next element wrapped in {@link Maybe#just}, according to the

@@ -85,4 +85,33 @@ public class ImmutableQueueTest {
         assertEquals("ImmutableQueue[]", ImmutableQueue.empty().toString());
         assertEquals("ImmutableQueue[1, 2, 3]", ImmutableQueue.of(1, 2, 3).toString());
     }
+
+    @Test
+    public void fmapAppliesAndPreservesOrder() {
+        ImmutableQueue<Integer> input = ImmutableQueue.of(2, 3, 4);
+        ImmutableQueue<Integer> output = input.fmap(x -> x * x);
+        assertEquals(ImmutableQueue.of(4, 9, 16), output);
+    }
+
+    @Test
+    public void fmapPreservesIdentity() {
+        ImmutableQueue<Integer> input = ImmutableQueue.empty();
+        ImmutableQueue<Integer> output = input.fmap(x -> x * x);
+        assertEquals(ImmutableQueue.empty(), output);
+    }
+
+    @Test
+    public void fmapPreservesComposition() {
+        ImmutableQueue<Integer> input = ImmutableQueue.of(2, 3, 4);
+
+        ImmutableQueue<Integer> output1 = input
+                .fmap(x -> x + 1)
+                .fmap(x -> x * x);
+
+        ImmutableQueue<Integer> output2 = input
+                .fmap(x -> (x + 1) * (x + 1));
+
+        assertEquals(output1, output2);
+    }
+
 }

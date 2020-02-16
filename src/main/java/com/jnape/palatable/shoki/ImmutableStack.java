@@ -93,7 +93,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
      */
     @Override
     public final boolean equals(Object other) {
-        return other instanceof ImmutableStack && OrderedCollection.equals(this, (ImmutableStack) other);
+        return other instanceof ImmutableStack && OrderedCollection.equals(this, (ImmutableStack<?>) other);
     }
 
     /**
@@ -125,7 +125,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
      */
     @SuppressWarnings("unchecked")
     public static <A> ImmutableStack<A> empty() {
-        return Empty.INSTANCE;
+        return (ImmutableStack<A>) Empty.INSTANCE;
     }
 
     /**
@@ -198,7 +198,7 @@ public abstract class ImmutableStack<A> implements Stack<Integer, A> {
     }
 
     private static final class Empty<A> extends ImmutableStack<A> {
-        private static final Empty INSTANCE = new Empty();
+        private static final Empty<?> INSTANCE = new Empty<>();
 
         private Empty() {
         }

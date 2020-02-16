@@ -65,7 +65,7 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
      */
     @Override
     public boolean equals(Object other) {
-        return other instanceof ImmutableQueue && OrderedCollection.equals(this, (ImmutableQueue) other);
+        return other instanceof ImmutableQueue && OrderedCollection.equals(this, (ImmutableQueue<?>) other);
     }
 
     /**
@@ -95,7 +95,7 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
      */
     @SuppressWarnings("unchecked")
     public static <A> ImmutableQueue<A> empty() {
-        return Empty.INSTANCE;
+        return (ImmutableQueue<A>) Empty.INSTANCE;
     }
 
     /**
@@ -124,7 +124,7 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
     }
 
     private static final class Empty<A> extends ImmutableQueue<A> {
-        private static final Empty INSTANCE = new Empty();
+        private static final Empty<?> INSTANCE = new Empty<>();
 
         private Empty() {
         }

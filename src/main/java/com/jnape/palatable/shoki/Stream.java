@@ -17,10 +17,9 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
 
     @SuppressWarnings("unchecked")
     public static <A> Stream.Nil<A> nil() {
-        return Nil.INSTANCE;
+        return (Nil<A>) Nil.INSTANCE;
     }
 
-    @SuppressWarnings("unchecked")
     public static <A> Stream.Cons<A> cons(A a, $<? extends Stream<A>> tail) {
         return new Cons<>(a, tail);
     }
@@ -34,7 +33,7 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
     }
 
     public static final class Nil<A> extends Stream<A> {
-        private static final Nil INSTANCE = new Nil();
+        private static final Nil<?> INSTANCE = new Nil<>();
 
         private Nil() {
         }

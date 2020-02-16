@@ -64,7 +64,7 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof Known && Objects.equals(this.size, ((Known) other).size);
+            return other instanceof Known && Objects.equals(this.size, ((Known<?>) other).size);
         }
 
         @Override

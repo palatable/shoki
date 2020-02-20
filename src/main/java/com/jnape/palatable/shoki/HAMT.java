@@ -48,7 +48,7 @@ public final class HAMT<K, V> {
     private HAMT<K, V> putForHashLevel(Entry<K, V> entry, int level) {
         int index = entry.keyHash.index(level);
         if (!bitmap.populatedAtIndex(index))
-            return fastInsert(entry, index);
+            return insert(entry, index);
 
         return replaceOrPropagate(entry, index, level);
     }
@@ -59,11 +59,15 @@ public final class HAMT<K, V> {
             @SuppressWarnings("unchecked")
             Entry<K, V> existingEntry = (Entry<K, V>) obj;
             return Objects.equals(existingEntry.k, newEntry.k)
-                   ? fastInsert(newEntry, index)
+                   ? insert(newEntry, index)
                    : propagateBoth(existingEntry, newEntry, index, level);
+        } else if (obj instanceof HAMT<?, ?>) {
+            @SuppressWarnings("unchecked")
+            HAMT<K, V> subTrie = (HAMT<K, V>) obj;
+            return insert(subTrie.putForHashLevel(newEntry, level + 1), index);
         }
 
-        throw new UnsupportedOperationException("Sub-tries not yet supported");
+        throw new UnsupportedOperationException("collisions not yet supported");
     }
 
     private HAMT<K, V> propagateBoth(Entry<K, V> existingEntry, Entry<K, V> newEntry, int index, int level) {
@@ -72,35 +76,23 @@ public final class HAMT<K, V> {
                 .putForHashLevel(existingEntry, nextLevel)
                 .putForHashLevel(newEntry, nextLevel);
 
-        Object[] copy = new Object[32];
-        if (index == 0) {
-            arraycopy(table, 1, copy, 1, 31);
-            copy[0] = subTrie;
-        } else if (index == 31) {
-            arraycopy(table, 0, copy, 0, 31);
-            copy[31] = subTrie;
-        } else {
-            arraycopy(table, 0, copy, 0, index);
-            copy[index] = subTrie;
-            arraycopy(table, index + 1, copy, index + 1, 31 - index);
-        }
-
-        return new HAMT<>(bitmap.populateAtIndex(index), copy);
+        return insert(subTrie, index);
     }
 
-    private HAMT<K, V> fastInsert(Entry<K, V> entry, int index) {
+    private HAMT<K, V> insert(Object valueForSlot, int index) {
         Object[] copy = new Object[32];
         if (index == 0) {
             arraycopy(table, 1, copy, 1, 31);
-            copy[0] = entry;
+            copy[0] = valueForSlot;
         } else if (index == 31) {
             arraycopy(table, 0, copy, 0, 31);
-            copy[31] = entry;
+            copy[31] = valueForSlot;
         } else {
             arraycopy(table, 0, copy, 0, index);
-            copy[index] = entry;
+            copy[index] = valueForSlot;
             arraycopy(table, index + 1, copy, index + 1, 31 - index);
         }
+
         return new HAMT<>(bitmap.populateAtIndex(index), copy);
     }
 

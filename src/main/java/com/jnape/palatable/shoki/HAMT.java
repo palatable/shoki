@@ -19,14 +19,14 @@ public final class HAMT<K, V> {
     }
 
     public Maybe<V> get(K k) {
-        return getForHashLevel(k, 1, Bitmap32.hash(k));
+        return getForHashLevel(k, Bitmap32.hash(k), 1);
     }
 
     public HAMT<K, V> put(K k, V v) {
-        return putForHashLevel(k, v, 1, Bitmap32.hash(k));
+        return putForHashLevel(new Entry<>(Bitmap32.hash(k), k, v), 1);
     }
 
-    private Maybe<V> getForHashLevel(K k, int level, Bitmap32 keyHash) {
+    private Maybe<V> getForHashLevel(K k, Bitmap32 keyHash, int level) {
         int index = keyHash.index(level);
         if (!bitmap.populatedAtIndex(index))
             return Maybe.nothing();
@@ -39,38 +39,38 @@ public final class HAMT<K, V> {
         } else if (valueAtIndex instanceof HAMT<?, ?>) {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) valueAtIndex;
-            return subTrie.getForHashLevel(k, level + 1, keyHash);
+            return subTrie.getForHashLevel(k, keyHash, level + 1);
         }
 
         throw new UnsupportedOperationException("collisions not yet suppported");
     }
 
-    private HAMT<K, V> putForHashLevel(K k, V v, int level, Bitmap32 keyHash) {
-        int index = keyHash.index(level);
+    private HAMT<K, V> putForHashLevel(Entry<K, V> entry, int level) {
+        int index = entry.keyHash.index(level);
         if (!bitmap.populatedAtIndex(index))
-            return fastInsert(k, v, index);
+            return fastInsert(entry, index);
 
-        return replaceOrPropagate(k, v, index, keyHash, level);
+        return replaceOrPropagate(entry, index, level);
     }
 
-    private HAMT<K, V> replaceOrPropagate(K k, V v, int index, Bitmap32 keyHash, int level) {
+    private HAMT<K, V> replaceOrPropagate(Entry<K, V> newEntry, int index, int level) {
         Object obj = table[index];
         if (obj instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
-            Entry<K, V> entry = (Entry<K, V>) obj;
-            return Objects.equals(entry.k, k)
-                   ? fastInsert(k, v, index)
-                   : propagate(entry, k, v, index, keyHash, level);
+            Entry<K, V> existingEntry = (Entry<K, V>) obj;
+            return Objects.equals(existingEntry.k, newEntry.k)
+                   ? fastInsert(newEntry, index)
+                   : propagateBoth(existingEntry, newEntry, index, level);
         }
 
         throw new UnsupportedOperationException("Sub-tries not yet supported");
     }
 
-    private HAMT<K, V> propagate(Entry<K, V> entry, K k, V v, int index, Bitmap32 newKeyHash, int level) {
+    private HAMT<K, V> propagateBoth(Entry<K, V> existingEntry, Entry<K, V> newEntry, int index, int level) {
         int nextLevel = level + 1;
         HAMT<K, V> subTrie = HAMT.<K, V>empty()
-                .putForHashLevel(entry.k, entry.v, nextLevel, Bitmap32.hash(entry.k))
-                .putForHashLevel(k, v, nextLevel, newKeyHash);
+                .putForHashLevel(existingEntry, nextLevel)
+                .putForHashLevel(newEntry, nextLevel);
 
         Object[] copy = new Object[32];
         if (index == 0) {
@@ -88,24 +88,20 @@ public final class HAMT<K, V> {
         return new HAMT<>(bitmap.populateAtIndex(index), copy);
     }
 
-    private HAMT<K, V> fastInsert(K k, V v, int index) {
+    private HAMT<K, V> fastInsert(Entry<K, V> entry, int index) {
         Object[] copy = new Object[32];
         if (index == 0) {
             arraycopy(table, 1, copy, 1, 31);
-            copy[0] = new Entry<>(k, v);
+            copy[0] = entry;
         } else if (index == 31) {
             arraycopy(table, 0, copy, 0, 31);
-            copy[31] = new Entry<>(k, v);
+            copy[31] = entry;
         } else {
             arraycopy(table, 0, copy, 0, index);
-            copy[index] = new Entry<>(k, v);
+            copy[index] = entry;
             arraycopy(table, index + 1, copy, index + 1, 31 - index);
         }
         return new HAMT<>(bitmap.populateAtIndex(index), copy);
-    }
-
-    public String bitmap() {
-        return bitmap.toString();
     }
 
     public static <K, V> HAMT<K, V> empty() {
@@ -114,10 +110,12 @@ public final class HAMT<K, V> {
 
     private static final class Entry<K, V> {
 
-        private final K k;
-        private final V v;
+        private final Bitmap32 keyHash;
+        private final K        k;
+        private final V        v;
 
-        private Entry(K k, V v) {
+        private Entry(Bitmap32 keyHash, K k, V v) {
+            this.keyHash = keyHash;
             this.k = k;
             this.v = v;
         }

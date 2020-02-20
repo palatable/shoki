@@ -91,6 +91,15 @@ public class HAMTTest {
         assertTrue(empty.put(0, "foo").contains(0));
     }
 
+    @Test(timeout = 1000)
+    public void insertionSanityBenchmark() {
+        int                    n    = 1_000_000;
+        HAMT<Integer, Integer> hamt = empty();
+        for (int i = 0; i < n; i++) {
+            hamt = hamt.put(i, i);
+        }
+    }
+
     static class StubbedHash<A> {
         private final A   a;
         private final int hash;

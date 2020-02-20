@@ -8,6 +8,7 @@ import java.util.Objects;
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static java.lang.System.arraycopy;
 
 public final class HAMT<K, V> {
@@ -26,6 +27,10 @@ public final class HAMT<K, V> {
 
     public HAMT<K, V> put(K k, V v) {
         return putForHashLevel(new Entry<>(Bitmap32.hash(k), k, v), 1);
+    }
+
+    public boolean contains(K k) {
+        return get(k).match(constantly(false), constantly(true));
     }
 
     private Maybe<V> getForHashLevel(K k, Bitmap32 keyHash, int level) {

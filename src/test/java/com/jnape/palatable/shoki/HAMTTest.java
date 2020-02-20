@@ -8,6 +8,8 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.HAMT.empty;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class HAMTTest {
 
@@ -80,6 +82,13 @@ public class HAMTTest {
 
         assertEquals(just(0), collision.get(foo));
         assertEquals(just(2), collision.get(bar));
+    }
+
+    @Test
+    public void contains() {
+        HAMT<Integer, String> empty = empty();
+        assertFalse(empty.contains(0));
+        assertTrue(empty.put(0, "foo").contains(0));
     }
 
     static class StubbedHash<A> {

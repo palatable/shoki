@@ -7,7 +7,10 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.ImmutableQueue.empty;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ImmutableQueueTest {
 
@@ -43,7 +46,7 @@ public class ImmutableQueueTest {
     @Test
     public void nonEmptyQueueQueuesIncomingElementsBehindOutgoing() {
         ImmutableQueue<Integer> outgoingQueued = ImmutableQueue.<Integer>empty().snoc(1).snoc(2).snoc(3).tail();
-        ImmutableQueue<Integer> queue = outgoingQueued.snoc(4).snoc(5);
+        ImmutableQueue<Integer> queue          = outgoingQueued.snoc(4).snoc(5);
 
         assertEquals(just(2), queue.head());
         assertEquals(just(3), queue.tail().head());

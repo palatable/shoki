@@ -1,6 +1,8 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.shoki.ImmutableQueue;
+import com.jnape.palatable.shoki.ImmutableStack;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

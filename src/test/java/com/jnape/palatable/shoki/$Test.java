@@ -19,8 +19,8 @@ public class $Test {
 
     @Test
     public void memoizationPreventsRecomputation() {
-        AtomicInteger counter = new AtomicInteger(0);
-        $<Integer> memoized = $(counter::incrementAndGet).memoize();
+        AtomicInteger counter  = new AtomicInteger(0);
+        $<Integer>    memoized = $(counter::incrementAndGet).memoize();
 
         assertEquals((Integer) 1, memoized.force());
         assertEquals((Integer) 1, memoized.force());
@@ -28,12 +28,12 @@ public class $Test {
 
     @Test
     public void onlyOneThreadAllowedToComputeResultToMemoize() throws Exception {
-        AtomicInteger counter = new AtomicInteger(0);
-        $<Integer> memoized = $(counter::incrementAndGet).memoize();
+        AtomicInteger counter  = new AtomicInteger(0);
+        $<Integer>    memoized = $(counter::incrementAndGet).memoize();
 
-        int threadCount = 100;
-        CyclicBarrier barrier = new CyclicBarrier(threadCount);
-        CountDownLatch latch = new CountDownLatch(threadCount);
+        int            threadCount = 100;
+        CyclicBarrier  barrier     = new CyclicBarrier(threadCount);
+        CountDownLatch latch       = new CountDownLatch(threadCount);
         while (threadCount-- > 0)
             new Thread(() -> {
                 try {

@@ -1,4 +1,6 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
+
+import com.jnape.palatable.shoki.ImmutableQueue;
 
 /**
  * A FIFO {@link Collection}.
@@ -18,13 +20,13 @@ public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A
     Queue<Size, A> snoc(A a);
 
     /**
-     * @inheritDoc
+     *
      */
     @Override
     Queue<Size, A> tail();
 
     /**
-     * @inheritDoc
+     *
      */
     @Override
     Queue<Size, A> reverse();

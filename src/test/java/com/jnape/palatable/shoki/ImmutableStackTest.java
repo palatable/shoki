@@ -64,7 +64,7 @@ public class ImmutableStackTest {
 
     @Test
     public void structureIsShared() {
-        ImmutableStack<Integer> tail = ImmutableStack.of(3, 2);
+        ImmutableStack<Integer> tail  = ImmutableStack.of(3, 2);
         ImmutableStack<Integer> stack = tail.cons(1);
 
         assertSame(stack.tail(), tail);

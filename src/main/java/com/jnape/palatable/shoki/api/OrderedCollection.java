@@ -1,4 +1,6 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
+
+import com.jnape.palatable.shoki.SizeInfo;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -21,7 +23,7 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
     OrderedCollection<Size, A> reverse();
 
     /**
-     * @inheritDoc
+     *
      */
     @Override
     OrderedCollection<Size, A> tail();

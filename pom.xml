@@ -73,6 +73,13 @@
             <artifactId>lambda</artifactId>
             <version>${lambda.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.jnape.palatable</groupId>
+            <artifactId>lambda</artifactId>
+            <version>${lambda.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

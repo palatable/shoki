@@ -1,4 +1,7 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
+
+import com.jnape.palatable.shoki.ImmutableQueue;
+import com.jnape.palatable.shoki.ImmutableStack;
 
 /**
  * A LIFO {@link Collection}.
@@ -19,13 +22,13 @@ public interface Stack<Size extends Number, A> extends OrderedCollection<Size, A
     Stack<Size, A> cons(A a);
 
     /**
-     * @inheritDoc
+     *
      */
     @Override
     Stack<Size, A> tail();
 
     /**
-     * @inheritDoc
+     *
      */
     @Override
     Stack<Size, A> reverse();

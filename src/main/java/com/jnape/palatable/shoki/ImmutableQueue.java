@@ -2,6 +2,9 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.OrderedCollection;
+import com.jnape.palatable.shoki.api.Queue;
+import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;
 
@@ -181,8 +184,8 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
         @Override
         public ImmutableQueue<A> reverse() {
             return incoming.isEmpty()
-                ? new NonEmpty<>(outgoing.reverse(), incoming)
-                : new NonEmpty<>(incoming, outgoing);
+                   ? new NonEmpty<>(outgoing.reverse(), incoming)
+                   : new NonEmpty<>(incoming, outgoing);
         }
 
         @Override

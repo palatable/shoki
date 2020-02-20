@@ -1,11 +1,13 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static java.lang.System.arraycopy;
 
 public final class HAMT<K, V> {
@@ -40,9 +42,11 @@ public final class HAMT<K, V> {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) valueAtIndex;
             return subTrie.getForHashLevel(k, keyHash, level + 1);
+        } else {
+            @SuppressWarnings("unchecked")
+            Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
+            return collision.get(k, keyHash);
         }
-
-        throw new UnsupportedOperationException("collisions not yet suppported");
     }
 
     private HAMT<K, V> putForHashLevel(Entry<K, V> entry, int level) {
@@ -65,18 +69,27 @@ public final class HAMT<K, V> {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) obj;
             return insert(subTrie.putForHashLevel(newEntry, level + 1), index);
+        } else {
+            @SuppressWarnings("unchecked")
+            Collision<K, V> collision = (Collision<K, V>) obj;
+            return insert(collision.put(newEntry.k, newEntry.v), index);
         }
-
-        throw new UnsupportedOperationException("collisions not yet supported");
     }
 
     private HAMT<K, V> propagateBoth(Entry<K, V> existingEntry, Entry<K, V> newEntry, int index, int level) {
         int nextLevel = level + 1;
-        HAMT<K, V> subTrie = HAMT.<K, V>empty()
-                .putForHashLevel(existingEntry, nextLevel)
-                .putForHashLevel(newEntry, nextLevel);
 
-        return insert(subTrie, index);
+        if (nextLevel == 8) {
+            return insert(new Collision<>(existingEntry.keyHash,
+                                          ImmutableStack.of(tuple(existingEntry.k, existingEntry.v),
+                                                            tuple(newEntry.k, newEntry.v))),
+                          index);
+        } else {
+            HAMT<K, V> subTrie = HAMT.<K, V>empty()
+                    .putForHashLevel(existingEntry, nextLevel)
+                    .putForHashLevel(newEntry, nextLevel);
+            return insert(subTrie, index);
+        }
     }
 
     private HAMT<K, V> insert(Object valueForSlot, int index) {
@@ -110,6 +123,30 @@ public final class HAMT<K, V> {
             this.keyHash = keyHash;
             this.k = k;
             this.v = v;
+        }
+    }
+
+    private static final class Collision<K, V> {
+        private final Bitmap32                     keyHash;
+        private final ImmutableStack<Tuple2<K, V>> kvPairs;
+
+        private Collision(Bitmap32 keyHash,
+                          ImmutableStack<Tuple2<K, V>> kvPairs) {
+            this.keyHash = keyHash;
+            this.kvPairs = kvPairs;
+        }
+
+        public Maybe<V> get(K k, Bitmap32 keyHash) {
+            if (keyHash.equals(this.keyHash))
+                for (Tuple2<K, V> kvPair : kvPairs)
+                    if (Objects.equals(kvPair._1(), k))
+                        return just(kvPair._2());
+
+            return nothing();
+        }
+
+        public Collision<K, V> put(K k, V v) {
+            return new Collision<>(keyHash, kvPairs.cons(tuple(k, v)));
         }
     }
 }

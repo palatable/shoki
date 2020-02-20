@@ -1,48 +1,43 @@
 package com.jnape.palatable.shoki;
 
+import com.jnape.palatable.lambda.functions.Fn0;
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functor.Functor;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
 
-public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
-
-    @Override
-    default A get() {
-        return force();
-    }
+public interface $<A> extends Functor<A, $<?>> {
 
     A force();
 
     @Override
-    default <B> $<B> fmap(Function<? super A, ? extends B> fn) {
+    default <B> $<B> fmap(Fn1<? super A, ? extends B> fn) {
         return $(() -> fn.apply(force()));
     }
 
     default $<A> memoize() {
-        return new Memoized<>(this);
+        return new Memoized<>(this::force);
     }
 
-    static <A> $<A> $(Supplier<A> supplier) {
-        return supplier::get;
+    static <A> $<A> $(Fn0<A> fn0) {
+        return fn0::apply;
     }
 
-    static <A> $<A> memoize(Supplier<A> supplier) {
-        return new Memoized<>(supplier);
+    static <A> $<A> memoize(Fn0<A> Fn0) {
+        return new Memoized<>(Fn0);
     }
 
     final class Memoized<A> implements $<A> {
-        private final    Supplier<A> supplier;
-        private volatile A           result;
-        private volatile boolean     computed;
+        private final    Fn0<A>  fn0;
+        private volatile A       result;
+        private volatile boolean computed;
 
-        private Memoized(Supplier<A> supplier) {
-            this.supplier = supplier;
+        private Memoized(Fn0<A> Fn0) {
+            this.fn0 = Fn0;
             computed = false;
         }
 
         @Override
-        public <B> Memoized<B> fmap(Function<? super A, ? extends B> fn) {
+        public <B> Memoized<B> fmap(Fn1<? super A, ? extends B> fn) {
             return new Memoized<>(() -> fn.apply(force()));
         }
 
@@ -51,7 +46,7 @@ public interface $<A> extends Supplier<A>, Functor<A, $<?>> {
             if (!computed) {
                 synchronized (this) {
                     if (!computed) {
-                        result = supplier.get();
+                        result = fn0.apply();
                         computed = true;
                     }
                 }

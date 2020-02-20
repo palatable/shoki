@@ -56,7 +56,7 @@
     </developers>
 
     <properties>
-        <lambda.version>2.1.0</lambda.version>
+        <lambda.version>5.2.0</lambda.version>
     </properties>
 
     <dependencies>

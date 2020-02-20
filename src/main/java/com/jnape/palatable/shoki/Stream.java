@@ -1,9 +1,8 @@
 package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functor.Functor;
-
-import java.util.function.Function;
 
 import static com.jnape.palatable.shoki.$.$;
 
@@ -13,7 +12,7 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
     }
 
     @Override
-    public abstract <B> Stream<B> fmap(Function<? super A, ? extends B> fn);
+    public abstract <B> Stream<B> fmap(Fn1<? super A, ? extends B> fn);
 
     @SuppressWarnings("unchecked")
     public static <A> Stream.Nil<A> nil() {
@@ -40,12 +39,12 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
 
         @Override
         @SuppressWarnings("unchecked")
-        public <B> Stream.Nil<B> fmap(Function<? super A, ? extends B> fn) {
+        public <B> Stream.Nil<B> fmap(Fn1<? super A, ? extends B> fn) {
             return (Stream.Nil<B>) this;
         }
 
         @Override
-        public <R> R match(Function<? super Nil<A>, ? extends R> aFn, Function<? super Cons<A>, ? extends R> bFn) {
+        public <R> R match(Fn1<? super Nil<A>, ? extends R> aFn, Fn1<? super Cons<A>, ? extends R> bFn) {
             return aFn.apply(this);
         }
     }
@@ -69,12 +68,12 @@ public abstract class Stream<A> implements Functor<A, Stream<?>>, CoProduct2<Str
         }
 
         @Override
-        public <B> Stream.Cons<B> fmap(Function<? super A, ? extends B> fn) {
+        public <B> Stream.Cons<B> fmap(Fn1<? super A, ? extends B> fn) {
             return new Cons<>(fn.apply(a), tail.fmap(s -> s.fmap(fn)));
         }
 
         @Override
-        public <R> R match(Function<? super Nil<A>, ? extends R> aFn, Function<? super Cons<A>, ? extends R> bFn) {
+        public <R> R match(Fn1<? super Nil<A>, ? extends R> aFn, Fn1<? super Cons<A>, ? extends R> bFn) {
             return bFn.apply(this);
         }
     }

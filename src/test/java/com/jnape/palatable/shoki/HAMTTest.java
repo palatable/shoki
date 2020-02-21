@@ -99,6 +99,7 @@ public class HAMTTest {
         for (int i = 0; i < n; i++) {
             hamt = hamt.put(i, i);
         }
+        boolean finished = true;
     }
 
     public static final class Hashed<A> {

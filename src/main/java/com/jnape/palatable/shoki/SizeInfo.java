@@ -71,6 +71,11 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
         public int hashCode() {
             return Objects.hash(size);
         }
+
+        @Override
+        public String toString() {
+            return "Known{size=" + size + '}';
+        }
     }
 
     /**

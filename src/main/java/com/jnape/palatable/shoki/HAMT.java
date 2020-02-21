@@ -16,7 +16,7 @@ public final class HAMT<K, V> {
     private final Bitmap32 bitmap;
     private final Object[] table;
 
-    HAMT(Bitmap32 bitmap, Object[] table) {
+    private HAMT(Bitmap32 bitmap, Object[] table) {
         this.bitmap = bitmap;
         this.table = table;
     }

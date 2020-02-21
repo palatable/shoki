@@ -109,4 +109,29 @@ public class Bitmap32Test {
         assertEquals(bitmap32(MIN_VALUE), bitmap32(0).populateAtIndex(31));
         assertEquals(bitmap32(-1), bitmap32(MAX_VALUE).populateAtIndex(31));
     }
+
+    @Test
+    public void bitsBelow() {
+        assertEquals(empty(),
+                     empty().lowerBits(10));
+        assertEquals(bitmap32(0b00_00000_00000_00000_00000_00000_00000),
+                     bitmap32(0b00_00000_00000_00000_00000_00000_00001).lowerBits(0));
+        assertEquals(bitmap32(0b00_00000_00000_00000_00000_00000_00001),
+                     bitmap32(0b00_00000_00000_00000_00000_00000_00011).lowerBits(1));
+        assertEquals(bitmap32(0b00_00000_00000_00000_00000_00000_01111),
+                     bitmap32(0b00_00000_00000_00000_00000_00000_11111).lowerBits(4));
+        assertEquals(bitmap32(0b11_11111_11111_11111_11111_11111_11111),
+                     bitmap32(0b11_11111_11111_11111_11111_11111_11111).lowerBits(32));
+        assertEquals(bitmap32(0b11_11111_11111_11111_11111_11111_11111),
+                     bitmap32(0b11_11111_11111_11111_11111_11111_11111).lowerBits(34));
+    }
+
+    @Test
+    public void populationCount() {
+        assertEquals(0, empty().populationCount());
+        assertEquals(0, bitmap32(0b00_00000_00000_00000_00000_00000_00000).populationCount());
+        assertEquals(1, bitmap32(0b10_00000_00000_00000_00000_00000_00000).populationCount());
+        assertEquals(2, bitmap32(0b10_00000_00000_00000_00000_00000_00001).populationCount());
+        assertEquals(32, bitmap32(-1).populationCount());
+    }
 }

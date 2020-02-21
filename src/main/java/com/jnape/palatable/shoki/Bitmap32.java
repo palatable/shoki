@@ -40,6 +40,18 @@ public final class Bitmap32 {
         return (bits & mask) >>> shift;
     }
 
+    public int populationCount() {
+        return Integer.bitCount(bits);
+    }
+
+    public Bitmap32 lowerBits(int index) {
+        return index <= 0
+               ? empty()
+               : index >= 32
+                 ? this
+                 : bitmap32(bits & (-1 >>> 32 - index));
+    }
+
     public Bit lsb() {
         return bits >> 31 == 0 ? ZERO : ONE;
     }

@@ -7,6 +7,7 @@ import java.util.Objects;
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.HAMT.empty;
+import static com.jnape.palatable.shoki.HAMTTest.Hashed.hashed;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -40,12 +41,12 @@ public class HAMTTest {
 
     @Test
     public void keysWithPartialHashCollisionPropagateDownwards() {
-        StubbedHash<String> foo = new StubbedHash<>("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        StubbedHash<String> bar = new StubbedHash<>("bar", 0b00_00000_00000_00000_00000_00001_00000);
-        StubbedHash<String> baz = new StubbedHash<>("baz", 0b00_00000_00000_00000_00001_00001_00000);
-        StubbedHash<String> qux = new StubbedHash<>("qux", 0b00_00000_00000_00000_00001_00000_00000);
-        StubbedHash<String> zux = new StubbedHash<>("zux", 0b01_00000_00000_00000_00001_00000_00000);
-        HAMT<StubbedHash<String>, Integer> nested = HAMT.<StubbedHash<String>, Integer>empty()
+        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
+        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00001_00000);
+        Hashed<String> baz = hashed("baz", 0b00_00000_00000_00000_00001_00001_00000);
+        Hashed<String> qux = hashed("qux", 0b00_00000_00000_00000_00001_00000_00000);
+        Hashed<String> zux = hashed("zux", 0b01_00000_00000_00000_00001_00000_00000);
+        HAMT<Hashed<String>, Integer> nested = HAMT.<Hashed<String>, Integer>empty()
                 .put(foo, 1)
                 .put(bar, 2)
                 .put(baz, 3)
@@ -61,9 +62,9 @@ public class HAMTTest {
 
     @Test
     public void keysWithFullCollisionsAreStoredAdjacently() {
-        StubbedHash<String> foo = new StubbedHash<>("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        StubbedHash<String> bar = new StubbedHash<>("bar", 0b00_00000_00000_00000_00000_00000_00000);
-        HAMT<StubbedHash<String>, Integer> collision = HAMT.<StubbedHash<String>, Integer>empty()
+        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
+        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
+        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
                 .put(foo, 0)
                 .put(bar, 1);
 
@@ -73,9 +74,9 @@ public class HAMTTest {
 
     @Test
     public void overridingAsPartOfCollision() {
-        StubbedHash<String> foo = new StubbedHash<>("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        StubbedHash<String> bar = new StubbedHash<>("bar", 0b00_00000_00000_00000_00000_00000_00000);
-        HAMT<StubbedHash<String>, Integer> collision = HAMT.<StubbedHash<String>, Integer>empty()
+        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
+        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
+        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
                 .put(foo, 0)
                 .put(bar, 1)
                 .put(bar, 2);
@@ -100,11 +101,11 @@ public class HAMTTest {
         }
     }
 
-    static class StubbedHash<A> {
+    public static final class Hashed<A> {
         private final A   a;
         private final int hash;
 
-        StubbedHash(A a, int hash) {
+        private Hashed(A a, int hash) {
             this.a = a;
             this.hash = hash;
         }
@@ -116,7 +117,11 @@ public class HAMTTest {
 
         @Override
         public boolean equals(Object obj) {
-            return obj instanceof StubbedHash && Objects.equals(a, ((StubbedHash<?>) obj).a);
+            return obj instanceof Hashed && Objects.equals(a, ((Hashed<?>) obj).a);
+        }
+
+        public static <A> Hashed<A> hashed(A a, int hash) {
+            return new Hashed<>(a, hash);
         }
     }
 }

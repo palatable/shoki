@@ -92,14 +92,45 @@ public class HAMTTest {
         assertTrue(empty.put(0, "foo").contains(0));
     }
 
+    @Test
+    public void remove() {
+        HAMT<Integer, Boolean> empty = empty();
+        assertEquals(empty, empty.remove(0));
+        assertEquals(nothing(), empty.put(0, true).remove(0).get(0));
+    }
+
+    @Test
+    public void removeNested() {
+        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
+        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00001_00000);
+        HAMT<Hashed<String>, Integer> nested = HAMT.<Hashed<String>, Integer>empty()
+                .put(foo, 0)
+                .put(bar, 1)
+                .remove(foo);
+        assertEquals(just(1), nested.get(bar));
+        assertEquals(nothing(), nested.get(foo));
+    }
+
+    @Test
+    public void removeFromCollision() {
+        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
+        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
+        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
+                .put(foo, 0)
+                .put(bar, 1)
+                .remove(foo);
+
+        assertEquals(just(1), collision.get(bar));
+        assertEquals(nothing(), collision.get(foo));
+    }
+
     @Test(timeout = 1000)
     public void insertionSanityBenchmark() {
         int                    n    = 1_000_000;
-        HAMT<Integer, Integer> hamt = empty();
+        HAMT<Integer, Boolean> hamt = empty();
         for (int i = 0; i < n; i++) {
-            hamt = hamt.put(i, i);
+            hamt = hamt.put(i, true);
         }
-        boolean finished = true;
     }
 
     public static final class Hashed<A> {

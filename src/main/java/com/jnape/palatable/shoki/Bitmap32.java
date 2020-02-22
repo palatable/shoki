@@ -81,6 +81,10 @@ public final class Bitmap32 {
         return new Bitmap32(bits | 1 << index);
     }
 
+    public Bitmap32 evictAtIndex(int index) {
+        return new Bitmap32(bits & ~(1 << index));
+    }
+
     public static Bitmap32 hash(Object object) {
         return bitmap32(Objects.hashCode(object));
     }

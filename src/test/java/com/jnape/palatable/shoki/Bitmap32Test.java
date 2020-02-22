@@ -105,9 +105,18 @@ public class Bitmap32Test {
     @Test
     public void populateAtIndex() {
         assertEquals(bitmap32(1), bitmap32(0).populateAtIndex(0));
+        assertEquals(bitmap32(2), bitmap32(2).populateAtIndex(1));
         assertEquals(bitmap32(3), bitmap32(1).populateAtIndex(1));
         assertEquals(bitmap32(MIN_VALUE), bitmap32(0).populateAtIndex(31));
         assertEquals(bitmap32(-1), bitmap32(MAX_VALUE).populateAtIndex(31));
+    }
+
+    @Test
+    public void evictAtIndex() {
+        assertEquals(bitmap32(0), bitmap32(1).evictAtIndex(0));
+        assertEquals(bitmap32(1), bitmap32(1).evictAtIndex(1));
+        assertEquals(bitmap32(2), bitmap32(3).evictAtIndex(0));
+        assertEquals(bitmap32(MAX_VALUE), bitmap32(-1).evictAtIndex(31));
     }
 
     @Test

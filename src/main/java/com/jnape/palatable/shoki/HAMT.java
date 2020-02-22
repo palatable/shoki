@@ -9,6 +9,7 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static java.lang.System.arraycopy;
 
 public final class HAMT<K, V> {
@@ -27,6 +28,10 @@ public final class HAMT<K, V> {
 
     public HAMT<K, V> put(K k, V v) {
         return putForHashLevel(new Entry<>(Bitmap32.hash(k), k, v), 1);
+    }
+
+    public HAMT<K, V> remove(K key) {
+        return removeForHashLevel(key, Bitmap32.hash(key), 1);
     }
 
     public boolean contains(K k) {
@@ -69,7 +74,7 @@ public final class HAMT<K, V> {
             Entry<K, V> existingEntry = (Entry<K, V>) obj;
             return Objects.equals(existingEntry.k, newEntry.k)
                    ? insert(newEntry, index)
-                   : propagateBoth(existingEntry, newEntry, index, level);
+                   : propagateBoth(existingEntry, newEntry, index, level, existingEntry.keyHash);
         } else if (obj instanceof HAMT<?, ?>) {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) obj;
@@ -81,11 +86,12 @@ public final class HAMT<K, V> {
         }
     }
 
-    private HAMT<K, V> propagateBoth(Entry<K, V> existingEntry, Entry<K, V> newEntry, int index, int level) {
+    private HAMT<K, V> propagateBoth(Entry<K, V> existingEntry, Entry<K, V> newEntry, int index, int level,
+                                     Bitmap32 existingKeyHash) {
         int nextLevel = level + 1;
 
         if (nextLevel == 8) {
-            return insert(new Collision<>(existingEntry.keyHash,
+            return insert(new Collision<>(existingKeyHash,
                                           ImmutableStack.of(tuple(existingEntry.k, existingEntry.v),
                                                             tuple(newEntry.k, newEntry.v))),
                           index);
@@ -98,6 +104,11 @@ public final class HAMT<K, V> {
     }
 
     private HAMT<K, V> insert(Object valueForSlot, int index) {
+        return new HAMT<>(bitmap.populateAtIndex(index),
+                          writeValueAtIndex(valueForSlot, index));
+    }
+
+    private Object[] writeValueAtIndex(Object valueForSlot, int index) {
         Object[] copy = new Object[32];
         if (index == 0) {
             arraycopy(table, 1, copy, 1, 31);
@@ -110,8 +121,35 @@ public final class HAMT<K, V> {
             copy[index] = valueForSlot;
             arraycopy(table, index + 1, copy, index + 1, 31 - index);
         }
+        return copy;
+    }
 
-        return new HAMT<>(bitmap.populateAtIndex(index), copy);
+    private HAMT<K, V> removeForHashLevel(K k, Bitmap32 keyHash, int level) {
+        int index = keyHash.index(level);
+        if (!bitmap.populatedAtIndex(index))
+            return this;
+
+        Object valueAtIndex = table[index];
+        if (valueAtIndex instanceof HAMT.Entry<?, ?>) {
+            @SuppressWarnings("unchecked")
+            Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
+            return Objects.equals(k, entry.k) ? delete(index) : this;
+        } else if (valueAtIndex instanceof HAMT<?, ?>) {
+            @SuppressWarnings("unchecked")
+            HAMT<K, V> subTrie = (HAMT<K, V>) valueAtIndex;
+            return insert(subTrie.removeForHashLevel(k, keyHash, level + 1), index);
+        } else {
+            @SuppressWarnings("unchecked")
+            Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
+            Collision<K, V> afterRemove = collision.remove(k, keyHash);
+            return afterRemove.kvPairs.isEmpty()
+                   ? delete(index)
+                   : insert(afterRemove, index);
+        }
+    }
+
+    private HAMT<K, V> delete(int index) {
+        return new HAMT<>(bitmap.evictAtIndex(index), writeValueAtIndex(null, index));
     }
 
     public static <K, V> HAMT<K, V> empty() {
@@ -152,6 +190,14 @@ public final class HAMT<K, V> {
 
         public Collision<K, V> put(K k, V v) {
             return new Collision<>(keyHash, kvPairs.cons(tuple(k, v)));
+        }
+
+        public Collision<K, V> remove(K k, Bitmap32 keyHash) {
+            return !keyHash.equals(this.keyHash)
+                   ? this
+                   : new Collision<>(keyHash, foldLeft(((s, kv) -> !Objects.equals(k, kv._1()) ? s.cons(kv) : s),
+                                                       ImmutableStack.empty(),
+                                                       kvPairs));
         }
     }
 }

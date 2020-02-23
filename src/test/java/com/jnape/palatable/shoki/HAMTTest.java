@@ -8,8 +8,10 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.HAMT.empty;
+import static com.jnape.palatable.shoki.SizeInfo.known;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
 
 public class HAMTTest {
@@ -35,7 +37,7 @@ public class HAMTTest {
     @Test
     public void immutability() {
         HAMT<Integer, Boolean> empty = empty();
-        empty.put(0, true);
+        assertNotSame(empty, empty.put(0, true));
         assertEquals(nothing(), empty.get(0));
     }
 
@@ -141,6 +143,22 @@ public class HAMTTest {
         assertEquals(just(false), hamt.get(1));
         assertEquals(just(true), hamt.get(2));
         assertEquals(nothing(), hamt.get(3));
+    }
+
+    @Test
+    public void sizeInfo() {
+        assertEquals(known(0), empty().sizeInfo());
+        assertEquals(known(1), HAMT.empty().put(1, 1).sizeInfo());
+        HAMT<Integer, Boolean> collisionsAndNesting =
+                HAMT.<Integer, Boolean>empty(objectEquals(), StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
+                        .stub(0, 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub(1, 0b00_00000_00000_00000_00000_00001_00000)
+                        .stub(2, 0b00_00000_00000_00000_00000_00001_00000))
+                        .put(0, true)
+                        .put(1, false)
+                        .put(2, true);
+        assertEquals(known(3), collisionsAndNesting.sizeInfo());
+        assertEquals(known(0), empty().put(1, 1).remove(1).sizeInfo());
     }
 
     @Test(timeout = 1000)

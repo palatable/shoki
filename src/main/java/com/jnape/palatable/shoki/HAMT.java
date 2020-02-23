@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 
+import java.util.Map;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -12,7 +13,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static java.lang.System.arraycopy;
 
-public final class HAMT<K, V> {
+public final class HAMT<K, V> implements RandomAccess<K, V> {
 
     private final Bitmap32 bitmap;
     private final Object[] table;
@@ -22,6 +23,7 @@ public final class HAMT<K, V> {
         this.table = table;
     }
 
+    @Override
     public Maybe<V> get(K k) {
         return getForHashLevel(k, Bitmap32.hash(k), 1);
     }
@@ -156,6 +158,51 @@ public final class HAMT<K, V> {
         return new HAMT<>(Bitmap32.empty(), new Object[32]);
     }
 
+    public static <K, V> HAMT<K, V> fromJavaMap(Map<K, V> map) {
+        return foldLeft((hamt, entry) -> hamt.put(entry.getKey(), entry.getValue()),
+                        empty(),
+                        map.entrySet());
+    }
+
+    public static <K, V> HAMT<K, V> of(K k, V v) {
+        return HAMT.<K, V>empty().put(k, v);
+    }
+
+    public static <K, V> HAMT<K, V> of(K k1, V v1,
+                                       K k2, V v2) {
+        return of(k1, v1).put(k2, v2);
+    }
+
+    public static <K, V> HAMT<K, V> of(K k1, V v1,
+                                       K k2, V v2,
+                                       K k3, V v3) {
+        return of(k1, v1, k2, v2).put(k3, v3);
+    }
+
+    public static <K, V> HAMT<K, V> of(K k1, V v1,
+                                       K k2, V v2,
+                                       K k3, V v3,
+                                       K k4, V v4) {
+        return of(k1, v1, k2, v2, k3, v3).put(k4, v4);
+    }
+
+    public static <K, V> HAMT<K, V> of(K k1, V v1,
+                                       K k2, V v2,
+                                       K k3, V v3,
+                                       K k4, V v4,
+                                       K k5, V v5) {
+        return of(k1, v1, k2, v2, k3, v3, k4, v4).put(k5, v5);
+    }
+
+    public static <K, V> HAMT<K, V> of(K k1, V v1,
+                                       K k2, V v2,
+                                       K k3, V v3,
+                                       K k4, V v4,
+                                       K k5, V v5,
+                                       K k6, V v6) {
+        return of(k1, v1, k2, v2, k3, v3, k4, v4, k5, v5).put(k6, v6);
+    }
+
     private static final class Entry<K, V> {
 
         private final Bitmap32 keyHash;
@@ -200,4 +247,5 @@ public final class HAMT<K, V> {
                                                        kvPairs));
         }
     }
+
 }

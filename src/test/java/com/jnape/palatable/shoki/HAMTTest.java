@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki;
 
 import org.junit.Test;
 
+import java.util.HashMap;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -122,6 +123,20 @@ public class HAMTTest {
 
         assertEquals(just(1), collision.get(bar));
         assertEquals(nothing(), collision.get(foo));
+    }
+
+    @Test
+    public void buildingFromJavaMap() {
+        HAMT<Integer, Boolean> hamt = HAMT.fromJavaMap(new HashMap<Integer, Boolean>() {{
+            put(0, true);
+            put(1, false);
+            put(2, true);
+        }});
+
+        assertEquals(just(true), hamt.get(0));
+        assertEquals(just(false), hamt.get(1));
+        assertEquals(just(true), hamt.get(2));
+        assertEquals(nothing(), hamt.get(3));
     }
 
     @Test(timeout = 1000)

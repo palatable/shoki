@@ -3,12 +3,11 @@ package com.jnape.palatable.shoki;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
+import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.HAMT.empty;
-import static com.jnape.palatable.shoki.HAMTTest.Hashed.hashed;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,48 +41,51 @@ public class HAMTTest {
 
     @Test
     public void keysWithPartialHashCollisionPropagateDownwards() {
-        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00001_00000);
-        Hashed<String> baz = hashed("baz", 0b00_00000_00000_00000_00001_00001_00000);
-        Hashed<String> qux = hashed("qux", 0b00_00000_00000_00000_00001_00000_00000);
-        Hashed<String> zux = hashed("zux", 0b01_00000_00000_00000_00001_00000_00000);
-        HAMT<Hashed<String>, Integer> nested = HAMT.<Hashed<String>, Integer>empty()
-                .put(foo, 1)
-                .put(bar, 2)
-                .put(baz, 3)
-                .put(qux, 4)
-                .put(zux, 5);
+        HAMT<String, Integer> nested = HAMT.<String, Integer>empty(
+                objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                        .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub("bar", 0b00_00000_00000_00000_00000_00001_00000)
+                        .stub("baz", 0b00_00000_00000_00000_00001_00001_00000)
+                        .stub("qux", 0b00_00000_00000_00000_00001_00000_00000)
+                        .stub("zux", 0b01_00000_00000_00000_00001_00000_00000))
+                .put("foo", 1)
+                .put("bar", 2)
+                .put("baz", 3)
+                .put("qux", 4)
+                .put("zux", 5);
 
-        assertEquals(just(1), nested.get(foo));
-        assertEquals(just(2), nested.get(bar));
-        assertEquals(just(3), nested.get(baz));
-        assertEquals(just(4), nested.get(qux));
-        assertEquals(just(5), nested.get(zux));
+        assertEquals(just(1), nested.get("foo"));
+        assertEquals(just(2), nested.get("bar"));
+        assertEquals(just(3), nested.get("baz"));
+        assertEquals(just(4), nested.get("qux"));
+        assertEquals(just(5), nested.get("zux"));
     }
 
     @Test
     public void keysWithFullCollisionsAreStoredAdjacently() {
-        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
-        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
-                .put(foo, 0)
-                .put(bar, 1);
+        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+                objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                        .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
+                .put("foo", 0)
+                .put("bar", 1);
 
-        assertEquals(just(0), collision.get(foo));
-        assertEquals(just(1), collision.get(bar));
+        assertEquals(just(0), collision.get("foo"));
+        assertEquals(just(1), collision.get("bar"));
     }
 
     @Test
     public void overridingAsPartOfCollision() {
-        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
-        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
-                .put(foo, 0)
-                .put(bar, 1)
-                .put(bar, 2);
+        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+                objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                        .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
+                .put("foo", 0)
+                .put("bar", 1)
+                .put("bar", 2);
 
-        assertEquals(just(0), collision.get(foo));
-        assertEquals(just(2), collision.get(bar));
+        assertEquals(just(0), collision.get("foo"));
+        assertEquals(just(2), collision.get("bar"));
     }
 
     @Test
@@ -102,27 +104,29 @@ public class HAMTTest {
 
     @Test
     public void removeNested() {
-        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00001_00000);
-        HAMT<Hashed<String>, Integer> nested = HAMT.<Hashed<String>, Integer>empty()
-                .put(foo, 0)
-                .put(bar, 1)
-                .remove(foo);
-        assertEquals(just(1), nested.get(bar));
-        assertEquals(nothing(), nested.get(foo));
+        HAMT<String, Integer> nested = HAMT.<String, Integer>empty(
+                objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                        .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub("bar", 0b00_00000_00000_00000_00000_00001_00000))
+                .put("foo", 0)
+                .put("bar", 1)
+                .remove("foo");
+        assertEquals(just(1), nested.get("bar"));
+        assertEquals(nothing(), nested.get("foo"));
     }
 
     @Test
     public void removeFromCollision() {
-        Hashed<String> foo = hashed("foo", 0b00_00000_00000_00000_00000_00000_00000);
-        Hashed<String> bar = hashed("bar", 0b00_00000_00000_00000_00000_00000_00000);
-        HAMT<Hashed<String>, Integer> collision = HAMT.<Hashed<String>, Integer>empty()
-                .put(foo, 0)
-                .put(bar, 1)
-                .remove(foo);
+        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+                objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                        .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                        .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
+                .put("foo", 0)
+                .put("bar", 1)
+                .remove("foo");
 
-        assertEquals(just(1), collision.get(bar));
-        assertEquals(nothing(), collision.get(foo));
+        assertEquals(nothing(), collision.get("foo"));
+        assertEquals(just(1), collision.get("bar"));
     }
 
     @Test
@@ -148,27 +152,24 @@ public class HAMTTest {
         }
     }
 
-    public static final class Hashed<A> {
-        private final A   a;
-        private final int hash;
+    public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {
+        private final HAMT<A, Integer> table;
 
-        private Hashed(A a, int hash) {
-            this.a = a;
-            this.hash = hash;
+        private StubbedHashingAlgorithm(HAMT<A, Integer> table) {
+            this.table = table;
         }
 
         @Override
-        public int hashCode() {
-            return hash;
+        public Integer checkedApply(A a) {
+            return table.get(a).orElseGet(a::hashCode);
         }
 
-        @Override
-        public boolean equals(Object obj) {
-            return obj instanceof Hashed && Objects.equals(a, ((Hashed<?>) obj).a);
+        public StubbedHashingAlgorithm<A> stub(A a, Integer hash) {
+            return new StubbedHashingAlgorithm<>(table.put(a, hash));
         }
 
-        public static <A> Hashed<A> hashed(A a, int hash) {
-            return new Hashed<>(a, hash);
+        public static <A> StubbedHashingAlgorithm<A> stubbedHashingAlgorithm() {
+            return new StubbedHashingAlgorithm<>(empty());
         }
     }
 }

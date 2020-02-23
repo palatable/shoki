@@ -39,13 +39,6 @@ public class Bitmap32Test {
     }
 
     @Test
-    public void hash() {
-        assertEquals(empty(), Bitmap32.hash(null));
-        Object object = new Object();
-        assertEquals(bitmap32(object.hashCode()), Bitmap32.hash(object));
-    }
-
-    @Test
     public void fromBits() {
         assertEquals(just(empty()), Bitmap32.fromBits());
         assertEquals(just(empty()), Bitmap32.fromBits(ZERO));

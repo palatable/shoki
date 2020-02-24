@@ -131,7 +131,8 @@ public class ImmutableHashMapTest {
 
     @Test
     public void buildingFromJavaMap() {
-        ImmutableHashMap<Integer, Boolean> immutableHashMap = ImmutableHashMap.fromJavaMap(new HashMap<Integer, Boolean>() {{
+        ImmutableHashMap<Integer, Boolean> immutableHashMap = ImmutableHashMap.fromJavaMap(new HashMap<Integer,
+            Boolean>() {{
             put(0, true);
             put(1, false);
             put(2, true);
@@ -148,10 +149,11 @@ public class ImmutableHashMapTest {
         assertEquals(known(0), empty().sizeInfo());
         assertEquals(known(1), ImmutableHashMap.empty().put(1, 1).sizeInfo());
         ImmutableHashMap<Integer, Boolean> collisionsAndNesting =
-            ImmutableHashMap.<Integer, Boolean>empty(objectEquals(), StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
-                .stub(0, 0b00_00000_00000_00000_00000_00000_00000)
-                .stub(1, 0b00_00000_00000_00000_00000_00001_00000)
-                .stub(2, 0b00_00000_00000_00000_00000_00001_00000))
+            ImmutableHashMap.<Integer, Boolean>empty(objectEquals(),
+                                                     StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
+                                                         .stub(0, 0b00_00000_00000_00000_00000_00000_00000)
+                                                         .stub(1, 0b00_00000_00000_00000_00000_00001_00000)
+                                                         .stub(2, 0b00_00000_00000_00000_00000_00001_00000))
                 .put(0, true)
                 .put(1, false)
                 .put(2, true);
@@ -166,6 +168,29 @@ public class ImmutableHashMapTest {
         for (int i = 0; i < n; i++) {
             immutableHashMap = immutableHashMap.put(i, true);
         }
+    }
+
+    @Test
+    public void isEmpty() {
+        assertTrue(empty().isEmpty());
+        assertFalse(empty().put(1, 1).isEmpty());
+        assertTrue(empty().put(1, 1).remove(1).isEmpty());
+    }
+
+    @Test
+    public void toStringIsUseful() {
+        assertEquals("ImmutableHashMap{entries=[]}", empty().toString());
+        assertEquals("ImmutableHashMap{entries=[(k=key, v=value)]}", empty().put("key", "value").toString());
+        assertEquals("ImmutableHashMap{entries=[(k=foo, v=foo value) | (k=baz, v=baz value) | (k=bar, v=bar value)]}",
+                     empty(objectEquals(),
+                           StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                               .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                               .stub("bar", 0b00_00000_00000_00000_00000_00001_00000)
+                               .stub("baz", 0b00_00000_00000_00000_00000_00001_00000))
+                         .put("foo", "foo value")
+                         .put("bar", "bar value")
+                         .put("baz", "baz value")
+                         .toString());
     }
 
     public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {

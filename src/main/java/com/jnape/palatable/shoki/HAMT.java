@@ -52,11 +52,12 @@ public final class HAMT<K, V> implements RandomAccess<K, V>, Sizable {
     }
 
     private Maybe<V> getForHashLevel(K key, Bitmap32 keyHash, int level) {
-        int index = keyHash.index(level);
-        if (!bitmap.populatedAtIndex(index))
+        int bitmapIndex = keyHash.index(level);
+        if (!bitmap.populatedAtIndex(bitmapIndex))
             return Maybe.nothing();
 
-        Object valueAtIndex = table[index];
+        int    tableIndex   = tableIndex(bitmapIndex);
+        Object valueAtIndex = table[tableIndex];
         if (valueAtIndex instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
             Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
@@ -73,33 +74,33 @@ public final class HAMT<K, V> implements RandomAccess<K, V>, Sizable {
     }
 
     private HAMT<K, V> putForHashLevel(Entry<K, V> entry, int level) {
-        int index = entry.keyHash.index(level);
-        if (!bitmap.populatedAtIndex(index))
-            return insertEntry(entry, index);
+        int bitmapIndex = entry.keyHash.index(level);
+        if (!bitmap.populatedAtIndex(bitmapIndex))
+            return insert(entry, bitmapIndex);
 
-        return replaceOrPropagate(entry, index, level);
+        return replaceOrPropagate(entry, bitmapIndex, level);
     }
 
-    private HAMT<K, V> insertEntry(Entry<K, V> entry, int index) {
-        return insert(entry, index);
+    private int tableIndex(int index) {
+        return bitmap.lowerBits(index).populationCount();
     }
 
-    private HAMT<K, V> replaceOrPropagate(Entry<K, V> newEntry, int index, int level) {
-        Object obj = table[index];
+    private HAMT<K, V> replaceOrPropagate(Entry<K, V> newEntry, int bitmapIndex, int level) {
+        Object obj = table[tableIndex(bitmapIndex)];
         if (obj instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
             Entry<K, V> existingEntry = (Entry<K, V>) obj;
             return keyEquivalence.apply(existingEntry.k, newEntry.k)
-                   ? insertEntry(newEntry, index)
-                   : propagateBoth(existingEntry, newEntry, index, level, existingEntry.keyHash);
+                ? override(newEntry, bitmapIndex)
+                : propagateBoth(existingEntry, newEntry, bitmapIndex, level, existingEntry.keyHash);
         } else if (obj instanceof HAMT<?, ?>) {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) obj;
-            return insert(subTrie.putForHashLevel(newEntry, level + 1), index);
+            return override(subTrie.putForHashLevel(newEntry, level + 1), bitmapIndex);
         } else {
             @SuppressWarnings("unchecked")
             Collision<K, V> collision = (Collision<K, V>) obj;
-            return insert(collision.put(newEntry.k, newEntry.v), index);
+            return override(collision.put(newEntry.k, newEntry.v), bitmapIndex);
         }
     }
 
@@ -107,47 +108,81 @@ public final class HAMT<K, V> implements RandomAccess<K, V>, Sizable {
                                      Bitmap32 existingKeyHash) {
         int nextLevel = level + 1;
 
-        if (nextLevel == 8) {
-            return insert(new Collision<>(existingKeyHash,
-                                          ImmutableStack.of(tuple(existingEntry.k, existingEntry.v),
-                                                            tuple(newEntry.k, newEntry.v))),
-                          index);
-        } else {
-            HAMT<K, V> subTrie = HAMT.<K, V>empty()
-                    .putForHashLevel(existingEntry, nextLevel)
-                    .putForHashLevel(newEntry, nextLevel);
-            return insert(subTrie, index);
-        }
+        return nextLevel == 8
+            ? override(new Collision<>(existingKeyHash,
+                                       ImmutableStack.of(tuple(existingEntry.k, existingEntry.v),
+                                                         tuple(newEntry.k, newEntry.v))), index)
+            : override(HAMT.<K, V>empty()
+                           .putForHashLevel(existingEntry, nextLevel)
+                           .putForHashLevel(newEntry, nextLevel), index);
     }
 
     private HAMT<K, V> insert(Object valueForSlot, int index) {
         return new HAMT<>(keyEquivalence, hashingAlgorithm, bitmap.populateAtIndex(index),
-                          writeValueAtIndex(valueForSlot, index));
+                          insertNewValueAtIndex(valueForSlot, index));
     }
 
-    private Object[] writeValueAtIndex(Object valueForSlot, int index) {
-        Object[] copy = new Object[32];
-        if (index == 0) {
-            arraycopy(table, 1, copy, 1, 31);
+    private HAMT<K, V> override(Object valueForSlot, int index) {
+        return new HAMT<>(keyEquivalence, hashingAlgorithm, bitmap.populateAtIndex(index),
+                          overrideValueAtIndex(valueForSlot, index));
+    }
+
+    private Object[] overrideValueAtIndex(Object valueForSlot, int bitmapIndex) {
+        int      tableIndex = tableIndex(bitmapIndex);
+        Object[] copy       = new Object[table.length];
+        int      maxValue   = copy.length - 1;
+        if (tableIndex == 0) {
+            arraycopy(table, 1, copy, 1, maxValue);
             copy[0] = valueForSlot;
-        } else if (index == 31) {
-            arraycopy(table, 0, copy, 0, 31);
-            copy[31] = valueForSlot;
+        } else if (tableIndex == maxValue) {
+            arraycopy(table, 0, copy, 0, maxValue);
+            copy[maxValue] = valueForSlot;
         } else {
-            arraycopy(table, 0, copy, 0, index);
-            copy[index] = valueForSlot;
-            arraycopy(table, index + 1, copy, index + 1, 31 - index);
+            arraycopy(table, 0, copy, 0, tableIndex);
+            copy[tableIndex] = valueForSlot;
+            arraycopy(table, tableIndex + 1, copy, tableIndex + 1, maxValue - tableIndex);
         }
         return copy;
     }
 
+    private Object[] deleteValueAtIndex(int bitmapIndex) {
+        int      tableIndex = tableIndex(bitmapIndex);
+        Object[] copy       = new Object[table.length - 1];
+        if (tableIndex == 0) {
+            arraycopy(table, 1, copy, 0, copy.length);
+        } else if (tableIndex == copy.length) {
+            arraycopy(table, 0, copy, 0, copy.length);
+        } else {
+            arraycopy(table, 0, copy, 0, tableIndex);
+            arraycopy(table, tableIndex + 1, copy, tableIndex, copy.length - tableIndex);
+        }
+        return copy;
+    }
+
+    private Object[] insertNewValueAtIndex(Object valueForSlot, int bitmapIndex) {
+        int      tableIndex = tableIndex(bitmapIndex);
+        Object[] copy       = new Object[table.length + 1];
+        if (tableIndex == 0) {
+            if (table.length != 0)
+                arraycopy(table, 0, copy, 1, table.length);
+            copy[0] = valueForSlot;
+        } else if (tableIndex == copy.length - 1) {
+            arraycopy(table, 0, copy, 0, table.length);
+            copy[copy.length - 1] = valueForSlot;
+        } else {
+            arraycopy(table, 0, copy, 0, tableIndex);
+            copy[tableIndex] = valueForSlot;
+            arraycopy(table, tableIndex, copy, tableIndex + 1, table.length - tableIndex);
+        }
+        return copy;
+    }
 
     private HAMT<K, V> removeForHashLevel(K key, Bitmap32 keyHash, int level) {
         int index = keyHash.index(level);
         if (!bitmap.populatedAtIndex(index))
             return this;
 
-        Object valueAtIndex = table[index];
+        Object valueAtIndex = table[tableIndex(index)];
         if (valueAtIndex instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
             Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
@@ -155,39 +190,39 @@ public final class HAMT<K, V> implements RandomAccess<K, V>, Sizable {
         } else if (valueAtIndex instanceof HAMT<?, ?>) {
             @SuppressWarnings("unchecked")
             HAMT<K, V> subTrie = (HAMT<K, V>) valueAtIndex;
-            return insert(subTrie.removeForHashLevel(key, keyHash, level + 1), index);
+            return override(subTrie.removeForHashLevel(key, keyHash, level + 1), index);
         } else {
             @SuppressWarnings("unchecked")
             Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
             Collision<K, V> afterRemove = collision.remove(key, keyHash, keyEquivalence);
             return afterRemove.kvPairs.isEmpty()
-                   ? delete(index)
-                   : insert(afterRemove, index);
+                ? delete(index)
+                : override(afterRemove, index);
         }
     }
 
     private HAMT<K, V> delete(int index) {
-        return new HAMT<>(keyEquivalence, hashingAlgorithm, bitmap.evictAtIndex(index), writeValueAtIndex(null, index));
+        return new HAMT<>(keyEquivalence, hashingAlgorithm, bitmap.evictAtIndex(index), deleteValueAtIndex(index));
     }
 
     @Override
     public SizeInfo.Known<Integer> sizeInfo() {
         return SizeInfo.known(Arrays.stream(table)
-                                      .filter(Objects::nonNull)
-                                      .reduce(0, (size, obj) -> {
-                                          if (obj instanceof HAMT<?, ?>) {
-                                              return size + ((HAMT<?, ?>) obj).sizeInfo().getSize();
-                                          } else if (obj instanceof Collision<?, ?>) {
-                                              return size + ((Collision<?, ?>) obj).size();
-                                          } else {
-                                              return size + 1;
-                                          }
-                                      }, Integer::sum));
+                                  .filter(Objects::nonNull)
+                                  .reduce(0, (size, obj) -> {
+                                      if (obj instanceof HAMT<?, ?>) {
+                                          return size + ((HAMT<?, ?>) obj).sizeInfo().getSize();
+                                      } else if (obj instanceof Collision<?, ?>) {
+                                          return size + ((Collision<?, ?>) obj).size();
+                                      } else {
+                                          return size + 1;
+                                      }
+                                  }, Integer::sum));
     }
 
     public static <K, V> HAMT<K, V> empty(EquivalenceRelation<K> equivalenceRelation,
                                           HashingAlgorithm<K> hashingAlgorithm) {
-        return new HAMT<>(equivalenceRelation, hashingAlgorithm, Bitmap32.empty(), new Object[32]);
+        return new HAMT<>(equivalenceRelation, hashingAlgorithm, Bitmap32.empty(), new Object[0]);
     }
 
     @SuppressWarnings("unchecked")
@@ -239,10 +274,10 @@ public final class HAMT<K, V> implements RandomAccess<K, V>, Sizable {
 
         public Collision<K, V> remove(K k, Bitmap32 keyHash, EquivalenceRelation<K> keyEquivalence) {
             return !keyHash.equals(this.keyHash)
-                   ? this
-                   : new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEquivalence.apply(k, kv._1()) ? s.cons(kv) : s),
-                                                       ImmutableStack.empty(),
-                                                       kvPairs));
+                ? this
+                : new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEquivalence.apply(k, kv._1()) ? s.cons(kv) : s),
+                                                    ImmutableStack.empty(),
+                                                    kvPairs));
         }
 
         public Integer size() {

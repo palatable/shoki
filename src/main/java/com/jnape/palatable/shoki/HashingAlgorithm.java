@@ -7,6 +7,6 @@ import java.util.Objects;
 public interface HashingAlgorithm<A> extends Fn1<A, Integer> {
 
     static <A> HashingAlgorithm<A> objectHashCode() {
-        return Objects::hash;
+        return Objects::hashCode;
     }
 }

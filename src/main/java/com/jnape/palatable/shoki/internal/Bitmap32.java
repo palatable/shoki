@@ -1,4 +1,4 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.internal;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 
@@ -18,8 +18,8 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Take.take;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.Times.times;
 import static com.jnape.palatable.lambda.monoid.builtin.Concat.concat;
-import static com.jnape.palatable.shoki.Bitmap32.Bit.ONE;
-import static com.jnape.palatable.shoki.Bitmap32.Bit.ZERO;
+import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ONE;
+import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ZERO;
 import static java.lang.Integer.MIN_VALUE;
 import static java.lang.String.join;
 import static java.util.Arrays.asList;
@@ -34,10 +34,8 @@ public final class Bitmap32 {
         this.bits = bits;
     }
 
-    public int index(int level) {
-        int shift = (level - 1) * 5;
-        int mask  = 31 << shift;
-        return (bits & mask) >>> shift;
+    public int bits() {
+        return bits;
     }
 
     public int populationCount() {
@@ -46,10 +44,10 @@ public final class Bitmap32 {
 
     public Bitmap32 lowerBits(int index) {
         return index <= 0
-               ? empty()
-               : index >= 32
-                 ? this
-                 : bitmap32(bits & (-1 >>> 32 - index));
+            ? empty()
+            : index >= 32
+            ? this
+            : bitmap32(bits & (-1 >>> 32 - index));
     }
 
     public Bit lsb() {
@@ -85,6 +83,14 @@ public final class Bitmap32 {
         return new Bitmap32(bits & ~(1 << index));
     }
 
+    public Bitmap32 and(Bitmap32 mask) {
+        return bitmap32(bits & mask.bits);
+    }
+
+    public Bitmap32 signedRightShift(int positions) {
+        return bitmap32(bits >>> positions);
+    }
+
     public static Bitmap32 bitmap32(int bits) {
         return new Bitmap32(bits);
     }
@@ -94,11 +100,11 @@ public final class Bitmap32 {
             return nothing();
 
         return just(bitmap32(foldLeft((maskWithIndex, bitAtIndex) -> maskWithIndex
-                                              .into((mask, index) -> tuple(mask | (bitAtIndex.ordinal() << index),
-                                                                           index - 1)),
+                                          .into((mask, index) -> tuple(mask | (bitAtIndex.ordinal() << index),
+                                                                       index - 1)),
                                       tuple(0, bits.length - 1),
                                       asList(bits))
-                                     ._1()));
+                                 ._1()));
     }
 
     public static Bitmap32 empty() {

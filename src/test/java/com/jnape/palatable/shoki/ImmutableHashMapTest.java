@@ -3,29 +3,30 @@ package com.jnape.palatable.shoki;
 import org.junit.Test;
 
 import java.util.HashMap;
+import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.HAMT.empty;
+import static com.jnape.palatable.shoki.ImmutableHashMap.empty;
 import static com.jnape.palatable.shoki.SizeInfo.known;
 import static org.junit.Assert.*;
 
-public class HAMTTest {
+public class ImmutableHashMapTest {
 
     @Test
     public void getMissingKey() {
-        assertEquals(nothing(), HAMT.<Integer, Boolean>empty().get(0));
+        assertEquals(nothing(), ImmutableHashMap.<Integer, Boolean>empty().get(0));
     }
 
     @Test
     public void getPresentKey() {
-        assertEquals(just(true), HAMT.<Integer, Boolean>empty().put(0, true).get(0));
+        assertEquals(just(true), ImmutableHashMap.<Integer, Boolean>empty().put(0, true).get(0));
     }
 
     @Test
     public void putReplacementKey() {
-        assertEquals(just(false), HAMT.<Integer, Boolean>empty()
+        assertEquals(just(false), ImmutableHashMap.<Integer, Boolean>empty()
             .put(0, true)
             .put(0, false)
             .get(0));
@@ -33,14 +34,14 @@ public class HAMTTest {
 
     @Test
     public void immutability() {
-        HAMT<Integer, Boolean> empty = empty();
+        ImmutableHashMap<Integer, Boolean> empty = empty();
         assertNotSame(empty, empty.put(0, true));
         assertEquals(nothing(), empty.get(0));
     }
 
     @Test
     public void keysWithPartialHashCollisionPropagateDownwards() {
-        HAMT<String, Integer> nested = HAMT.<String, Integer>empty(
+        ImmutableHashMap<String, Integer> nested = ImmutableHashMap.<String, Integer>empty(
             objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
                 .stub("bar", 0b00_00000_00000_00000_00000_00001_00000)
@@ -62,7 +63,7 @@ public class HAMTTest {
 
     @Test
     public void keysWithFullCollisionsAreStoredAdjacently() {
-        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+        ImmutableHashMap<String, Integer> collision = ImmutableHashMap.<String, Integer>empty(
             objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
                 .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
@@ -75,7 +76,7 @@ public class HAMTTest {
 
     @Test
     public void overridingAsPartOfCollision() {
-        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+        ImmutableHashMap<String, Integer> collision = ImmutableHashMap.<String, Integer>empty(
             objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
                 .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
@@ -89,21 +90,21 @@ public class HAMTTest {
 
     @Test
     public void contains() {
-        HAMT<Integer, String> empty = empty();
+        ImmutableHashMap<Integer, String> empty = empty();
         assertFalse(empty.contains(0));
         assertTrue(empty.put(0, "foo").contains(0));
     }
 
     @Test
     public void remove() {
-        HAMT<Integer, Boolean> empty = empty();
+        ImmutableHashMap<Integer, Boolean> empty = empty();
         assertEquals(empty, empty.remove(0));
         assertEquals(nothing(), empty.put(0, true).remove(0).get(0));
     }
 
     @Test
     public void removeNested() {
-        HAMT<String, Integer> nested = HAMT.<String, Integer>empty(
+        ImmutableHashMap<String, Integer> nested = ImmutableHashMap.<String, Integer>empty(
             objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
                 .stub("bar", 0b00_00000_00000_00000_00000_00001_00000))
@@ -116,7 +117,7 @@ public class HAMTTest {
 
     @Test
     public void removeFromCollision() {
-        HAMT<String, Integer> collision = HAMT.<String, Integer>empty(
+        ImmutableHashMap<String, Integer> collision = ImmutableHashMap.<String, Integer>empty(
             objectEquals(), StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
                 .stub("bar", 0b00_00000_00000_00000_00000_00000_00000))
@@ -130,24 +131,24 @@ public class HAMTTest {
 
     @Test
     public void buildingFromJavaMap() {
-        HAMT<Integer, Boolean> hamt = HAMT.fromJavaMap(new HashMap<Integer, Boolean>() {{
+        ImmutableHashMap<Integer, Boolean> immutableHashMap = ImmutableHashMap.fromJavaMap(new HashMap<Integer, Boolean>() {{
             put(0, true);
             put(1, false);
             put(2, true);
         }});
 
-        assertEquals(just(true), hamt.get(0));
-        assertEquals(just(false), hamt.get(1));
-        assertEquals(just(true), hamt.get(2));
-        assertEquals(nothing(), hamt.get(3));
+        assertEquals(just(true), immutableHashMap.get(0));
+        assertEquals(just(false), immutableHashMap.get(1));
+        assertEquals(just(true), immutableHashMap.get(2));
+        assertEquals(nothing(), immutableHashMap.get(3));
     }
 
     @Test
     public void sizeInfo() {
         assertEquals(known(0), empty().sizeInfo());
-        assertEquals(known(1), HAMT.empty().put(1, 1).sizeInfo());
-        HAMT<Integer, Boolean> collisionsAndNesting =
-            HAMT.<Integer, Boolean>empty(objectEquals(), StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
+        assertEquals(known(1), ImmutableHashMap.empty().put(1, 1).sizeInfo());
+        ImmutableHashMap<Integer, Boolean> collisionsAndNesting =
+            ImmutableHashMap.<Integer, Boolean>empty(objectEquals(), StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
                 .stub(0, 0b00_00000_00000_00000_00000_00000_00000)
                 .stub(1, 0b00_00000_00000_00000_00000_00001_00000)
                 .stub(2, 0b00_00000_00000_00000_00000_00001_00000))
@@ -160,23 +161,23 @@ public class HAMTTest {
 
     @Test(timeout = 1000)
     public void insertionSanityBenchmark() {
-        int                    n    = 1_000_000;
-        HAMT<Integer, Boolean> hamt = empty();
+        int                                n                = 1_000_000;
+        ImmutableHashMap<Integer, Boolean> immutableHashMap = empty();
         for (int i = 0; i < n; i++) {
-            hamt = hamt.put(i, true);
+            immutableHashMap = immutableHashMap.put(i, true);
         }
     }
 
     public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {
-        private final HAMT<A, Integer> table;
+        private final ImmutableHashMap<A, Integer> table;
 
-        private StubbedHashingAlgorithm(HAMT<A, Integer> table) {
+        private StubbedHashingAlgorithm(ImmutableHashMap<A, Integer> table) {
             this.table = table;
         }
 
         @Override
         public Integer checkedApply(A a) {
-            return table.get(a).orElseGet(a::hashCode);
+            return table.get(a).orElseGet(() -> Objects.hashCode(a));
         }
 
         public StubbedHashingAlgorithm<A> stub(A a, Integer hash) {

@@ -1,4 +1,4 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.internal;
 
 import static java.lang.System.arraycopy;
 

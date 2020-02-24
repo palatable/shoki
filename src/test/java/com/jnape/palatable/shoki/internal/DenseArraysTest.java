@@ -1,10 +1,10 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.internal;
 
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.jnape.palatable.shoki.DenseArrays.*;
+import static com.jnape.palatable.shoki.internal.DenseArrays.*;
 import static org.junit.Assert.*;
 
 public class DenseArraysTest {

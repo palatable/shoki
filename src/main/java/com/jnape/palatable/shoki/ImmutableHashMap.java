@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
 import com.jnape.palatable.shoki.internal.Arrays;
 import com.jnape.palatable.shoki.internal.Bitmap32;
 
@@ -21,10 +22,12 @@ import static com.jnape.palatable.shoki.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.internal.Bitmap32.bitmap32;
 import static com.jnape.palatable.shoki.internal.Indices.bitmapIndex;
 import static com.jnape.palatable.shoki.internal.Indices.tableIndex;
+import static java.lang.String.format;
+import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-public final class ImmutableHashMap<K, V> implements RandomAccess<K, V>, Sizable, Iterable<Tuple2<K, V>> {
+public final class ImmutableHashMap<K, V> implements Collection<Integer, Tuple2<K, V>>, RandomAccess<K, V> {
 
     private static final ImmutableHashMap<?, ?> DEFAULT_EMPTY = empty(objectEquals(), objectHashCode());
 
@@ -58,15 +61,28 @@ public final class ImmutableHashMap<K, V> implements RandomAccess<K, V>, Sizable
         return get(key).match(constantly(false), constantly(true));
     }
 
+    @Override
     public boolean isEmpty() {
         return bitmap.populationCount() == 0;
     }
 
     @Override
+    public Maybe<Tuple2<K, V>> head() {
+        return Head.head(this);
+    }
+
+    @Override
+    public ImmutableHashMap<K, V> tail() {
+        return head()
+            .fmap(into((headKey, __) -> remove(headKey)))
+            .orElse(this);
+    }
+
+    @Override
     public String toString() {
-        return "ImmutableHashMap{entries=[" + String.join(" | ",
-                                                          map(into((k, v) -> "(" + "k=" + k + ", v=" + v + ")"),
-                                                              this)) + "]}";
+        return "ImmutableHashMap{entries=["
+            + join(" | ", map(into((k, v) -> format("(k=%s, v=%s)", k, v)), this))
+            + "]}";
     }
 
     @Override

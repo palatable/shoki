@@ -211,6 +211,27 @@ public class ImmutableHashMapTest {
                    iterates(tuple("foo", 1), tuple("baz", 3), tuple("bar", 2)));
     }
 
+    @Test
+    public void headEntry() {
+        assertEquals(nothing(), empty().head());
+        assertEquals(just(tuple("foo", 1)), empty().put("foo", 1).head());
+        assertEquals(just(tuple("foo", 1)), empty().put("foo", 1).put("bar", 32).head());
+        assertEquals(just(tuple("foo", 1)), empty().put("bar", 32).put("foo", 1).head());
+    }
+
+    @Test
+    public void tail() {
+        assertEquals(empty(), empty().tail());
+        assertTrue(empty().put("foo", 1).tail().isEmpty());
+
+        ImmutableHashMap<Integer, Boolean> tail = ImmutableHashMap.<Integer, Boolean>empty()
+            .put(0, true)
+            .put(32, false)
+            .tail();
+        assertEquals(nothing(), tail.get(0));
+        assertEquals(just(false), tail.get(32));
+    }
+
     public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {
         private final ImmutableHashMap<A, Integer> table;
 

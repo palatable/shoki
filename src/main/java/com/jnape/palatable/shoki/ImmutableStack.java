@@ -3,6 +3,8 @@ package com.jnape.palatable.shoki;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.OrderedCollection;
+import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Objects;
 

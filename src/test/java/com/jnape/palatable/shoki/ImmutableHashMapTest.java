@@ -8,9 +8,9 @@ import java.util.HashMap;
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
-import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.ImmutableHashMap.empty;
 import static com.jnape.palatable.shoki.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static org.junit.Assert.*;
 import static testsupport.matchers.IterableMatcher.isEmpty;
 import static testsupport.matchers.IterableMatcher.iterates;
@@ -164,15 +164,6 @@ public class ImmutableHashMapTest {
         assertEquals(known(0), empty().put(1, 1).remove(1).sizeInfo());
     }
 
-    @Test(timeout = 1000)
-    public void insertionSanityBenchmark() {
-        int                                n                = 1_000_000;
-        ImmutableHashMap<Integer, Boolean> immutableHashMap = empty();
-        for (int i = 0; i < n; i++) {
-            immutableHashMap = immutableHashMap.put(i, true);
-        }
-    }
-
     @Test
     public void emptyDetection() {
         assertTrue(empty().isEmpty());
@@ -233,7 +224,37 @@ public class ImmutableHashMapTest {
     }
 
     @Test
-    public void keys() {
+    public void sameEntries() {
+        assertTrue(empty().sameEntries(empty()));
+        assertTrue(empty().put(1, 1).sameEntries(empty().put(1, 1)));
+        assertTrue(empty().put(1, 1).put(2, 2).remove(2).sameEntries(empty().put(1, 1)));
 
+        assertTrue(ImmutableHashMap.<Integer, Boolean>empty()
+                       .put(1, true)
+                       .put(2, false)
+                       .sameEntries(ImmutableHashMap.<Integer, Boolean>empty()
+                                        .put(1, true)
+                                        .put(2, true),
+                                    (v1, v2) -> true));
+    }
+
+    @Test
+    public void keys() {
+        assertEquals(ImmutableHashSet.empty(), ImmutableHashMap.empty().keys());
+        assertEquals(ImmutableHashSet.of("foo", "bar", "baz"),
+                     ImmutableHashMap.fromJavaMap(new HashMap<String, Integer>() {{
+                         put("foo", 1);
+                         put("bar", 2);
+                         put("baz", 3);
+                     }}).keys());
+    }
+
+    @Test(timeout = 1000)
+    public void insertionSanityBenchmark() {
+        int                                n                = 1_000_000;
+        ImmutableHashMap<Integer, Boolean> immutableHashMap = empty();
+        for (int i = 0; i < n; i++) {
+            immutableHashMap = immutableHashMap.put(i, true);
+        }
     }
 }

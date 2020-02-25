@@ -1,4 +1,7 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
+
+import com.jnape.palatable.shoki.ImmutableQueue;
+import com.jnape.palatable.shoki.ImmutableStack;
 
 /**
  * A LIFO {@link Collection}.

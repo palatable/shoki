@@ -1,6 +1,6 @@
 package com.jnape.palatable.shoki.testsupport;
 
-import com.jnape.palatable.shoki.HashingAlgorithm;
+import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.ImmutableHashMap;
 
 import java.util.Objects;

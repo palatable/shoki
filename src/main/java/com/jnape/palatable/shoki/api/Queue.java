@@ -1,4 +1,6 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
+
+import com.jnape.palatable.shoki.ImmutableQueue;
 
 /**
  * A FIFO {@link Collection}.

@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.functions.Fn1;
+import com.jnape.palatable.shoki.api.Sizable;
 
 import java.util.Objects;
 
@@ -52,7 +53,7 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
          *
          * @return the known size
          */
-        Size getSize() {
+        public Size getSize() {
             return size;
         }
 

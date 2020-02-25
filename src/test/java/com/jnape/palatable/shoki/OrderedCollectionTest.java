@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki;
 
+import com.jnape.palatable.shoki.api.OrderedCollection;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;

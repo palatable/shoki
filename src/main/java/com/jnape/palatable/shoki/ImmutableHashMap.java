@@ -3,6 +3,9 @@ package com.jnape.palatable.shoki;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
+import com.jnape.palatable.shoki.api.EquivalenceRelation;
+import com.jnape.palatable.shoki.api.HashingAlgorithm;
+import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.internal.Arrays;
 import com.jnape.palatable.shoki.internal.Bitmap32;
 
@@ -16,8 +19,8 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.internal.Bitmap32.bitmap32;
 import static com.jnape.palatable.shoki.internal.Indices.bitmapIndex;
 import static com.jnape.palatable.shoki.internal.Indices.tableIndex;
@@ -32,8 +35,9 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     private final EquivalenceRelation<K> keyEquivalenceRelation;
     private final HashingAlgorithm<K>    keyHashingAlgorithm;
-    private final Bitmap32               bitmap;
-    private final Object[]               table;
+
+    private final Bitmap32 bitmap;
+    private final Object[] table;
 
     private ImmutableHashMap(EquivalenceRelation<K> keyEquivalenceRelation, HashingAlgorithm<K> keyHashingAlgorithm,
                              Bitmap32 bitmap, Object[] table) {
@@ -50,6 +54,10 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     @Override
     public Maybe<V> get(K key) {
+        return getEntry(key).fmap(e -> e.v);
+    }
+
+    private Maybe<Entry<K, V>> getEntry(K key) {
         return getForHashLevel(key, bitmap32(keyHashingAlgorithm.apply(key)), 1);
     }
 
@@ -120,7 +128,43 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
                                   }, Integer::sum));
     }
 
-    private Maybe<V> getForHashLevel(K key, Bitmap32 keyHash, int level) {
+    public ImmutableHashSet<K> keys() {
+        return foldLeft((keys, kv) -> keys.add(kv._1()), ImmutableHashSet.empty(), this);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public boolean equals(Object other) {
+        try {
+            return other instanceof ImmutableHashMap<?, ?>
+                && sameEntries((ImmutableHashMap<K, V>) other);
+        } catch (ClassCastException cce) {
+            return false;
+        }
+    }
+
+    public boolean sameEntries(ImmutableHashMap<K, V> other) {
+        return sameEntries(other, objectEquals());
+    }
+
+    public boolean sameEntries(ImmutableHashMap<K, V> other, EquivalenceRelation<V> valueEquivalenceRelation) {
+        if (!sizeInfo().equals(other.sizeInfo())) {
+            return false;
+        }
+
+        for (Tuple2<K, V> entry : this) {
+            K myKey = entry.getKey();
+            if (!other.getEntry(myKey).match(
+                constantly(false),
+                otherEntry -> keyEquivalenceRelation.apply(otherEntry.k, myKey)
+                    && valueEquivalenceRelation.apply(otherEntry.v, entry.getValue())))
+                return false;
+        }
+
+        return true;
+    }
+
+    private Maybe<Entry<K, V>> getForHashLevel(K key, Bitmap32 keyHash, int level) {
         int bitmapIndex = bitmapIndex(keyHash, level);
         if (!bitmap.populatedAtIndex(bitmapIndex))
             return Maybe.nothing();
@@ -129,7 +173,7 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
         if (valueAtIndex instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
             Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
-            return keyEquivalenceRelation.apply(key, entry.k) ? just(entry.v) : nothing();
+            return keyEquivalenceRelation.apply(key, entry.k) ? just(entry) : nothing();
         } else if (valueAtIndex instanceof ImmutableHashMap<?, ?>) {
             @SuppressWarnings("unchecked")
             ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtIndex;
@@ -254,11 +298,11 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
             this.kvPairs = kvPairs;
         }
 
-        public Maybe<V> get(K k, Bitmap32 keyHash, EquivalenceRelation<K> keyEquivalence) {
+        public Maybe<Entry<K, V>> get(K k, Bitmap32 keyHash, EquivalenceRelation<K> keyEquivalence) {
             if (keyHash.equals(this.keyHash))
                 for (Entry<K, V> kvPair : kvPairs)
                     if (keyEquivalence.apply(kvPair.k, k))
-                        return just(kvPair.v);
+                        return just(kvPair);
 
             return nothing();
         }

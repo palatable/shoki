@@ -7,10 +7,10 @@ import com.jnape.palatable.lambda.adt.Maybe;
  * <code>Index</code> to the value type <code>A</code>, where "efficient" is loosely defined to be the fastest available
  * mechanism for accessing a value of type <code>A</code> given an index of type <code>Index</code>.
  * <p>
- * While this loose definition may technically allow for an amortized worst case performance of worse than
- * <code>O(1)</code>, an implementing type who's {@link RandomAccess#get(Object)} implementation cannot offer a
- * performance benefit over merely linearly scanning the underlying structure via successive invocations of other
- * published methods should be appropriately treated with skepticism.
+ * While this loose definition may technically allow for amortized performance of worse than <code>O(1)</code>, an
+ * implementing type who's {@link RandomAccess#get(Object)} implementation cannot offer a performance benefit over
+ * merely linearly scanning the underlying structure via successive invocations of other published methods should be
+ * appropriately treated with skepticism.
  *
  * @param <Index> the index type
  * @param <A>     the value type

@@ -7,10 +7,13 @@ import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.ImmutableHashMap.empty;
 import static com.jnape.palatable.shoki.SizeInfo.known;
 import static org.junit.Assert.*;
+import static testsupport.matchers.IterableMatcher.isEmpty;
+import static testsupport.matchers.IterableMatcher.iterates;
 
 public class ImmutableHashMapTest {
 
@@ -171,7 +174,7 @@ public class ImmutableHashMapTest {
     }
 
     @Test
-    public void isEmpty() {
+    public void emptyDetection() {
         assertTrue(empty().isEmpty());
         assertFalse(empty().put(1, 1).isEmpty());
         assertTrue(empty().put(1, 1).remove(1).isEmpty());
@@ -191,6 +194,21 @@ public class ImmutableHashMapTest {
                          .put("bar", "bar value")
                          .put("baz", "baz value")
                          .toString());
+    }
+
+    @Test
+    public void iterableOverEntries() {
+        assertThat(empty(), isEmpty());
+        assertThat(empty().put(0, true), iterates(tuple(0, true)));
+        assertThat(empty(objectEquals(),
+                         StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                             .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                             .stub("bar", 0b00_00000_00000_00000_00000_00001_00000)
+                             .stub("baz", 0b00_00000_00000_00000_00000_00001_00000))
+                       .put("foo", 1)
+                       .put("bar", 2)
+                       .put("baz", 3),
+                   iterates(tuple("foo", 1), tuple("baz", 3), tuple("bar", 2)));
     }
 
     public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {

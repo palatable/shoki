@@ -7,7 +7,6 @@ import com.jnape.palatable.shoki.internal.Arrays;
 import com.jnape.palatable.shoki.internal.Bitmap32;
 
 import java.util.Iterator;
-import java.util.Map;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -27,7 +26,7 @@ import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-public final class ImmutableHashMap<K, V> implements Collection<Integer, Tuple2<K, V>>, RandomAccess<K, V> {
+public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     private static final ImmutableHashMap<?, ?> DEFAULT_EMPTY = empty(objectEquals(), objectHashCode());
 
@@ -45,6 +44,11 @@ public final class ImmutableHashMap<K, V> implements Collection<Integer, Tuple2<
     }
 
     @Override
+    public boolean contains(K key) {
+        return get(key).match(constantly(false), constantly(true));
+    }
+
+    @Override
     public Maybe<V> get(K key) {
         return getForHashLevel(key, bitmap32(keyHashingAlgorithm.apply(key)), 1);
     }
@@ -55,10 +59,6 @@ public final class ImmutableHashMap<K, V> implements Collection<Integer, Tuple2<
 
     public ImmutableHashMap<K, V> remove(K key) {
         return removeForHashLevel(key, bitmap32(keyHashingAlgorithm.apply(key)), 1);
-    }
-
-    public boolean contains(K key) {
-        return get(key).match(constantly(false), constantly(true));
     }
 
     @Override
@@ -227,7 +227,7 @@ public final class ImmutableHashMap<K, V> implements Collection<Integer, Tuple2<
         return (ImmutableHashMap<K, V>) DEFAULT_EMPTY;
     }
 
-    public static <K, V> ImmutableHashMap<K, V> fromJavaMap(Map<K, V> map) {
+    public static <K, V> ImmutableHashMap<K, V> fromJavaMap(java.util.Map<K, V> map) {
         return foldLeft((immutableHashMap, entry) -> immutableHashMap.put(entry.getKey(), entry.getValue()),
                         empty(),
                         map.entrySet());

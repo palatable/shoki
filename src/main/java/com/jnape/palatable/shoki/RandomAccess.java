@@ -2,6 +2,8 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+
 /**
  * An interface indicating that the implementing type supports an "efficient" mapping from the index type
  * <code>Index</code> to the value type <code>A</code>, where "efficient" is loosely defined to be the fastest available
@@ -15,7 +17,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
  * @param <Index> the index type
  * @param <A>     the value type
  */
-public interface RandomAccess<Index, A> {
+public interface RandomAccess<Index, A> extends Membership<Index> {
 
     /**
      * Lookup a value for some given index in an efficient manner.
@@ -24,4 +26,12 @@ public interface RandomAccess<Index, A> {
      * @return {@link Maybe} the value
      */
     Maybe<A> get(Index index);
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default boolean contains(Index index) {
+        return get(index).match(constantly(false), constantly(true));
+    }
 }

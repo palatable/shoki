@@ -1,9 +1,9 @@
 package com.jnape.palatable.shoki;
 
+import com.jnape.palatable.shoki.testsupport.StubbedHashingAlgorithm;
 import org.junit.Test;
 
 import java.util.HashMap;
-import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -232,24 +232,8 @@ public class ImmutableHashMapTest {
         assertEquals(just(false), tail.get(32));
     }
 
-    public static final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {
-        private final ImmutableHashMap<A, Integer> table;
+    @Test
+    public void keys() {
 
-        private StubbedHashingAlgorithm(ImmutableHashMap<A, Integer> table) {
-            this.table = table;
-        }
-
-        @Override
-        public Integer checkedApply(A a) {
-            return table.get(a).orElseGet(() -> Objects.hashCode(a));
-        }
-
-        public StubbedHashingAlgorithm<A> stub(A a, Integer hash) {
-            return new StubbedHashingAlgorithm<>(table.put(a, hash));
-        }
-
-        public static <A> StubbedHashingAlgorithm<A> stubbedHashingAlgorithm() {
-            return new StubbedHashingAlgorithm<>(empty());
-        }
     }
 }

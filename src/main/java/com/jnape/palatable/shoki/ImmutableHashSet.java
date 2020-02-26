@@ -10,6 +10,8 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Membership;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static java.util.Arrays.asList;
 
@@ -68,13 +70,20 @@ public final class ImmutableHashSet<A> implements Collection<Integer, A>, Member
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean equals(Object obj) {
-        try {
-            return obj instanceof ImmutableHashSet<?> &&
-                ((ImmutableHashSet<A>) obj).table.sameEntries(table);
-        } catch (ClassCastException cce) {
-            return false;
-        }
+        return obj instanceof ImmutableHashSet<?> &&
+            ((ImmutableHashSet<?>) obj).table.equals(table);
+    }
+
+    @Override
+    public int hashCode() {
+        return table.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "ImmutableHashSet[" +
+            String.join(", ", map(into((e, __) -> e.toString()), table)) +
+            ']';
     }
 }

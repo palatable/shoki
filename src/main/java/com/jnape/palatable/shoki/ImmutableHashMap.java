@@ -87,9 +87,9 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     @Override
     public String toString() {
-        return "ImmutableHashMap{entries=["
-            + join(" | ", map(into((k, v) -> format("(k=%s, v=%s)", k, v)), this))
-            + "]}";
+        return "ImmutableHashMap["
+            + join("|", map(into((k, v) -> format("(%s=%s)", k, v)), this))
+            + "]";
     }
 
     @Override

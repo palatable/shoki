@@ -173,9 +173,9 @@ public class ImmutableHashMapTest {
 
     @Test
     public void toStringIsUseful() {
-        assertEquals("ImmutableHashMap{entries=[]}", empty().toString());
-        assertEquals("ImmutableHashMap{entries=[(k=key, v=value)]}", empty().put("key", "value").toString());
-        assertEquals("ImmutableHashMap{entries=[(k=foo, v=foo value) | (k=baz, v=baz value) | (k=bar, v=bar value)]}",
+        assertEquals("ImmutableHashMap[]", empty().toString());
+        assertEquals("ImmutableHashMap[(key=value)]", empty().put("key", "value").toString());
+        assertEquals("ImmutableHashMap[(foo=foo value)|(baz=baz value)|(bar=bar value)]",
                      empty(objectEquals(),
                            StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                                .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)

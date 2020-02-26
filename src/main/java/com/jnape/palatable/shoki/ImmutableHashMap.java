@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
@@ -94,37 +95,22 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     @Override
     public Iterator<Tuple2<K, V>> iterator() {
-        Iterable<Iterable<Tuple2<K, V>>> map = map(valueAtSlot -> {
-            if (valueAtSlot instanceof Entry<?, ?>) {
-                @SuppressWarnings("unchecked")
-                Entry<K, V> entry = (Entry<K, V>) valueAtSlot;
-                return singletonList(tuple(entry.k, entry.v));
-            } else if (valueAtSlot instanceof ImmutableHashMap<?, ?>) {
-                @SuppressWarnings("unchecked")
-                ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtSlot;
-                return subTrie;
-            } else {
-                @SuppressWarnings("unchecked")
-                Collision<K, V> collision = (Collision<K, V>) valueAtSlot;
-                return map(entry -> tuple(entry.k, entry.v), collision.kvPairs);
-            }
-        }, asList(table));
-
+        Iterable<Iterable<Tuple2<K, V>>> map = map(valueAtSlot -> match(
+            valueAtSlot,
+            entry -> singletonList(tuple(entry.k, entry.v)),
+            subTrie -> subTrie,
+            collision -> map(entry -> tuple(entry.k, entry.v), collision.kvPairs)), asList(table));
         return flatten(map).iterator();
     }
 
     @Override
     public SizeInfo.Known<Integer> sizeInfo() {
         return SizeInfo.known(java.util.Arrays.stream(table)
-                                  .reduce(0, (size, obj) -> {
-                                      if (obj instanceof ImmutableHashMap<?, ?>) {
-                                          return size + ((ImmutableHashMap<?, ?>) obj).sizeInfo().getSize();
-                                      } else if (obj instanceof Collision<?, ?>) {
-                                          return size + ((Collision<?, ?>) obj).size();
-                                      } else {
-                                          return size + 1;
-                                      }
-                                  }, Integer::sum));
+                                  .reduce(0, (size, obj) -> match(
+                                      obj,
+                                      entry -> size + 1,
+                                      map -> size + map.sizeInfo().getSize(),
+                                      collision -> size + collision.size()), Integer::sum));
     }
 
     private Maybe<Entry<K, V>> getEntry(K key) {
@@ -173,52 +159,49 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
         return true;
     }
 
-    private Maybe<Entry<K, V>> getEntryForHashLevel(K key, Bitmap32 keyHash, int level) {
-        int bitmapIndex = bitmapIndex(keyHash, level);
-        if (!bitmap.populatedAtIndex(bitmapIndex))
-            return Maybe.nothing();
-
-        Object valueAtIndex = table[tableIndex(bitmap, bitmapIndex)];
+    private <R> R match(Object valueAtIndex,
+                        Fn1<? super Entry<K, V>, ? extends R> entryFn,
+                        Fn1<? super ImmutableHashMap<K, V>, ? extends R> mapFn,
+                        Fn1<? super Collision<K, V>, ? extends R> collisionFn) {
         if (valueAtIndex instanceof Entry<?, ?>) {
             @SuppressWarnings("unchecked")
             Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
-            return keyEquivalenceRelation.apply(key, entry.k) ? just(entry) : nothing();
+            return entryFn.apply(entry);
         } else if (valueAtIndex instanceof ImmutableHashMap<?, ?>) {
             @SuppressWarnings("unchecked")
             ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtIndex;
-            return subTrie.getEntryForHashLevel(key, keyHash, level + 1);
+            return mapFn.apply(subTrie);
         } else {
             @SuppressWarnings("unchecked")
             Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
-            return collision.get(key, keyHash, keyEquivalenceRelation);
+            return collisionFn.apply(collision);
         }
+    }
+
+    private Maybe<Entry<K, V>> getEntryForHashLevel(K key, Bitmap32 keyHash, int level) {
+        int bitmapIndex = bitmapIndex(keyHash, level);
+        return bitmap.populatedAtIndex(bitmapIndex)
+            ? match(table[tableIndex(bitmap, bitmapIndex)],
+                    entry -> keyEquivalenceRelation.apply(key, entry.k) ? just(entry) : nothing(),
+                    subTrie -> subTrie.getEntryForHashLevel(key, keyHash, level + 1),
+                    collision -> collision.get(key, keyHash, keyEquivalenceRelation))
+            : Maybe.nothing();
     }
 
     private ImmutableHashMap<K, V> putForHashAndLevel(Entry<K, V> entry, Bitmap32 keyHash, int level) {
         int bitmapIndex = bitmapIndex(keyHash, level);
         int tableIndex  = tableIndex(bitmap, bitmapIndex);
-
-        if (!bitmap.populatedAtIndex(bitmapIndex))
-            return insertAt(bitmapIndex, entry, tableIndex);
-
-        Object obj = table[tableIndex];
-        if (obj instanceof Entry<?, ?>) {
-            @SuppressWarnings("unchecked")
-            Entry<K, V> existingEntry = (Entry<K, V>) obj;
-            return keyEquivalenceRelation.apply(existingEntry.k, entry.k)
-                ? overrideAt(entry, tableIndex)
-                : propagateBoth(existingEntry, bitmap32(keyHashingAlgorithm.apply(existingEntry.k)),
-                                entry, keyHash,
-                                level, tableIndex);
-        } else if (obj instanceof ImmutableHashMap<?, ?>) {
-            @SuppressWarnings("unchecked")
-            ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) obj;
-            return overrideAt(subTrie.putForHashAndLevel(entry, keyHash, level + 1), tableIndex);
-        } else {
-            @SuppressWarnings("unchecked")
-            Collision<K, V> collision = (Collision<K, V>) obj;
-            return overrideAt(collision.put(entry), tableIndex);
-        }
+        return bitmap.populatedAtIndex(bitmapIndex)
+            ? match(table[tableIndex],
+                    existingEntry -> keyEquivalenceRelation.apply(existingEntry.k, entry.k)
+                        ? overrideAt(entry, tableIndex)
+                        : propagateBoth(existingEntry,
+                                        bitmap32(keyHashingAlgorithm.apply(existingEntry.k)),
+                                        entry, keyHash,
+                                        level, tableIndex),
+                    subTrie -> overrideAt(subTrie.putForHashAndLevel(entry, keyHash, level + 1), tableIndex),
+                    collision -> overrideAt(collision.put(entry), tableIndex))
+            : insertAt(bitmapIndex, entry, tableIndex);
     }
 
     private ImmutableHashMap<K, V> propagateBoth(Entry<K, V> existingEntry, Bitmap32 existingKeyHash,
@@ -238,21 +221,11 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
         if (!bitmap.populatedAtIndex(bitmapIndex))
             return this;
 
-        int    tableIndex   = tableIndex(bitmap, bitmapIndex);
-        Object valueAtIndex = table[tableIndex];
-        if (valueAtIndex instanceof Entry<?, ?>) {
-            @SuppressWarnings("unchecked")
-            Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
-            return keyEquivalenceRelation.apply(key, entry.k) ? deleteAt(bitmapIndex, tableIndex) : this;
-        } else if (valueAtIndex instanceof ImmutableHashMap<?, ?>) {
-            @SuppressWarnings("unchecked")
-            ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtIndex;
-            return overrideAt(subTrie.removeForHashLevel(key, keyHash, level + 1), tableIndex);
-        } else {
-            @SuppressWarnings("unchecked")
-            Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
-            return collision.removeAndUpdate(this, key, keyHash, bitmapIndex, tableIndex);
-        }
+        int tableIndex = tableIndex(bitmap, bitmapIndex);
+        return match(table[tableIndex],
+                     entry -> keyEquivalenceRelation.apply(key, entry.k) ? deleteAt(bitmapIndex, tableIndex) : this,
+                     subTrie -> overrideAt(subTrie.removeForHashLevel(key, keyHash, level + 1), tableIndex),
+                     collision -> collision.removeAndUpdate(this, key, keyHash, bitmapIndex, tableIndex));
     }
 
     private ImmutableHashMap<K, V> insertAt(int index, Object valueForSlot, int tableIndex) {

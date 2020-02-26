@@ -180,7 +180,9 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
 
         @Override
         public ImmutableQueue<A> reverse() {
-            return new NonEmpty<>(incoming, outgoing);
+            return incoming.isEmpty()
+                ? new NonEmpty<>(outgoing.reverse(), incoming)
+                : new NonEmpty<>(incoming, outgoing);
         }
 
         @Override
@@ -196,7 +198,8 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
 
             return incoming.isEmpty()
                    ? ImmutableQueue.empty()
-                   : new NonEmpty<>(foldLeft(ImmutableStack::cons, ImmutableStack.empty(), incoming), ImmutableStack.empty());
+                   : new NonEmpty<>(foldLeft(ImmutableStack::cons, ImmutableStack.empty(), incoming),
+                                    ImmutableStack.empty());
         }
 
         @Override

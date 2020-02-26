@@ -6,31 +6,29 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
+import static com.jnape.palatable.shoki.ImmutableQueue.empty;
+import static org.junit.Assert.*;
 
 public class ImmutableQueueTest {
 
     @Test
     public void headIfEmptyIsNothing() {
-        assertEquals(nothing(), ImmutableQueue.empty().head());
+        assertEquals(nothing(), empty().head());
     }
 
     @Test
     public void isEmptyIfEmpty() {
-        assertTrue(ImmutableQueue.empty().isEmpty());
+        assertTrue(empty().isEmpty());
     }
 
     @Test
     public void tailIfEmptyIsAlsoEmpty() {
-        assertTrue(ImmutableQueue.empty().tail().isEmpty());
+        assertTrue(empty().tail().isEmpty());
     }
 
     @Test
     public void nonEmptyQueueIsNotEmpty() {
-        assertFalse(ImmutableQueue.empty().snoc(1).isEmpty());
+        assertFalse(empty().snoc(1).isEmpty());
     }
 
     @Test
@@ -68,21 +66,23 @@ public class ImmutableQueueTest {
         assertEquals(ImmutableQueue.of(3, 2, 1), ImmutableQueue.of(1, 2, 3).reverse());
         assertEquals(ImmutableQueue.of(5, 4, 3, 2, 1), ImmutableQueue.of(2, 3).tail().snoc(4).snoc(5).cons(2).cons(1).reverse());
         assertEquals(ImmutableQueue.of(1, 2, 3), ImmutableQueue.of(1, 2, 3).reverse().reverse());
+
+        assertEquals(ImmutableQueue.of(1), ImmutableQueue.of(1).reverse());
     }
 
     @Test
     public void stackSafeEqualsAndHashCode() {
-        ImmutableQueue<Integer> xs = foldLeft(ImmutableQueue::cons, ImmutableQueue.<Integer>empty(), replicate(10_000, 1));
-        ImmutableQueue<Integer> ys = foldLeft(ImmutableQueue::cons, ImmutableQueue.<Integer>empty(), replicate(10_000, 1));
+        ImmutableQueue<Integer> xs = foldLeft(ImmutableQueue::cons, empty(), replicate(10_000, 1));
+        ImmutableQueue<Integer> ys = foldLeft(ImmutableQueue::cons, empty(), replicate(10_000, 1));
         assertEquals(xs, ys);
         assertEquals(xs.hashCode(), ys.hashCode());
-        assertEquals(ImmutableQueue.empty(), ImmutableQueue.empty());
+        assertEquals(empty(), empty());
         assertNotEquals(ImmutableQueue.of(1), ImmutableQueue.of(2));
     }
 
     @Test
     public void toStringImplementation() {
-        assertEquals("ImmutableQueue[]", ImmutableQueue.empty().toString());
+        assertEquals("ImmutableQueue[]", empty().toString());
         assertEquals("ImmutableQueue[1, 2, 3]", ImmutableQueue.of(1, 2, 3).toString());
     }
 }

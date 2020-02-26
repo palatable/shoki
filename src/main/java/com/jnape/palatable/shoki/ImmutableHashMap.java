@@ -21,6 +21,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.SizeInfo.known;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.internal.Bitmap32.bitmap32;
@@ -29,6 +30,7 @@ import static com.jnape.palatable.shoki.internal.Indices.tableIndex;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Arrays.asList;
+import static java.util.Arrays.stream;
 import static java.util.Collections.singletonList;
 
 public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
@@ -70,6 +72,11 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
     }
 
     @Override
+    public ImmutableHashSet<K> keys() {
+        return foldLeft((keys, kv) -> keys.add(kv._1()), ImmutableHashSet.empty(), this);
+    }
+
+    @Override
     public boolean isEmpty() {
         return bitmap.populationCount() == 0;
     }
@@ -105,20 +112,18 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     @Override
     public SizeInfo.Known<Integer> sizeInfo() {
-        return SizeInfo.known(java.util.Arrays.stream(table)
-                                  .reduce(0, (size, obj) -> match(
-                                      obj,
-                                      entry -> size + 1,
-                                      map -> size + map.sizeInfo().getSize(),
-                                      collision -> size + collision.size()), Integer::sum));
+        return known(stream(table).reduce(
+            0,
+            (size, obj) -> match(
+                obj,
+                entry -> size + 1,
+                map -> size + map.sizeInfo().getSize(),
+                collision -> size + collision.size()),
+            Integer::sum));
     }
 
     private Maybe<Entry<K, V>> getEntry(K key) {
         return getEntryForHashLevel(key, bitmap32(keyHashingAlgorithm.apply(key)), 1);
-    }
-
-    public ImmutableHashSet<K> keys() {
-        return foldLeft((keys, kv) -> keys.add(kv._1()), ImmutableHashSet.empty(), this);
     }
 
     @Override
@@ -157,25 +162,6 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
         }
 
         return true;
-    }
-
-    private <R> R match(Object valueAtIndex,
-                        Fn1<? super Entry<K, V>, ? extends R> entryFn,
-                        Fn1<? super ImmutableHashMap<K, V>, ? extends R> mapFn,
-                        Fn1<? super Collision<K, V>, ? extends R> collisionFn) {
-        if (valueAtIndex instanceof Entry<?, ?>) {
-            @SuppressWarnings("unchecked")
-            Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
-            return entryFn.apply(entry);
-        } else if (valueAtIndex instanceof ImmutableHashMap<?, ?>) {
-            @SuppressWarnings("unchecked")
-            ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtIndex;
-            return mapFn.apply(subTrie);
-        } else {
-            @SuppressWarnings("unchecked")
-            Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
-            return collisionFn.apply(collision);
-        }
     }
 
     private Maybe<Entry<K, V>> getEntryForHashLevel(K key, Bitmap32 keyHash, int level) {
@@ -317,4 +303,22 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
         }
     }
 
+    private <R> R match(Object valueAtIndex,
+                        Fn1<? super Entry<K, V>, ? extends R> entryFn,
+                        Fn1<? super ImmutableHashMap<K, V>, ? extends R> mapFn,
+                        Fn1<? super Collision<K, V>, ? extends R> collisionFn) {
+        if (valueAtIndex instanceof Entry<?, ?>) {
+            @SuppressWarnings("unchecked")
+            Entry<K, V> entry = (Entry<K, V>) valueAtIndex;
+            return entryFn.apply(entry);
+        } else if (valueAtIndex instanceof ImmutableHashMap<?, ?>) {
+            @SuppressWarnings("unchecked")
+            ImmutableHashMap<K, V> subTrie = (ImmutableHashMap<K, V>) valueAtIndex;
+            return mapFn.apply(subTrie);
+        } else {
+            @SuppressWarnings("unchecked")
+            Collision<K, V> collision = (Collision<K, V>) valueAtIndex;
+            return collisionFn.apply(collision);
+        }
+    }
 }

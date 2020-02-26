@@ -7,4 +7,6 @@ public interface Map<Size extends Number, K, V> extends Collection<Size, Tuple2<
     Map<Size, K, V> put(K k, V v);
 
     Map<Size, K, V> remove(K k);
+
+    Set<Size, K> keys();
 }

@@ -4,10 +4,9 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
-import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
-import com.jnape.palatable.shoki.api.Membership;
+import com.jnape.palatable.shoki.api.Set;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
@@ -15,7 +14,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static java.util.Arrays.asList;
 
-public final class ImmutableHashSet<A> implements Collection<Integer, A>, Membership<A> {
+public final class ImmutableHashSet<A> implements Set<Integer, A> {
 
     private static final ImmutableHashSet<?> DEFAULT_EMPTY = new ImmutableHashSet<>(ImmutableHashMap.empty());
 

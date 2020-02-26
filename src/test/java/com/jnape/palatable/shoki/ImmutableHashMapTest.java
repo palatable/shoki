@@ -236,6 +236,73 @@ public class ImmutableHashMapTest {
                                         .put(1, true)
                                         .put(2, true),
                                     (v1, v2) -> true));
+
+        assertTrue(ImmutableHashMap.<Integer, Boolean>empty((k, k2) -> k % 2 == k2 % 2, k -> k.hashCode() % 2)
+                       .put(1, true)
+                       .put(2, false)
+                       .put(3, false)
+                       .put(4, true).sameEntries(ImmutableHashMap.<Integer, Boolean>empty()
+                                                     .put(3, false)
+                                                     .put(4, true)));
+
+        assertTrue(ImmutableHashMap.<Integer, Boolean>empty()
+                       .put(3, false)
+                       .put(4, true).sameEntries(ImmutableHashMap.<Integer, Boolean>empty((k, k2) -> k % 2 == k2 % 2,
+                                                                                          k -> k.hashCode() % 2)
+                                                     .put(1, true)
+                                                     .put(2, false)
+                                                     .put(3, false)
+                                                     .put(4, true)));
+
+        assertFalse(ImmutableHashMap.<Integer, Boolean>empty((k, k2) -> k % 2 == k2 % 2, k -> k.hashCode() % 2)
+                        .put(4, true)
+                        .put(3, false)
+                        .put(2, false)
+                        .put(1, true)
+                        .sameEntries(ImmutableHashMap.<Integer, Boolean>empty()
+                                         .put(3, false)
+                                         .put(4, true)));
+
+        assertFalse(ImmutableHashMap.<Integer, Boolean>empty()
+                        .put(3, false)
+                        .put(4, true)
+                        .sameEntries(ImmutableHashMap.<Integer, Boolean>empty((k, k2) -> k % 2 == k2 % 2,
+                                                                              k -> k.hashCode() % 2)
+                                         .put(4, true)
+                                         .put(3, false)
+                                         .put(2, false)
+                                         .put(1, true)));
+    }
+
+    @Test
+    public void equalsUsesSameEntriesWithObjectEqualsForValues() {
+        assertEquals(empty(), empty());
+        assertEquals(empty().put(1, 1), empty().put(1, 1));
+        assertEquals(empty().put(1, 1).put(2, 2).remove(2), empty().put(1, 1));
+
+        assertNotEquals(empty(), empty().put(1, 1));
+        assertNotEquals(empty().put(1, 1), empty().put(1, 2));
+        assertNotEquals(empty().put(1, 1), empty().put(2, 1));
+
+        assertEquals(ImmutableHashMap.<Integer, Boolean>empty()
+                         .put(0, true)
+                         .put(32, false),
+                     ImmutableHashMap.<Integer, Boolean>empty()
+                         .put(0, true)
+                         .put(32, false)
+                         .put(64, true)
+                         .remove(64));
+    }
+
+    @Test
+    public void hashCodeUsesKeyHashingAlgorithmForKeysAndObjectHashForValuesForEqualsSymmetry() {
+        assertEquals(empty().hashCode(), empty().hashCode());
+        assertEquals(empty().put(1, 1).hashCode(), empty().put(1, 1).hashCode());
+
+        assertNotEquals(empty().hashCode(), empty().put(1, 1).hashCode());
+        assertNotEquals(empty().put(1, 1).hashCode(), empty().put(1, 2).hashCode());
+
+        assertEquals(empty().put(0, 1).put(32, 2).remove(32).hashCode(), empty().put(0, 1).hashCode());
     }
 
     @Test

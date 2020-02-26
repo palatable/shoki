@@ -5,14 +5,15 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 
 /**
- * An interface indicating that the implementing type supports an "efficient" mapping from the index type
- * <code>Index</code> to the value type <code>A</code>, where "efficient" is loosely defined to be the fastest available
- * mechanism for accessing a value of type <code>A</code> given an index of type <code>Index</code>.
+ * An interface offering a mechanism for looking up {@link Maybe} a value of type <code>A</code> for an index of type
+ * <code>Index</code>. Generally, to implement this interface is to suggest that {@link RandomAccess#get(Object) get}
+ * is "efficient", where "efficient" is loosely defined as "the fastest available mechanism for accessing a value
+ * of type <code>A</code> given an index of type <code>Index</code>".
  * <p>
- * While this loose definition may technically allow for amortized performance of worse than <code>O(1)</code>, an
- * implementing type who's {@link RandomAccess#get(Object)} implementation cannot offer a performance benefit over
- * merely linearly scanning the underlying structure via successive invocations of other published methods should be
- * appropriately treated with skepticism.
+ * Note that while this loose definition may technically allow for amortized performance of worse than
+ * <code>O(1)</code>, an implementing type who's {@link RandomAccess#get(Object) get} implementation cannot offer a
+ * performance benefit over merely linearly scanning the underlying structure via successive invocations of other
+ * published methods might reconsider implementing this interface.
  *
  * @param <Index> the index type
  * @param <A>     the value type

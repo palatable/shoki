@@ -18,6 +18,7 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Size.size;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -112,14 +113,7 @@ public final class ImmutableHashMap<K, V> implements Map<Integer, K, V> {
 
     @Override
     public SizeInfo.Known<Integer> sizeInfo() {
-        return known(stream(table).reduce(
-            0,
-            (size, obj) -> match(
-                obj,
-                entry -> size + 1,
-                map -> size + map.sizeInfo().getSize(),
-                collision -> size + collision.size()),
-            Integer::sum));
+        return known(size(this).intValue());
     }
 
     private Maybe<Entry<K, V>> getEntry(K key) {

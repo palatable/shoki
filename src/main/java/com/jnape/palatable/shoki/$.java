@@ -19,11 +19,35 @@ public interface $<A> extends Functor<A, $<?>> {
     }
 
     static <A> $<A> $(Fn0<A> fn0) {
-        return fn0::apply;
+        return new Suspended<>(fn0);
+    }
+
+    static <A> $<A> $(A a) {
+        return new Value<>(a);
     }
 
     static <A> $<A> memoize(Fn0<A> Fn0) {
         return new Memoized<>(Fn0);
+    }
+
+    final class Suspended<A> implements $<A> {
+        private final Fn0<A> fn0;
+
+        private Suspended(Fn0<A> fn0) {
+            this.fn0 = fn0;
+        }
+
+        @Override
+        public A force() {
+            return fn0.apply();
+        }
+
+        @Override
+        public String toString() {
+            return "Suspended{" +
+                "fn0=" + fn0 +
+                '}';
+        }
     }
 
     final class Memoized<A> implements $<A> {
@@ -31,14 +55,19 @@ public interface $<A> extends Functor<A, $<?>> {
         private volatile A       result;
         private volatile boolean computed;
 
-        private Memoized(Fn0<A> Fn0) {
-            this.fn0 = Fn0;
+        private Memoized(Fn0<A> fn0) {
+            this.fn0 = fn0;
             computed = false;
         }
 
         @Override
         public <B> Memoized<B> fmap(Fn1<? super A, ? extends B> fn) {
             return new Memoized<>(() -> fn.apply(force()));
+        }
+
+        @Override
+        public Memoized<A> memoize() {
+            return this;
         }
 
         @Override
@@ -52,6 +81,39 @@ public interface $<A> extends Functor<A, $<?>> {
                 }
             }
             return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Memoized{" + (computed ? result : "Not computed") + "}";
+        }
+    }
+
+    final class Value<A> implements $<A> {
+        private final A a;
+
+        private Value(A a) {
+            this.a = a;
+        }
+
+        @Override
+        public A force() {
+            return a;
+        }
+
+        @Override
+        public <B> Value<B> fmap(Fn1<? super A, ? extends B> fn) {
+            return new Value<>(fn.apply(a));
+        }
+
+        @Override
+        public Value<A> memoize() {
+            return this;
+        }
+
+        @Override
+        public String toString() {
+            return "Value{a=" + a + "}";
         }
     }
 }

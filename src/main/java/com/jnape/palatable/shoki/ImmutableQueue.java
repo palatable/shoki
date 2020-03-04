@@ -39,7 +39,7 @@ public abstract class ImmutableQueue<A> implements Queue<Integer, A>, Stack<Inte
     public abstract ImmutableQueue<A> tail();
 
     /**
-     * Reverse this {@link ImmutableQueue}. <code>O(1)</code>.
+     * Reverse this {@link ImmutableQueue}. Amortized <code>O(1)</code>.
      *
      * @return this {@link ImmutableQueue}, reversed
      */

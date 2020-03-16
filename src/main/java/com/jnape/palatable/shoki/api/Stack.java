@@ -22,13 +22,13 @@ public interface Stack<Size extends Number, A> extends OrderedCollection<Size, A
     Stack<Size, A> cons(A a);
 
     /**
-     *
+     * {@inheritDoc}
      */
     @Override
     Stack<Size, A> tail();
 
     /**
-     *
+     * {@inheritDoc}
      */
     @Override
     Stack<Size, A> reverse();

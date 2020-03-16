@@ -68,6 +68,11 @@ public final class HashArrayMappedTrie<K, V> implements Map<Integer, K, V> {
     }
 
     @Override
+    public ImmutableStack<V> values() {
+        return foldLeft((keys, kv) -> keys.cons(kv._2()), ImmutableStack.empty(), this);
+    }
+
+    @Override
     public HashArrayMappedTrie<K, V> tail() {
         return head()
                 .fmap(into((headKey, __) -> remove(headKey)))

@@ -23,7 +23,7 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
     OrderedCollection<Size, A> reverse();
 
     /**
-     *
+     * {@inheritDoc}
      */
     @Override
     OrderedCollection<Size, A> tail();

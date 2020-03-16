@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.Objects;
 
 /**
- * An {@link EquivalenceRelation} is an equivalence relation between two instances of some type <code>A</code> with the
+ * An {@link EquivalenceRelation equivalence relation} between two terms of some type <code>A</code> satisfies the
  * following characteristics:
  * <ul>
  * <li>Reflexivity: <code>eq.apply(a, a) == true</code></li>

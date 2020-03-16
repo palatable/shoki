@@ -34,12 +34,11 @@ public interface Sequence<A> extends Iterable<A> {
     Sequence<A> tail();
 
     /**
-     * Returns <code>true</code> if calling {@link Sequence#head()} on this {@link Sequence} would return {@link
-     * Maybe#nothing()}; <code>false</code>, otherwise.
+     * Returns <code>true</code> if calling {@link Sequence#head()} on this {@link Sequence} would return
+     * {@link Maybe#nothing()}; <code>false</code>, otherwise.
      * <p>
-     * This default implementation relies on {@link Sequence#head()}, but subtypes of {@link Sequence} may be able to
-     * answer this question more directly. Note that if a subtype overrides this method, the contract with {@link
-     * Sequence#head()} must be preserved.
+     * Note that if a subtype supports a more direct implementation than {@link Sequence#head} interactions, the
+     * contract <code>isEmpty() == (head() == nothing())</code> must be preserved.
      *
      * @return true if this {@link Sequence} is empty; false, otherwise
      */

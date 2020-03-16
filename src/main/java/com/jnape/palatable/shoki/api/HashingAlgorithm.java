@@ -5,10 +5,9 @@ import com.jnape.palatable.lambda.functions.Fn1;
 import java.util.Objects;
 
 /**
- * A {@link HashingAlgorithm} is a function from <code>A -&gt; Integer</code>. Good
- * {@link HashingAlgorithm HashingAlgorithms}s are generally fast and uniformly distribute values of type
- * <code>A</code> across values of type {@link Integer} (modulo cardinality differences where <code>A</code>'s
- * cardinality exceeds {@link Integer}'s).
+ * A {@link HashingAlgorithm hashing algorithm} is an arrow <code>A -&gt; Integer</code>. Good
+ * hashing algorithms are generally fast and uniformly distribute values of type <code>A</code> across values of type
+ * {@link Integer} (modulo cardinality differences where <code>A</code>'s cardinality exceeds {@link Integer}'s).
  *
  * @param <A> the type to hash
  */

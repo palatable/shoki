@@ -20,13 +20,13 @@ public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A
     Queue<Size, A> snoc(A a);
 
     /**
-     *
+     * {@inheritDoc}
      */
     @Override
     Queue<Size, A> tail();
 
     /**
-     *
+     * {@inheritDoc}
      */
     @Override
     Queue<Size, A> reverse();

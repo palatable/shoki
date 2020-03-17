@@ -1,33 +1,22 @@
-package com.jnape.palatable.shoki.internal;
+package com.jnape.palatable.shoki.hamt;
 
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ONE;
-import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ZERO;
-import static com.jnape.palatable.shoki.internal.Bitmap32.bitmap32;
-import static com.jnape.palatable.shoki.internal.Bitmap32.empty;
+import static com.jnape.palatable.shoki.hamt.Bitmap32.Bit.ONE;
+import static com.jnape.palatable.shoki.hamt.Bitmap32.Bit.ZERO;
+import static com.jnape.palatable.shoki.hamt.Bitmap32.bitmap32;
+import static com.jnape.palatable.shoki.hamt.Bitmap32.empty;
+import static com.jnape.palatable.shoki.hamt.Bitmap32.full;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class Bitmap32Test {
-
-    @Test
-    public void lsb() {
-        assertEquals(ZERO, empty().lsb());
-        assertEquals(ZERO, bitmap32(0).lsb());
-        assertEquals(ZERO, bitmap32(-0).lsb());
-
-        assertEquals(ZERO, bitmap32(1).lsb());
-        assertEquals(ZERO, bitmap32(Integer.MAX_VALUE).lsb());
-
-        assertEquals(Bitmap32.Bit.ONE, bitmap32(-1).lsb());
-        assertEquals(Bitmap32.Bit.ONE, bitmap32(MIN_VALUE).lsb());
-    }
 
     @Test
     public void fromBits() {
@@ -137,10 +126,10 @@ public class Bitmap32Test {
 
     @Test
     public void signedRightShift() {
-        assertEquals(bitmap32(0b00000), bitmap32(0b00000).signedRightShift(0));
-        assertEquals(bitmap32(0b00000), bitmap32(0b00000).signedRightShift(1));
-        assertEquals(bitmap32(0b00000), bitmap32(0b00001).signedRightShift(1));
-        assertEquals(bitmap32(MAX_VALUE), bitmap32(-1).signedRightShift(1));
+        assertEquals(bitmap32(0b00000), bitmap32(0b00000).signedShiftR(0));
+        assertEquals(bitmap32(0b00000), bitmap32(0b00000).signedShiftR(1));
+        assertEquals(bitmap32(0b00000), bitmap32(0b00001).signedShiftR(1));
+        assertEquals(bitmap32(MAX_VALUE), bitmap32(-1).signedShiftR(1));
     }
 
     @Test
@@ -148,5 +137,12 @@ public class Bitmap32Test {
         assertEquals(0, bitmap32(0).bits());
         assertEquals(1, bitmap32(1).bits());
         assertEquals(MIN_VALUE, bitmap32(MIN_VALUE).bits());
+    }
+
+    @Test
+    public void hashCodeEquivalence() {
+        assertEquals(empty().hashCode(), bitmap32(0).hashCode());
+        assertEquals(full().hashCode(), bitmap32(0b11_11111_11111_11111_11111_11111_11111).hashCode());
+        assertNotEquals(empty().hashCode(), full().hashCode());
     }
 }

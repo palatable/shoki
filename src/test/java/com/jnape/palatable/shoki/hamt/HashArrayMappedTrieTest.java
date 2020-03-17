@@ -1,15 +1,19 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.hamt;
 
+import com.jnape.palatable.shoki.ImmutableHashSet;
+import com.jnape.palatable.shoki.ImmutableStack;
 import com.jnape.palatable.shoki.testsupport.StubbedHashingAlgorithm;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
-import static com.jnape.palatable.shoki.HashArrayMappedTrie.empty;
-import static com.jnape.palatable.shoki.HashArrayMappedTrie.hashArrayMappedTrie;
 import static com.jnape.palatable.shoki.SizeInfo.known;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.hamt.HashArrayMappedTrie.empty;
+import static com.jnape.palatable.shoki.hamt.HashArrayMappedTrie.hashArrayMappedTrie;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -29,38 +33,44 @@ public class HashArrayMappedTrieTest {
     @Test
     public void getPresentKey() {
         assertEquals(just(true), HashArrayMappedTrie.<Integer, Boolean>empty().put(0, true).get(0));
+
+        HashArrayMappedTrie<Integer, Boolean> populated = HashArrayMappedTrie.<Integer, Boolean>empty()
+                .put(0, true)
+                .put(1, false);
+        assertEquals(just(true), populated.get(0));
+        assertEquals(just(false), populated.get(1));
     }
 
     @Test
     public void deepCollisions() {
-        HashArrayMappedTrie<String, Integer> deepCollisions =
-                hashArrayMappedTrie(objectEquals(),
-                                    StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
-                                            .stub("a", 0b00_00000_00000_00000_00000_00000_00000)
-                                            .stub("b", 0b01_00000_00000_00000_00000_00000_00000)
-                                            .stub("c", 0b01_00001_00000_00000_00000_00000_00000)
-                                            .stub("d", 0b01_00001_00001_00000_00000_00000_00000)
-                                            .stub("e", 0b01_00001_00001_00001_00000_00000_00000)
-                                            .stub("f", 0b01_00001_00001_00001_00001_00000_00000)
-                                            .stub("g", 0b01_00001_00001_00001_00001_00001_00000)
-                                            .stub("h", 0b01_00001_00001_00001_00001_00001_00001),
-                                    tuple("a", 1),
-                                    tuple("b", 2),
-                                    tuple("c", 3),
-                                    tuple("d", 4),
-                                    tuple("e", 5),
-                                    tuple("f", 6),
-                                    tuple("g", 7),
-                                    tuple("h", 8));
+        int a = 0b00_00000_00000_00000_00000_00000_00000;
+        int b = 0b01_00000_00000_00000_00000_00000_00000;
+        int c = 0b01_00001_00000_00000_00000_00000_00000;
+        int d = 0b01_00001_00001_00000_00000_00000_00000;
+        int e = 0b01_00001_00001_00001_00000_00000_00000;
+        int f = 0b01_00001_00001_00001_00001_00000_00000;
+        int g = 0b01_00001_00001_00001_00001_00001_00000;
+        int h = 0b01_00001_00001_00001_00001_00001_00001;
 
-        assertEquals(deepCollisions.get("a"), just(1));
-        assertEquals(deepCollisions.get("b"), just(2));
-        assertEquals(deepCollisions.get("c"), just(3));
-        assertEquals(deepCollisions.get("d"), just(4));
-        assertEquals(deepCollisions.get("e"), just(5));
-        assertEquals(deepCollisions.get("f"), just(6));
-        assertEquals(deepCollisions.get("g"), just(7));
-        assertEquals(deepCollisions.get("h"), just(8));
+        HashArrayMappedTrie<Integer, Integer> deepCollisions =
+                hashArrayMappedTrie(objectEquals(), objectHashCode(),
+                                    tuple(a, 1),
+                                    tuple(b, 2),
+                                    tuple(c, 3),
+                                    tuple(d, 4),
+                                    tuple(e, 5),
+                                    tuple(f, 6),
+                                    tuple(g, 7),
+                                    tuple(h, 8));
+
+        assertEquals(deepCollisions.get(a), just(1));
+        assertEquals(deepCollisions.get(b), just(2));
+        assertEquals(deepCollisions.get(c), just(3));
+        assertEquals(deepCollisions.get(d), just(4));
+        assertEquals(deepCollisions.get(e), just(5));
+        assertEquals(deepCollisions.get(f), just(6));
+        assertEquals(deepCollisions.get(g), just(7));
+        assertEquals(deepCollisions.get(h), just(8));
     }
 
     @Test
@@ -80,7 +90,7 @@ public class HashArrayMappedTrieTest {
 
     @Test
     public void ofStaticFactoryMethod() {
-        assertEquals(ImmutableHashSet.empty(), HashArrayMappedTrie.empty().keys());
+        Assert.assertEquals(ImmutableHashSet.empty(), HashArrayMappedTrie.empty().keys());
         assertEquals(ImmutableHashSet.of("foo", "bar", "baz"),
                      hashArrayMappedTrie(tuple("foo", 1),
                                          tuple("bar", 2),
@@ -204,9 +214,9 @@ public class HashArrayMappedTrieTest {
 
     @Test
     public void toStringIsUseful() {
-        assertEquals("ImmutableHashMap[]", empty().toString());
-        assertEquals("ImmutableHashMap[(key=value)]", empty().put("key", "value").toString());
-        assertEquals("ImmutableHashMap[(foo=foo value), (baz=baz value), (bar=bar value)]",
+        assertEquals("HashArrayMappedTrie[]", empty().toString());
+        assertEquals("HashArrayMappedTrie[(key=value)]", empty().put("key", "value").toString());
+        assertEquals("HashArrayMappedTrie[(foo=foo value), (baz=baz value), (bar=bar value)]",
                      empty(objectEquals(),
                            StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                                    .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
@@ -254,52 +264,6 @@ public class HashArrayMappedTrieTest {
         assertEquals(just(false), tail.get(32));
     }
 
-    @Test
-    public void sameEntries() {
-        assertTrue(empty().sameEntries(empty()));
-        assertTrue(empty().put(1, 1).sameEntries(empty().put(1, 1)));
-        assertTrue(empty().put(1, 1).put(2, 2).remove(2).sameEntries(empty().put(1, 1)));
-
-        assertTrue(hashArrayMappedTrie(tuple(1, true), tuple(2, false))
-                           .sameEntries(hashArrayMappedTrie(tuple(1, true), tuple(2, false)),
-                                        (v1, v2) -> true));
-
-        assertTrue(hashArrayMappedTrie((k, k2) -> k % 2 == k2 % 2,
-                                       k -> k.hashCode() % 2,
-                                       tuple(1, true),
-                                       tuple(2, false),
-                                       tuple(3, false),
-                                       tuple(4, true))
-                           .sameEntries(hashArrayMappedTrie(tuple(3, false),
-                                                            tuple(4, true))));
-
-        assertTrue(hashArrayMappedTrie(tuple(3, false),
-                                       tuple(4, true))
-                           .sameEntries(hashArrayMappedTrie((k, k2) -> k % 2 == k2 % 2,
-                                                            k -> k.hashCode() % 2,
-                                                            tuple(1, true),
-                                                            tuple(2, false),
-                                                            tuple(3, false),
-                                                            tuple(4, true))));
-
-        assertFalse(hashArrayMappedTrie((k, k2) -> k % 2 == k2 % 2, k -> k.hashCode() % 2,
-                                        tuple(4, true),
-                                        tuple(3, false),
-                                        tuple(2, false),
-                                        tuple(1, true))
-                            .sameEntries(hashArrayMappedTrie(tuple(3, false),
-                                                             tuple(4, true))));
-
-        assertFalse(HashArrayMappedTrie.<Integer, Boolean>empty()
-                            .put(3, false)
-                            .put(4, true)
-                            .sameEntries(HashArrayMappedTrie.<Integer, Boolean>empty((k, k2) -> k % 2 == k2 % 2,
-                                                                                     k -> k.hashCode() % 2)
-                                                 .put(4, true)
-                                                 .put(3, false)
-                                                 .put(2, false)
-                                                 .put(1, true)));
-    }
 
     @Test
     public void equalsUsesSameEntriesWithObjectEqualsForValues() {
@@ -339,6 +303,46 @@ public class HashArrayMappedTrieTest {
                      hashArrayMappedTrie(tuple("foo", 1),
                                          tuple("bar", 2),
                                          tuple("baz", 3)).keys());
+    }
+
+    @Test
+    public void values() {
+        assertEquals(ImmutableStack.of(1, 2, 3),
+                     hashArrayMappedTrie(tuple("foo", 1),
+                                         tuple("bar", 2),
+                                         tuple("baz", 3))
+                             .values());
+    }
+
+    @Test
+    public void removeKeyForSingleCollisionThatDoesNotContainKey() {
+        assertEquals(just(1),
+                     hashArrayMappedTrie(objectEquals(),
+                                         StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                                                 .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                                                 .stub("bar", 0b00_00000_00000_00000_00000_00000_00000)
+                                                 .stub("baz", 0b00_00000_00000_00000_00000_00000_00000),
+                                         tuple("foo", 1),
+                                         tuple("bar", 2))
+                             .remove("bar")
+                             .remove("baz")
+                             .get("foo"));
+    }
+
+    @Test
+    public void insertCollisionThatAlreadyExists() {
+        HashArrayMappedTrie<String, Integer> doubleCollision =
+                hashArrayMappedTrie(objectEquals(),
+                                    StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
+                                            .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
+                                            .stub("bar", 0b00_00000_00000_00000_00000_00000_00000)
+                                            .stub("baz", 0b00_00000_00000_00000_00000_00000_00000),
+                                    tuple("foo", 1),
+                                    tuple("bar", 2),
+                                    tuple("foo", 3));
+        assertEquals(just(3), doubleCollision.get("foo"));
+        assertEquals(nothing(), doubleCollision.remove("foo").get("foo"));
+        assertEquals(known(2), doubleCollision.sizeInfo());
     }
 
     @Test(timeout = 1000)

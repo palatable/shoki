@@ -93,5 +93,10 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
                            Fn1<? super Unknown, ? extends R> bFn) {
             return bFn.apply(this);
         }
+
+        @Override
+        public String toString() {
+            return "Unknown{}";
+        }
     }
 }

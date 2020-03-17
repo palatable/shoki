@@ -1,4 +1,4 @@
-package com.jnape.palatable.shoki.internal;
+package com.jnape.palatable.shoki.hamt;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 
@@ -18,15 +18,15 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Take.take;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.Times.times;
 import static com.jnape.palatable.lambda.monoid.builtin.Concat.concat;
-import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ONE;
-import static com.jnape.palatable.shoki.internal.Bitmap32.Bit.ZERO;
 import static java.lang.Integer.MIN_VALUE;
+import static java.lang.Math.pow;
 import static java.lang.String.join;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
-public final class Bitmap32 {
+final class Bitmap32 {
     private static final Bitmap32 EMPTY = bitmap32(0);
+    private static final Bitmap32 FULL  = bitmap32(-1);
 
     private final int bits;
 
@@ -47,11 +47,7 @@ public final class Bitmap32 {
                ? empty()
                : index >= 32
                  ? this
-                 : bitmap32(bits & (-1 >>> 32 - index));
-    }
-
-    public Bit lsb() {
-        return bits >> 31 == 0 ? ZERO : ONE;
+                 : and(FULL.signedShiftR(32 - index));
     }
 
     @Override
@@ -72,23 +68,39 @@ public final class Bitmap32 {
     }
 
     public boolean populatedAtIndex(int index) {
-        return (bits & (1 << index)) >>> index == 1;
+        return and(bitmap32(1).shiftL(index)).signedShiftR(index).bits() == 1;
     }
 
     public Bitmap32 populateAtIndex(int index) {
-        return new Bitmap32(bits | 1 << index);
+        return or(bitmap32(1).shiftL(index));
+    }
+
+    public Bitmap32 flip() {
+        return bitmap32(~bits);
     }
 
     public Bitmap32 evictAtIndex(int index) {
-        return new Bitmap32(bits & ~(1 << index));
+        return and(bitmap32(1).shiftL(index).flip());
     }
 
     public Bitmap32 and(Bitmap32 mask) {
         return bitmap32(bits & mask.bits);
     }
 
-    public Bitmap32 signedRightShift(int positions) {
+    public Bitmap32 or(Bitmap32 mask) {
+        return bitmap32(bits | mask.bits);
+    }
+
+    public Bitmap32 shiftL(int positions) {
+        return bitmap32(bits << positions);
+    }
+
+    public Bitmap32 signedShiftR(int positions) {
         return bitmap32(bits >>> positions);
+    }
+
+    public static Bitmap32 fillUpTo(int index) {
+        return bitmap32((int) pow(2, index) - 1);
     }
 
     public static Bitmap32 bitmap32(int bits) {
@@ -109,6 +121,10 @@ public final class Bitmap32 {
 
     public static Bitmap32 empty() {
         return EMPTY;
+    }
+
+    public static Bitmap32 full() {
+        return FULL;
     }
 
     public enum Bit {

@@ -71,6 +71,7 @@ public class ImmutableQueueTest {
         assertEquals(ImmutableQueue.of(1, 2, 3), ImmutableQueue.of(1, 2, 3).reverse().reverse());
 
         assertEquals(ImmutableQueue.of(1), ImmutableQueue.of(1).reverse());
+        assertEquals(ImmutableQueue.empty(), ImmutableQueue.empty().reverse());
     }
 
     @Test

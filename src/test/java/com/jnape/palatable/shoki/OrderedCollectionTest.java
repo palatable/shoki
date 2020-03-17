@@ -26,5 +26,6 @@ public class OrderedCollectionTest {
         assertFalse(OrderedCollection.equals(queue, ImmutableQueue.of(1, 2, 3)));
         assertFalse(OrderedCollection.equals(stack, ImmutableQueue.of(1, 2, 3)));
         assertFalse(OrderedCollection.equals(ImmutableQueue.of(1, 2, 3), stack));
+        assertFalse(OrderedCollection.equals(ImmutableQueue.of(1, 2, 3), ImmutableQueue.empty()));
     }
 }

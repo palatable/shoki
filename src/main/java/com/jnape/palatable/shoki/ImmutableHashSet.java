@@ -7,6 +7,7 @@ import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Set;
+import com.jnape.palatable.shoki.hamt.HashArrayMappedTrie;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;

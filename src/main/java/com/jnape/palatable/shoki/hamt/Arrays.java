@@ -1,9 +1,9 @@
-package com.jnape.palatable.shoki.internal;
+package com.jnape.palatable.shoki.hamt;
 
 import static java.lang.Math.max;
 import static java.lang.System.arraycopy;
 
-public final class Arrays {
+final class Arrays {
     private Arrays() {
     }
 

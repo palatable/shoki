@@ -1,8 +1,8 @@
 package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.shoki.ImmutableQueue;
-import com.jnape.palatable.shoki.ImmutableStack;
+import com.jnape.palatable.shoki.impl.StrictQueue;
+import com.jnape.palatable.shoki.impl.StrictStack;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -13,8 +13,8 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
  * A recursive, homogeneous data structure supporting singly-linked iteration.
  *
  * @param <A> the element type
- * @see ImmutableStack
- * @see ImmutableQueue
+ * @see StrictStack
+ * @see StrictQueue
  */
 public interface Sequence<A> extends Iterable<A> {
 

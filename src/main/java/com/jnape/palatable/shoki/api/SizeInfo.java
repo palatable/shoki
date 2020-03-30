@@ -1,8 +1,7 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.functions.Fn1;
-import com.jnape.palatable.shoki.api.Sizable;
 
 import java.util.Objects;
 

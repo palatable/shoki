@@ -1,7 +1,5 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.SizeInfo;
-
 import java.util.Iterator;
 import java.util.Objects;
 

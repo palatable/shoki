@@ -1,13 +1,13 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.ImmutableQueue;
+import com.jnape.palatable.shoki.impl.StrictQueue;
 
 /**
- * A FIFO {@link Collection}.
+ * A {@link Collection} offering "first-in/first-out" semantics..
  *
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type
- * @see ImmutableQueue
+ * @see StrictQueue
  */
 public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A> {
 

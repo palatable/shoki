@@ -1,12 +1,12 @@
-package com.jnape.palatable.shoki.hamt;
+package com.jnape.palatable.shoki.impl;
 
 import org.junit.Test;
 
 import java.util.Arrays;
 
-import static com.jnape.palatable.shoki.hamt.Arrays.deleteAt;
-import static com.jnape.palatable.shoki.hamt.Arrays.insertAt;
-import static com.jnape.palatable.shoki.hamt.Arrays.overrideAt;
+import static com.jnape.palatable.shoki.impl.Arrays.deleteAt;
+import static com.jnape.palatable.shoki.impl.Arrays.insertAt;
+import static com.jnape.palatable.shoki.impl.Arrays.overrideAt;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -1,7 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.shoki.SizeInfo;
 import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;

@@ -1,10 +1,10 @@
-package com.jnape.palatable.shoki;
+package com.jnape.palatable.shoki.api;
 
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
-import static com.jnape.palatable.shoki.SizeInfo.known;
-import static com.jnape.palatable.shoki.SizeInfo.unknown;
+import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.unknown;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;

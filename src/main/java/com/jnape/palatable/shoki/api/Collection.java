@@ -1,6 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 /**
  * A known-sized {@link Sequence}.

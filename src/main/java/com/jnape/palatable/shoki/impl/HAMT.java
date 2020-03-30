@@ -1,9 +1,8 @@
-package com.jnape.palatable.shoki.hamt;
+package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.adt.product.Product2;
-import com.jnape.palatable.shoki.ImmutableStack;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 
@@ -18,25 +17,25 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Find.find;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.bitmap32;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.fillUpTo;
+import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
+import static com.jnape.palatable.shoki.impl.Bitmap32.fillUpTo;
 import static java.lang.Math.ceil;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
-interface Body<K, V> extends Iterable<Tuple2<K, V>> {
+interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
     int LEVEL_SIZE = 5;
     int MAX_LEVEL  = (int) ceil(32D / LEVEL_SIZE);
 
-    Body<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
+    HAMT<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
                    int level);
 
     Maybe<V> get(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
-    Maybe<Body<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
-    final class Node<K, V> implements Body<K, V> {
+    final class Node<K, V> implements HAMT<K, V> {
 
         private static final Node<?, ?> ROOT = new Node<>(Bitmap32.empty(), new Object[0]);
 
@@ -70,12 +69,12 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         @Override
         public Iterator<Tuple2<K, V>> iterator() {
             @SuppressWarnings("unchecked")
-            List<Body<K, V>> bodies = (List<Body<K, V>>) (Object) asList(table);
+            List<HAMT<K, V>> bodies = (List<HAMT<K, V>>) (Object) asList(table);
             return flatten(bodies).iterator();
         }
 
         @Override
-        public Maybe<Body<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
             if (!bitmap.populatedAtIndex(bitmapIndex))
                 return just(this);
@@ -124,15 +123,15 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @SuppressWarnings("unchecked")
-        private Body<K, V> valueAtIndex(int tableIndex) {
-            return (Body<K, V>) table[tableIndex];
+        private HAMT<K, V> valueAtIndex(int tableIndex) {
+            return (HAMT<K, V>) table[tableIndex];
         }
 
-        private Node<K, V> insertAt(int tableIndex, int bitmapIndex, Body<K, V> valueForSlot) {
+        private Node<K, V> insertAt(int tableIndex, int bitmapIndex, HAMT<K, V> valueForSlot) {
             return new Node<>(bitmap.populateAtIndex(bitmapIndex), Arrays.insertAt(tableIndex, table, valueForSlot));
         }
 
-        private Node<K, V> overrideAt(int tableIndex, Body<K, V> valueForSlot) {
+        private Node<K, V> overrideAt(int tableIndex, HAMT<K, V> valueForSlot) {
             return new Node<>(bitmap, Arrays.overrideAt(tableIndex, table, valueForSlot));
         }
 
@@ -141,12 +140,12 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @SuppressWarnings("unchecked")
-        static <K, V> Body<K, V> rootNode() {
-            return (Body<K, V>) ROOT;
+        static <K, V> HAMT<K, V> rootNode() {
+            return (HAMT<K, V>) ROOT;
         }
     }
 
-    final class Entry<K, V> implements Body<K, V>, Product2<K, V> {
+    final class Entry<K, V> implements HAMT<K, V>, Product2<K, V> {
 
         private final K k;
         private final V v;
@@ -167,7 +166,7 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Body<K, V> put(K newKey, V newValue, Bitmap32 keyHash,
+        public HAMT<K, V> put(K newKey, V newValue, Bitmap32 keyHash,
                               EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
                               int level) {
             if (keyEqRel.apply(newKey, k))
@@ -178,7 +177,7 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
                    ? new Node<K, V>(Bitmap32.empty(), new Object[0])
                            .put(k, v, existingKeyHash, keyEqRel, keyHashAlg, level)
                            .put(newKey, newValue, keyHash, keyEqRel, keyHashAlg, level)
-                   : new Collision<>(existingKeyHash, ImmutableStack.of(this, new Entry<>(newKey, newValue)));
+                   : new Collision<>(existingKeyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
         }
 
         @Override
@@ -192,7 +191,7 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<Body<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             return keyEqRel.apply(key, k) ? nothing() : just(this);
         }
 
@@ -216,21 +215,21 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
     }
 
-    final class Collision<K, V> implements Body<K, V> {
-        private final Bitmap32                    keyHash;
-        private final ImmutableStack<Entry<K, V>> kvPairs;
+    final class Collision<K, V> implements HAMT<K, V> {
+        private final Bitmap32                 keyHash;
+        private final StrictStack<Entry<K, V>> kvPairs;
 
         Collision(Bitmap32 keyHash,
-                  ImmutableStack<Entry<K, V>> kvPairs) {
+                  StrictStack<Entry<K, V>> kvPairs) {
             this.keyHash = keyHash;
             this.kvPairs = kvPairs;
         }
 
         @Override
-        public Body<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel,
+        public HAMT<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel,
                               HashingAlgorithm<K> keyHashAlg, int level) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                     ImmutableStack.<Entry<K, V>>of(new Entry<>(key, value)),
+                                                     StrictStack.<Entry<K, V>>of(new Entry<>(key, value)),
                                                      kvPairs));
         }
 
@@ -247,15 +246,15 @@ interface Body<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<Body<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             if (!keyHash.equals(this.keyHash))
                 return just(this);
 
-            ImmutableStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1())
-                                                                          ? s.cons(kv)
-                                                                          : s),
-                                                              ImmutableStack.empty(),
-                                                              kvPairs);
+            StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1())
+                                                                       ? s.cons(kv)
+                                                                       : s),
+                                                           StrictStack.empty(),
+                                                           kvPairs);
             return just(withoutKey.sizeInfo().getSize() == 1
                         ? withoutKey.iterator().next()
                         : new Collision<>(keyHash, withoutKey));

@@ -1,7 +1,5 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.SizeInfo;
-
 /**
  * A generic interface representing a type that can provide information about its size.
  *

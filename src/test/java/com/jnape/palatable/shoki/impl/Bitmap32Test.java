@@ -1,14 +1,14 @@
-package com.jnape.palatable.shoki.hamt;
+package com.jnape.palatable.shoki.impl;
 
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.Bit.ONE;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.Bit.ZERO;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.bitmap32;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.empty;
-import static com.jnape.palatable.shoki.hamt.Bitmap32.full;
+import static com.jnape.palatable.shoki.impl.Bitmap32.Bit.ONE;
+import static com.jnape.palatable.shoki.impl.Bitmap32.Bit.ZERO;
+import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
+import static com.jnape.palatable.shoki.impl.Bitmap32.empty;
+import static com.jnape.palatable.shoki.impl.Bitmap32.full;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.MIN_VALUE;
 import static org.junit.Assert.assertEquals;

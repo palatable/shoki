@@ -1,4 +1,4 @@
-package com.jnape.palatable.shoki.hamt;
+package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 

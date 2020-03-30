@@ -1,4 +1,4 @@
-package com.jnape.palatable.shoki.hamt;
+package com.jnape.palatable.shoki.impl;
 
 import static java.lang.Math.max;
 import static java.lang.System.arraycopy;

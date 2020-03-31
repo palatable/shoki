@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -133,18 +134,6 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * Convenience static factory method to construct an {@link StrictStack} from an {@link Iterable} of elements.
-     * <code>O(n)</code>.
-     *
-     * @param as  the {@link Iterable} of elements from back to front
-     * @param <A> the {@link Iterable} and {@link StrictStack} element type
-     * @return the new {@link StrictStack}
-     */
-    public static <A> StrictStack<A> of(Iterable<A> as) {
-        return foldLeft(StrictStack::cons, empty(), as);
-    }
-
-    /**
      * Convenience static factory method to construct an {@link StrictStack} from varargs elements.
      * <code>O(n)</code>.
      *
@@ -153,8 +142,8 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
      * @return the new {@link StrictStack}
      */
     @SafeVarargs
-    public static <A> StrictStack<A> of(A... as) {
-        return of(asList(as));
+    public static <A> StrictStack<A> of(A a, A... as) {
+        return foldLeft(StrictStack::cons, empty(), Cons.cons(a, asList(as)));
     }
 
     private static final class Head<A> extends StrictStack<A> {

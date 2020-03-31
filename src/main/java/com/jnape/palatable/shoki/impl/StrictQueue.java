@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.Queue;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -103,18 +104,6 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
     }
 
     /**
-     * Convenience static factory method to construct an {@link StrictQueue} from an {@link Iterable} of elements.
-     * <code>O(n)</code>.
-     *
-     * @param as  the elements from front to back
-     * @param <A> the {@link Iterable} and {@link StrictQueue} element type
-     * @return the new {@link StrictQueue}
-     */
-    public static <A> StrictQueue<A> of(Iterable<A> as) {
-        return foldLeft(StrictQueue::snoc, StrictQueue.empty(), as);
-    }
-
-    /**
      * Convenience static factory method to construct an {@link StrictQueue} from varargs elements.
      * <code>O(n)</code>.
      *
@@ -123,8 +112,8 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
      * @return the new {@link StrictQueue}
      */
     @SafeVarargs
-    public static <A> StrictQueue<A> of(A... as) {
-        return of(asList(as));
+    public static <A> StrictQueue<A> of(A a, A... as) {
+        return foldLeft(StrictQueue::snoc, StrictQueue.empty(), Cons.cons(a, asList(as)));
     }
 
     private static final class Empty<A> extends StrictQueue<A> {

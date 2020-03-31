@@ -20,6 +20,7 @@ import static com.jnape.palatable.shoki.impl.Bitmap32.empty;
 import static com.jnape.palatable.shoki.impl.HAMT.MAX_LEVEL;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static testsupport.matchers.IterableMatcher.iterates;
@@ -158,6 +159,19 @@ public class HAMTTest {
                          collision
                                  .remove("foo", bitmap32(0), objectEquals(), 1)
                                  .flatMap(c -> c.remove("bar", bitmap32(0), objectEquals(), 1)));
+        }
+
+        @Test
+        public void equalsAndHashCode() {
+            assertEquals(new Collision<>(empty(), StrictStack.empty()), new Collision<>(empty(), StrictStack.empty()));
+            assertNotEquals(new Collision<>(empty(), StrictStack.empty()),
+                            new Collision<>(bitmap32(1), StrictStack.empty()));
+            assertEquals(new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))),
+                         new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))));
+            assertNotEquals(new Collision<>(empty(), StrictStack.empty()),
+                            new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))));
+
+            assertNotEquals(new Collision<>(empty(), StrictStack.empty()), new Object());
         }
     }
 

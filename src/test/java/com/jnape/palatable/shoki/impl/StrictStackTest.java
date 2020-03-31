@@ -7,7 +7,6 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertSame;
@@ -72,7 +71,6 @@ public class StrictStackTest {
 
     @Test
     public void convenienceStaticFactoryMethod() {
-        assertEquals(StrictStack.empty().cons(1).cons(2).cons(3), StrictStack.of(asList(1, 2, 3)));
         assertEquals(StrictStack.empty().cons(1).cons(2).cons(3), StrictStack.of(1, 2, 3));
     }
 

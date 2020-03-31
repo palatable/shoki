@@ -110,7 +110,7 @@ public final class HashSet<A> implements Set<Integer, A> {
     @Override
     public HashSet<A> intersection(Set<Integer, A> other) {
         return (sizeInfo().getSize() < other.sizeInfo().getSize() ? tuple(this, other) : tuple(other, this))
-                .into((smaller, larger) -> foldLeft((i, x) -> larger.contains(x) ? i.add(x) : i, empty(), smaller));
+                .into((source, filter) -> foldLeft((i, x) -> filter.contains(x) ? i.add(x) : i, empty(), source));
     }
 
     /**
@@ -119,9 +119,10 @@ public final class HashSet<A> implements Set<Integer, A> {
      */
     @Override
     public HashSet<A> union(Set<Integer, A> other) {
-        return other instanceof HashSet<?> && other.sizeInfo().getSize() > sizeInfo().getSize()
-               ? foldLeft(HashSet::add, (HashSet<A>) other, this)
-               : foldLeft(HashSet::add, this, other);
+        return (other instanceof HashSet<?> && other.sizeInfo().getSize() > sizeInfo().getSize()
+                ? tuple((HashSet<A>) other, this)
+                : tuple(this, other))
+                .into(foldLeft(HashSet::add));
     }
 
     /**

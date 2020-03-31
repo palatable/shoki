@@ -70,12 +70,12 @@ import static java.util.Arrays.asList;
  * Trie={bitmap: 0b11,
  *       // index 0 is populated (value)
  *       // index 1 is populated (sub-trie)
- *       // cardinality of this array is 2 (ctpop(0b11))
+ *       // cardinality of this array is 2 (POPCNT(0b11))
  *       arr: [Value="foo"
  *             Trie={bitmap: 0b11,
  *                   // index 0 is populated (value)
  *                   // index 1 is populated (value)
- *                   // cardinality of this array is 2 (ctpop(0b11))
+ *                   // cardinality of this array is 2 (POPCNT(0b11))
  *                   arr: [Value="bar", Value="baz"]
  *                  }
  *            ]
@@ -97,7 +97,7 @@ import static java.util.Arrays.asList;
  * characteristics.
  * <p>
  * Finally, a {@link HashMap} can be configured upon creation with custom {@link EquivalenceRelation equality} and
- * {@link HashingAlgorithm hashing} semantics, avoiding the need to rely on
+ * {@link HashingAlgorithm hashing} semantics, obviating the need to rely on
  * {@link Object#equals(Object) Object equality} and {@link Object#hashCode() Object hashCode} unless specifically
  * desired.
  *

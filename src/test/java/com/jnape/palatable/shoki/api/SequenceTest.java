@@ -1,25 +1,18 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.shoki.impl.StrictStack;
+import com.jnape.palatable.shoki.testsupport.DefaultMethodsSequence;
 import org.junit.Test;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class SequenceTest {
 
     @Test
     public void isEmpty() {
-        Sequence<String> empty = new Sequence<String>() {
-            @Override
-            public Maybe<String> head() {
-                return Maybe.nothing();
-            }
-
-            @Override
-            public Sequence<String> tail() {
-                return this;
-            }
-        };
-        assertTrue(empty.isEmpty());
+        assertTrue(new DefaultMethodsSequence<>(StrictStack.empty()).isEmpty());
+        assertFalse(new DefaultMethodsSequence<>(StrictStack.of(1)).isEmpty());
     }
+
 }

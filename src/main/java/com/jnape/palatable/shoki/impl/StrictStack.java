@@ -98,7 +98,7 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
      */
     @Override
     public final boolean equals(Object other) {
-        return other instanceof StrictStack && OrderedCollection.equals(this, (StrictStack<?>) other);
+        return other instanceof StrictStack<?> && OrderedCollection.equals(this, (StrictStack<?>) other);
     }
 
     /**

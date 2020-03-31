@@ -19,14 +19,14 @@ public class OrderedCollectionTest {
         assertTrue(OrderedCollection.equals(queue, queue));
         assertTrue(OrderedCollection.equals(stack, stack));
 
-        assertFalse(OrderedCollection.equals(StrictStack.of(3, 2, 1), stack));
-        assertFalse(OrderedCollection.equals(stack, StrictStack.of(3, 2, 1)));
-        assertFalse(OrderedCollection.equals(queue, StrictStack.of(3, 2, 1)));
-        assertFalse(OrderedCollection.equals(StrictStack.of(3, 2, 1), queue));
-        assertFalse(OrderedCollection.equals(StrictQueue.of(1, 2, 3), queue));
-        assertFalse(OrderedCollection.equals(queue, StrictQueue.of(1, 2, 3)));
-        assertFalse(OrderedCollection.equals(stack, StrictQueue.of(1, 2, 3)));
-        assertFalse(OrderedCollection.equals(StrictQueue.of(1, 2, 3), stack));
-        assertFalse(OrderedCollection.equals(StrictQueue.of(1, 2, 3), StrictQueue.empty()));
+        assertFalse(OrderedCollection.equals(stack.reverse(), stack));
+        assertFalse(OrderedCollection.equals(stack, stack.reverse()));
+        assertFalse(OrderedCollection.equals(queue, stack.reverse()));
+        assertFalse(OrderedCollection.equals(stack.reverse(), queue));
+        assertFalse(OrderedCollection.equals(queue.reverse(), queue));
+        assertFalse(OrderedCollection.equals(queue, queue.reverse()));
+        assertFalse(OrderedCollection.equals(stack, queue.reverse()));
+        assertFalse(OrderedCollection.equals(queue.reverse(), stack));
+        assertFalse(OrderedCollection.equals(queue.reverse(), StrictQueue.empty()));
     }
 }

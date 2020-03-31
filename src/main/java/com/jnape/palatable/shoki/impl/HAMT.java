@@ -103,14 +103,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             return result;
         }
 
-        @Override
-        public String toString() {
-            return "Node{" +
-                    "bitmap=" + bitmap +
-                    ", table=" + java.util.Arrays.toString(table) +
-                    '}';
-        }
-
         private int tableIndex(int bitmapIndex) {
             return bitmap.lowerBits(bitmapIndex).populationCount();
         }
@@ -208,11 +200,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         public int hashCode() {
             return Objects.hash(k, v);
         }
-
-        @Override
-        public String toString() {
-            return "Entry{k=" + k + ", v=" + v + '}';
-        }
     }
 
     final class Collision<K, V> implements HAMT<K, V> {
@@ -229,7 +216,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         public HAMT<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel,
                               HashingAlgorithm<K> keyHashAlg, int level) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                     StrictStack.<Entry<K, V>>of(new Entry<>(key, value)),
+                                                     StrictStack.of(new Entry<>(key, value)),
                                                      kvPairs));
         }
 
@@ -273,14 +260,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         @Override
         public int hashCode() {
             return Objects.hash(keyHash, kvPairs);
-        }
-
-        @Override
-        public String toString() {
-            return "Collision{" +
-                    "keyHash=" + keyHash +
-                    ", kvPairs=" + kvPairs +
-                    '}';
         }
     }
 }

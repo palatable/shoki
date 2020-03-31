@@ -12,6 +12,7 @@ import com.jnape.palatable.shoki.api.SizeInfo;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
+import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -100,6 +101,45 @@ public final class HashSet<A> implements Set<Integer, A> {
     @Override
     public boolean isEmpty() {
         return map.isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(max(n, o))</code>.
+     */
+    @Override
+    public HashSet<A> intersection(Set<Integer, A> other) {
+        return (sizeInfo().getSize() < other.sizeInfo().getSize() ? tuple(this, other) : tuple(other, this))
+                .into((smaller, larger) -> foldLeft((i, x) -> larger.contains(x) ? i.add(x) : i, empty(), smaller));
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(min(n, o))</code>.
+     */
+    @Override
+    public HashSet<A> union(Set<Integer, A> other) {
+        return other instanceof HashSet<?> && other.sizeInfo().getSize() > sizeInfo().getSize()
+               ? foldLeft(HashSet::add, (HashSet<A>) other, this)
+               : foldLeft(HashSet::add, this, other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(o)</code>.
+     */
+    @Override
+    public HashSet<A> difference(Set<Integer, A> other) {
+        return foldLeft(HashSet::remove, this, other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o + min(n, o))</code>.
+     */
+    @Override
+    public HashSet<A> symmetricDifference(Set<Integer, A> other) {
+        return (HashSet<A>) Set.super.symmetricDifference(other);
     }
 
     /**

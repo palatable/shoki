@@ -1,5 +1,7 @@
 package com.jnape.palatable.shoki.impl;
 
+import com.jnape.palatable.shoki.api.Set;
+import com.jnape.palatable.shoki.testsupport.DefaultMethodsSet;
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -110,5 +112,43 @@ public class HashSetTest {
         assertEquals(identityHashSet, HashSet.of(referenceEquals(), identityHashCode(), 1, saboteur));
         assertNotEquals(identityHashSet, HashSet.of(1, 666));
         assertEquals(HashSet.of(1, 666), identityHashSet);
+    }
+
+    @Test
+    public void intersection() {
+        assertEquals(HashSet.empty(), HashSet.empty().intersection(HashSet.empty()));
+        assertEquals(HashSet.empty(), HashSet.empty().intersection(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.empty(), HashSet.of(1, 2, 3).intersection(HashSet.empty()));
+        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).intersection(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.of(2, 3), HashSet.of(1, 2, 3).intersection(HashSet.of(2, 3, 4)));
+        assertEquals(HashSet.of(2, 3), HashSet.of(2, 3, 4).intersection(HashSet.of(1, 2, 3)));
+    }
+
+    @Test
+    public void union() {
+        assertEquals(HashSet.empty(), HashSet.empty().union(HashSet.empty()));
+        assertEquals(HashSet.of(1, 2, 3), HashSet.empty().union(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).union(HashSet.empty()));
+        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).union(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.of(1, 2, 3, 4), HashSet.of(1, 2, 3).union(HashSet.of(2, 3, 4)));
+        assertEquals(HashSet.of(1, 2, 3, 4), HashSet.of(2, 3, 4).union(HashSet.of(1, 2, 3)));
+    }
+
+    @Test
+    public void difference() {
+        assertEquals(HashSet.empty(), HashSet.empty().difference(HashSet.empty()));
+        assertEquals(HashSet.empty(), HashSet.empty().difference(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).difference(HashSet.empty()));
+        assertEquals(HashSet.empty(), HashSet.of(1, 2, 3).difference(HashSet.of(1, 2, 3)));
+        assertEquals(HashSet.of(1), HashSet.of(1, 2, 3).difference(HashSet.of(2, 3, 4)));
+        assertEquals(HashSet.of(4), HashSet.of(2, 3, 4).difference(HashSet.of(1, 2, 3)));
+    }
+
+    @Test
+    public void symmetricDifference() {
+        HashSet<Object> empty = HashSet.empty();
+        assertTrue(Set.equals(DefaultMethodsSet.delegate(empty).symmetricDifference(empty),
+                              empty.symmetricDifference(empty)));
+
     }
 }

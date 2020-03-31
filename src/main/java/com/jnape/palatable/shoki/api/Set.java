@@ -1,5 +1,9 @@
 package com.jnape.palatable.shoki.api;
 
+import java.util.Objects;
+
+import static com.jnape.palatable.lambda.monoid.builtin.And.and;
+
 /**
  * A {@link Set} is a {@link Collection} of distinct elements with a {@link Membership} capability for determining if
  * an element is a member of the {@link Set}.
@@ -32,4 +36,62 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
      */
     @Override
     Set<Size, A> tail();
+
+    /**
+     * The <a href="https://en.wikipedia.org/wiki/Intersection_(set_theory)" target="_new">intersection</a> of two
+     * {@link Set Sets} <code>xs</code> and <code>ys</code> is the {@link Set} of those elements present in both
+     * <code>xs</code> and <code>ys</code>.
+     *
+     * @param other the {@link Set} to intersect this {@link Set} with
+     * @return the intersection {@link Set}
+     */
+    Set<Size, A> intersection(Set<Size, A> other);
+
+    /**
+     * The <a href="https://en.wikipedia.org/wiki/Union_(set_theory)" target="_new">union</a> of two {@link Set Sets}
+     * <code>xs</code> and <code>ys</code> is the {@link Set} of those elements present in either <code>xs</code> or
+     * <code>ys</code>.
+     *
+     * @param other the {@link Set} to union this {@link Set} with
+     * @return the union {@link Set}
+     */
+    Set<Size, A> union(Set<Size, A> other);
+
+    /**
+     * The <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement"
+     * target="_new">difference</a> (also known as "relative complement") of two {@link Set Sets} <code>xs</code> and
+     * <code>ys</code> is the {@link Set} of those elements present in <code>xs</code> that are not also present in
+     * <code>ys</code>.
+     *
+     * @param other the {@link Set} to subtract from this {@link Set}
+     * @return the difference {@link Set}
+     */
+    Set<Size, A> difference(Set<Size, A> other);
+
+    /**
+     * The <a href="https://en.wikipedia.org/wiki/Symmetric_difference" target="_new">symmetric difference</a> of two
+     * {@link Set Sets} <code>xs</code> and <code>ys</code> is the {@link Set} of those elements that appear in either
+     * <code>xs</code> or <code>ys</code> but do not appear in both, and has denotational equivalence with the
+     * {@link Set#union(Set) union} of <code>xs.{@link Set#difference(Set) difference}(ys)</code> and
+     * <code>ys.{@link Set#difference(Set) difference}(xs)</code>.
+     *
+     * @param other the {@link Set} to symmetrically difference this {@link Set} with
+     * @return the symmetric difference {@link Set}
+     */
+    default Set<Size, A> symmetricDifference(Set<Size, A> other) {
+        return difference(other).union(other.difference(this));
+    }
+
+    /**
+     * Determine if two {@link Set}s have the same {@link SizeInfo}, and contain the same elements. <code>O(n)</code>.
+     *
+     * @param xs  the first {@link Set}
+     * @param ys  the second {@link Set}
+     * @param <A> the element type
+     * @param <S> the {@link Set} subtype of the arguments
+     * @return true if both {@link Set}s are equal by the parameters above; false otherwise
+     */
+    static <A, S extends Set<?, A>> boolean equals(S xs, S ys) {
+        return Objects.equals(xs.sizeInfo().getSize(), ys.sizeInfo().getSize()) && and().foldMap(ys::contains, xs);
+    }
 }

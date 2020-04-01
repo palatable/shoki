@@ -67,7 +67,18 @@ public interface Map<Size extends Number, K, V> extends
     @Override
     Map<Size, K, V> tail();
 
-    static <K, V, M extends Map<?, K, V>> boolean sameEntries(M m1, M m2, EquivalenceRelation<V> valueEqRel) {
+    /**
+     * Determine if two {@link Map}s have the same {@link SizeInfo}, and contain the same entries. <code>O(n)</code>.
+     *
+     * @param m1         the first {@link Map}
+     * @param m2         the second {@link Map}
+     * @param valueEqRel the {@link EquivalenceRelation} to use to compare entry values
+     * @param <K>        the key type
+     * @param <V>        the value type
+     * @param <M>        the {@link Map} subtype of the arguments
+     * @return true if both {@link Map}s have the same entries by the parameters above; false otherwise
+     */
+    static <K, V, M extends Map<?, K, V>> boolean equals(M m1, M m2, EquivalenceRelation<V> valueEqRel) {
         return m1.sizeInfo().equals(m2.sizeInfo())
                 && and().foldMap(into((k, v) -> m2.get(k).fmap(valueEqRel.apply(v)).orElse(false)), m1);
     }

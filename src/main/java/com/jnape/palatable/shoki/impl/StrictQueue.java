@@ -44,7 +44,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
     public abstract StrictQueue<A> tail();
 
     /**
-     * Reverse this {@link StrictQueue}. <code>O(1)</code>.
+     * Reverse this {@link StrictQueue}. Amortized <code>O(1)</code>.
      *
      * @return this {@link StrictQueue}, reversed
      */
@@ -191,8 +191,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
 
             return incoming.isEmpty()
                    ? StrictQueue.empty()
-                   : new NonEmpty<>(foldLeft(StrictStack::cons, StrictStack.empty(), incoming),
-                                    StrictStack.empty());
+                   : new NonEmpty<>(incoming.reverse(), StrictStack.empty());
         }
 
         @Override

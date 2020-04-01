@@ -67,7 +67,8 @@ public class StrictQueueTest {
     @Test
     public void reverse() {
         assertEquals(StrictQueue.of(3, 2, 1), StrictQueue.of(1, 2, 3).reverse());
-        assertEquals(StrictQueue.of(5, 4, 3, 2, 1), StrictQueue.of(2, 3).tail().snoc(4).snoc(5).cons(2).cons(1).reverse());
+        assertEquals(StrictQueue.of(5, 4, 3, 2, 1),
+                     StrictQueue.of(2, 3).tail().snoc(4).snoc(5).cons(2).cons(1).reverse());
         assertEquals(StrictQueue.of(1, 2, 3), StrictQueue.of(1, 2, 3).reverse().reverse());
 
         assertEquals(StrictQueue.of(1), StrictQueue.of(1).reverse());

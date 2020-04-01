@@ -4,7 +4,7 @@ import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
 
 /**
- * A {@link Collection} offering "last-in/first-out" semantics.
+ * A {@link Collection} offering <em>last-in, first-out</em> semantics.
  *
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type

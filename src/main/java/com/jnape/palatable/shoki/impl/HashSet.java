@@ -153,7 +153,7 @@ public final class HashSet<A> implements Set<Integer, A> {
      */
     @Override
     public boolean equals(Object other) {
-        return other instanceof HashSet<?> && ((HashSet<?>) other).map.equals(map);
+        return other instanceof HashSet<?> && map.equals(((HashSet<?>) other).map);
     }
 
     /**

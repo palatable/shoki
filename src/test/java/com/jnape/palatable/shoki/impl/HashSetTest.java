@@ -110,8 +110,8 @@ public class HashSetTest {
         assertTrue(identityHashSet.contains(saboteur));
 
         assertEquals(identityHashSet, HashSet.of(referenceEquals(), identityHashCode(), 1, saboteur));
-        assertNotEquals(identityHashSet, HashSet.of(1, 666));
-        assertEquals(HashSet.of(1, 666), identityHashSet);
+        assertNotEquals(HashSet.of(1, 666), identityHashSet);
+        assertEquals(identityHashSet, HashSet.of(1, 666));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki.api;
 
 import org.junit.Test;
 
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static java.util.Comparator.comparing;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -42,10 +43,15 @@ public class EquivalenceRelationTest {
     @Test
     @SuppressWarnings("UnnecessaryBoxing")
     public void comparablyEquals() {
-        EquivalenceRelation<Integer> comparablyEquals =
-                EquivalenceRelation.comparablyEquals();
+        EquivalenceRelation<Integer> comparablyEquals = EquivalenceRelation.comparablyEquals();
         assertTrue(comparablyEquals.apply(1, 1));
         assertTrue(comparablyEquals.apply(1, new Integer(1)));
         assertFalse(comparablyEquals.apply(1, 2));
+    }
+
+    @Test
+    public void equivalence() {
+        assertTrue(equivalent(1, 1, EquivalenceRelation.objectEquals()));
+        assertFalse(equivalent(1, 2, EquivalenceRelation.objectEquals()));
     }
 }

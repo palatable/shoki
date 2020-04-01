@@ -3,7 +3,7 @@ package com.jnape.palatable.shoki.api;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 
 /**
- * A {@link Collection} offering "first-in/first-out" semantics..
+ * A {@link Collection} offering <em>first-in, first-out</em> semantics.
  *
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type

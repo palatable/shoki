@@ -341,13 +341,4 @@ public class HashMapTest {
         assertEquals(nothing(), doubleCollision.remove("foo").get("foo"));
         assertEquals(known(2), doubleCollision.sizeInfo());
     }
-
-    @Test(timeout = 1000)
-    public void insertionSanityBenchmark() {
-        int                       n       = 1_000_000;
-        HashMap<Integer, Boolean> hashMap = empty();
-        for (int i = 0; i < n; i++) {
-            hashMap = hashMap.put(i, true);
-        }
-    }
 }

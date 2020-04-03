@@ -172,6 +172,8 @@ public class NaturalTest {
         assertNotEquals(new NonZero(ONE), new NonZero(BigInteger.valueOf(2)));
         assertNotEquals(new NonZero(ONE), new Object());
 
+        assertTrue(zero().hashCode() < one().hashCode());
+        assertTrue(one().hashCode() < one().plus(one()).hashCode());
         assertEquals(zero().hashCode(), zero().hashCode());
         assertEquals(new NonZero(ONE).hashCode(), new NonZero(ONE).hashCode());
         assertNotEquals(new NonZero(ONE).hashCode(), new NonZero(BigInteger.valueOf(2)).hashCode());

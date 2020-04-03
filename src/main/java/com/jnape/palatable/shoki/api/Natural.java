@@ -269,6 +269,11 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
         }
 
         @Override
+        public int hashCode() {
+            return 0;
+        }
+
+        @Override
         public String toString() {
             return "Zero{}";
         }
@@ -317,7 +322,7 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
 
         @Override
         public int hashCode() {
-            return Objects.hash(value);
+            return Objects.hashCode(value);
         }
 
         @Override

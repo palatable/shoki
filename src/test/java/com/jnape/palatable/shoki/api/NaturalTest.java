@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.CmpEq.cmpEq;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
@@ -55,6 +56,15 @@ public class NaturalTest {
     }
 
     @Test
+    public void natural() {
+        assertEquals(just(zero()), Natural.natural(ZERO));
+        assertEquals(just(new NonZero(ONE)), Natural.natural(ONE));
+        assertEquals(nothing(), Natural.natural(ONE.negate()));
+        assertEquals(just(1L), Natural.natural(1L).<NonZero>fmap(downcast()).fmap(nz -> nz.value));
+        assertEquals(just(1), Natural.natural(1).<NonZero>fmap(downcast()).fmap(nz -> nz.value));
+    }
+
+    @Test
     public void abs() {
         assertEquals(zero(), Natural.abs(ZERO));
         assertEquals(zero(), Natural.abs(ZERO.negate()));
@@ -62,15 +72,8 @@ public class NaturalTest {
         assertEquals(zero(), Natural.abs(new BigInteger("0")));
         assertEquals(new NonZero(ONE), Natural.abs(ONE));
         assertEquals(new NonZero(ONE), Natural.abs(ONE.negate()));
-        assertEquals(Natural.abs(ONE), Natural.abs(1L));
-    }
-
-    @Test
-    public void natural() {
-        assertEquals(just(zero()), Natural.natural(ZERO));
-        assertEquals(just(new NonZero(ONE)), Natural.natural(ONE));
-        assertEquals(nothing(), Natural.natural(ONE.negate()));
-        assertEquals(Natural.natural(ONE), Natural.natural(1L));
+        assertEquals(1L, ((NonZero) Natural.abs(1L)).value);
+        assertEquals(1, ((NonZero) Natural.abs(1)).value);
     }
 
     @Test
@@ -78,7 +81,8 @@ public class NaturalTest {
         assertEquals(zero(), Natural.clampZero(ZERO));
         assertEquals(new NonZero(ONE), Natural.clampZero(ONE));
         assertEquals(zero(), Natural.clampZero(ONE.negate()));
-        assertEquals(Natural.clampZero(ONE), Natural.clampZero(1L));
+        assertEquals(1L, ((NonZero) Natural.clampZero(1L)).value);
+        assertEquals(1, ((NonZero) Natural.clampZero(1)).value);
     }
 
     @Test
@@ -87,7 +91,8 @@ public class NaturalTest {
         assertEquals(new NonZero(ONE), Natural.clampOne(ONE));
         assertEquals(new NonZero(TEN), Natural.clampOne(TEN));
         assertEquals(new NonZero(ONE), Natural.clampOne(ONE.negate()));
-        assertEquals(Natural.clampOne(BigInteger.valueOf(2)), Natural.clampZero(2L));
+        assertEquals(2L, Natural.clampOne(2L).value);
+        assertEquals(2, Natural.clampOne(2).value);
     }
 
     @Test
@@ -164,6 +169,18 @@ public class NaturalTest {
     }
 
     @Test
+    public void nonZeroAdditionNeverOverflows() {
+        assertEquals(127, new NonZero(Byte.MAX_VALUE - 1).plus(one()).value);
+        assertEquals(128, new NonZero(Byte.MAX_VALUE).plus(one()).value);
+        assertEquals(32767, new NonZero(Short.MAX_VALUE - 1).plus(one()).value);
+        assertEquals(32768, new NonZero(Short.MAX_VALUE).plus(one()).value);
+        assertEquals(Integer.MAX_VALUE, new NonZero(Integer.MAX_VALUE - 1).plus(one()).value);
+        assertEquals(Integer.MAX_VALUE + 1L, new NonZero(Integer.MAX_VALUE).plus(one()).value);
+        assertEquals(Long.MAX_VALUE, new NonZero(Long.MAX_VALUE - 1).plus(one()).value);
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(ONE), new NonZero(Long.MAX_VALUE).plus(one()).value);
+    }
+
+    @Test
     public void equalsAndHashCode() {
         assertEquals(zero(), zero());
         assertEquals(new NonZero(ONE), new NonZero(ONE));
@@ -177,6 +194,9 @@ public class NaturalTest {
         assertEquals(zero().hashCode(), zero().hashCode());
         assertEquals(new NonZero(ONE).hashCode(), new NonZero(ONE).hashCode());
         assertNotEquals(new NonZero(ONE).hashCode(), new NonZero(BigInteger.valueOf(2)).hashCode());
+
+        assertEquals(new NonZero(ONE).hashCode(), new NonZero(1L).hashCode());
+        assertEquals(new NonZero(1L).hashCode(), new NonZero(1).hashCode());
     }
 
     @Test

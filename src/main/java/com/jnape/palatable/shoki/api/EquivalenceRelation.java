@@ -63,7 +63,7 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
      * @return an {@link EquivalenceRelation} implemented in terms of the {@link Comparable} type's
      * {@link Comparable#compareTo(Object) compareTo} method.
      */
-    static <A extends Comparable<A>> EquivalenceRelation<A> comparablyEquals() {
+    static <A extends Comparable<? super A>> EquivalenceRelation<A> comparablyEquals() {
         return comparablyEquals(naturalOrder());
     }
 

@@ -173,32 +173,31 @@ public abstract class Natural extends Number
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the value's absolute value
-     * @see Natural#abs(long)
      */
-    public static Natural abs(BigInteger value) {
-        return abs(value, ZERO, BigInteger::negate);
+    public static Natural abs(int value) {
+        return abs(value, 0, i -> -i);
     }
 
     /**
-     * Convenience overload of {@link Natural#abs(BigInteger)} allowing <code>long</code> values.
+     * Convenience overload of {@link Natural#abs(int)} allowing <code>long</code> values.
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the value's absolute value
-     * @see Natural#abs(BigInteger)
+     * @see Natural#abs(int)
      */
     public static Natural abs(long value) {
         return abs(value, 0L, l -> -l);
     }
 
     /**
-     * Convenience overload of {@link Natural#abs(BigInteger)} allowing <code>int</code> values.
+     * Convenience overload of {@link Natural#abs(int)} allowing {@link BigInteger} values.
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the value's absolute value
-     * @see Natural#abs(BigInteger)
+     * @see Natural#abs(int)
      */
-    public static Natural abs(int value) {
-        return abs(value, 0, i -> -i);
+    public static Natural abs(BigInteger value) {
+        return abs(value, ZERO, BigInteger::negate);
     }
 
     /**
@@ -207,68 +206,64 @@ public abstract class Natural extends Number
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the given value, or {@link Zero}
-     * @see Natural#clampZero(long)
-     */
-    public static Natural clampZero(BigInteger value) {
-        return clampZero(value, ZERO);
-    }
-
-    /**
-     * Convenience overload of {@link Natural#clampZero(BigInteger)} allowing <code>long</code> values.
-     *
-     * @param value the value
-     * @return the {@link Natural} corresponding to the given value, or {@link Zero}
-     * @see Natural#clampZero(BigInteger)
-     */
-    public static Natural clampZero(long value) {
-        return clampZero(value, 0L);
-    }
-
-    /**
-     * Convenience overload of {@link Natural#clampZero(BigInteger)} allowing <code>int</code> values.
-     *
-     * @param value the value
-     * @return the {@link Natural} corresponding to the given value, or {@link Zero}
-     * @see Natural#clampZero(BigInteger)
      */
     public static Natural clampZero(int value) {
         return clampZero(value, 0);
     }
 
     /**
-     * Return the corresponding {@link NonZero non-zero} {@link Natural} for the given <code>value</code>, defaulting to
-     * {@link Natural#one() one} if <code>value</code> is {@link BigInteger#ZERO zero} or negative.
+     * Convenience overload of {@link Natural#clampZero(int)} allowing <code>long</code> values.
      *
      * @param value the value
-     * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
-     * @see Natural#clampOne(long)
+     * @return the {@link Natural} corresponding to the given value, or {@link Zero}
+     * @see Natural#clampZero(int)
      */
-    public static NonZero clampOne(BigInteger value) {
-        return clampOne(value, ZERO);
+    public static Natural clampZero(long value) {
+        return clampZero(value, 0L);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampOne(BigInteger)} allowing <code>long</code> values.
+     * Convenience overload of {@link Natural#clampZero(int)} allowing {@link BigInteger} values.
+     *
+     * @param value the value
+     * @return the {@link Natural} corresponding to the given value, or {@link Zero}
+     * @see Natural#clampZero(int)
+     */
+    public static Natural clampZero(BigInteger value) {
+        return clampZero(value, ZERO);
+    }
+
+    /**
+     * Return the corresponding {@link NonZero non-zero} {@link Natural} for the given <code>value</code>, defaulting to
+     * {@link Natural#one() one} if <code>value</code> is less than <code>1</code>.
      *
      * @param value the value
      * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
-     * {@link Natural#one() one}
-     * @see Natural#clampOne(BigInteger)
+     */
+    public static NonZero clampOne(int value) {
+        return clampOne(value, 0);
+    }
+
+    /**
+     * Convenience overload of {@link Natural#clampOne(int)} allowing <code>long</code> values.
+     *
+     * @param value the value
+     * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
+     * @see Natural#clampOne(int)
      */
     public static NonZero clampOne(long value) {
         return clampOne(value, 0L);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampOne(BigInteger)} allowing <code>int</code> values.
+     * Convenience overload of {@link Natural#clampOne(int)} allowing {@link BigInteger} values.
      *
      * @param value the value
      * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
-     * {@link Natural#one() one}
-     * @see Natural#clampOne(BigInteger)
+     * @see Natural#clampOne(int)
      */
-    public static NonZero clampOne(int value) {
-        return clampOne(value, 0);
+    public static NonZero clampOne(BigInteger value) {
+        return clampOne(value, ZERO);
     }
 
     private static <N extends Number & Comparable<N>> Maybe<Natural> natural(N value, N zero) {

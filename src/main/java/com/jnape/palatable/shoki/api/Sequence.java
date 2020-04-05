@@ -20,7 +20,7 @@ public interface Sequence<A> extends Iterable<A> {
 
     /**
      * If this {@link Sequence} is not empty, return the next element wrapped in {@link Maybe#just}, according to the
-     * supported iteration strategy. Otherwise, return {@link Maybe#nothing()};
+     * supported iteration strategy. Otherwise, return {@link Maybe#nothing()}.
      *
      * @return {@link Maybe} the next element
      */

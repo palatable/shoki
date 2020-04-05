@@ -97,18 +97,24 @@ public abstract class Natural extends Number
 
     /**
      * {@inheritDoc}
+     * If the underlying value of this {@link Natural} is greater than {@link Integer#MAX_VALUE}, the result is
+     * {@link Integer#MAX_VALUE}.
      */
     @Override
     public abstract int intValue();
 
     /**
      * {@inheritDoc}
+     * If the underlying value of this {@link Natural} is greater than {@link Long#MAX_VALUE}, the result is
+     * {@link Long#MAX_VALUE}.
      */
     @Override
     public abstract long longValue();
 
     /**
      * {@inheritDoc}
+     * Since {@link Natural Naturals} are by definition integral values, this is simply the result of
+     * {@link Natural#intValue()}, and subject to precision loss.
      */
     @Override
     public final float floatValue() {
@@ -117,6 +123,8 @@ public abstract class Natural extends Number
 
     /**
      * {@inheritDoc}
+     * Since {@link Natural Naturals} are by definition integral values, this is simply the result of
+     * {@link Natural#longValue()}, and subject to precision loss.
      */
     @Override
     public final double doubleValue() {

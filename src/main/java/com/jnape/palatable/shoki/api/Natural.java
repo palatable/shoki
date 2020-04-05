@@ -17,6 +17,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static java.lang.Math.addExact;
+import static java.lang.Math.min;
 import static java.math.BigInteger.ZERO;
 
 /**
@@ -25,7 +26,8 @@ import static java.math.BigInteger.ZERO;
  * integers - with type-safe interfaces for dealing with the {@link CoProduct2 coproduct} of {@link Zero zero} and
  * {@link NonZero non-zero} values.
  */
-public abstract class Natural extends Number implements CoProduct2<Natural.Zero, Natural.NonZero, Natural>, Comparable<Natural> {
+public abstract class Natural extends Number
+        implements CoProduct2<Natural.Zero, Natural.NonZero, Natural>, Comparable<Natural> {
 
     private Natural() {
     }
@@ -62,7 +64,7 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      * @return {@link Maybe} the {@link Natural} difference
      */
     public final Maybe<Natural> minus(Natural subtrahend) {
-        return natural(bigIntegerValue().subtract(subtrahend.bigIntegerValue()));
+        return subtrahend.match(constantly(just(this)), this::minus);
     }
 
     /**
@@ -79,28 +81,20 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      * {@inheritDoc}
      */
     @Override
-    public final int intValue() {
-        return trying(() -> bigIntegerValue().intValueExact())
-                .catching(ArithmeticException.class, constantly(Integer.MAX_VALUE))
-                .orThrow();
-    }
+    public abstract int intValue();
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public final long longValue() {
-        return trying(() -> bigIntegerValue().longValueExact())
-                .catching(ArithmeticException.class, constantly(Long.MAX_VALUE))
-                .orThrow();
-    }
+    public abstract long longValue();
 
     /**
      * {@inheritDoc}
      */
     @Override
     public final float floatValue() {
-        return bigIntegerValue().floatValue();
+        return intValue();
     }
 
     /**
@@ -108,7 +102,7 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      */
     @Override
     public final double doubleValue() {
-        return bigIntegerValue().doubleValue();
+        return longValue();
     }
 
     /**
@@ -118,6 +112,8 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
     public int compareTo(Natural other) {
         return bigIntegerValue().compareTo(other.bigIntegerValue());
     }
+
+    protected abstract Maybe<Natural> minus(NonZero subtrahend);
 
     /**
      * The singleton {@link Zero zero} value, the smallest {@link Natural}.
@@ -134,7 +130,7 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      * @return the {@link NonZero non-zero} value of 1
      */
     public static NonZero one() {
-        return NonZero.ONE;
+        return NonZero.I.ONE;
     }
 
     /**
@@ -143,32 +139,31 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      *
      * @param value the value
      * @return {@link Maybe} the corresponding {@link Natural}
-     * @see Natural#natural(long)
-     */
-    public static Maybe<Natural> natural(BigInteger value) {
-        return natural(value, ZERO);
-    }
-
-    /**
-     * Convenience overload of {@link Natural#natural(BigInteger)} allowing <code>int</code> values.
-     *
-     * @param value the value
-     * @return {@link Maybe} the corresponding {@link Natural}
-     * @see Natural#natural(BigInteger)
      */
     public static Maybe<Natural> natural(int value) {
         return natural(value, 0);
     }
 
     /**
-     * Convenience overload of {@link Natural#natural(BigInteger)} allowing <code>long</code> values.
+     * Convenience overload of {@link Natural#natural(int)} allowing <code>long</code> values.
      *
      * @param value the value
      * @return {@link Maybe} the corresponding {@link Natural}
-     * @see Natural#natural(BigInteger)
+     * @see Natural#natural(int)
      */
     public static Maybe<Natural> natural(long value) {
         return natural(value, 0L);
+    }
+
+    /**
+     * Convenience overload of {@link Natural#natural(int)} allowing {@link BigInteger} values.
+     *
+     * @param value the value
+     * @return {@link Maybe} the corresponding {@link Natural}
+     * @see Natural#natural(int)
+     */
+    public static Maybe<Natural> natural(BigInteger value) {
+        return natural(value, ZERO);
     }
 
     /**
@@ -277,11 +272,11 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
     }
 
     private static <N extends Number & Comparable<N>> Maybe<Natural> natural(N value, N zero) {
-        return gt(zero, value) ? just(new NonZero(value)) : lt(zero, value) ? nothing() : just(zero());
+        return gt(zero, value) ? just(NonZero.nonZero(value)) : lt(zero, value) ? nothing() : just(zero());
     }
 
     private static <N extends Number & Comparable<N>> Natural abs(N value, N zero, Fn1<? super N, ? extends N> negate) {
-        return natural(value, zero).orElseGet(() -> new NonZero(negate.apply(value)));
+        return natural(value, zero).orElseGet(() -> NonZero.nonZero(negate.apply(value)));
     }
 
     private static <N extends Number & Comparable<N>> Natural clampZero(N value, N zero) {
@@ -325,8 +320,23 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
         }
 
         @Override
+        public Maybe<Natural> minus(NonZero subtrahend) {
+            return nothing();
+        }
+
+        @Override
         public BigInteger bigIntegerValue() {
             return ZERO;
+        }
+
+        @Override
+        public int intValue() {
+            return 0;
+        }
+
+        @Override
+        public long longValue() {
+            return 0L;
         }
 
         @Override
@@ -351,32 +361,19 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
      * @see Natural
      * @see NonZero
      */
-    public static final class NonZero extends Natural {
+    public static abstract class NonZero extends Natural {
 
-        private static final NonZero ONE = new NonZero(1);
-
-        final Number value;
-
-        NonZero(Number value) {
-            this.value = value;
+        private NonZero() {
         }
+
+        abstract Number value();
+
+        @Override
+        public abstract NonZero plus(Natural addend);
 
         @Override
         public NonZero minus(Zero subtrahend) {
             return this;
-        }
-
-        @Override
-        public NonZero plus(Natural addend) {
-            return new NonZero(Try.<Number>trying(() -> addExact(intValue(), addend.intValue()))
-                                       .catchError(__ -> trying(() -> addExact(longValue(), addend.longValue())))
-                                       .catchError(__ -> success(bigIntegerValue().add(addend.bigIntegerValue())))
-                                       .orThrow());
-        }
-
-        @Override
-        public final BigInteger bigIntegerValue() {
-            return value instanceof BigInteger ? (BigInteger) value : BigInteger.valueOf(value.longValue());
         }
 
         @Override
@@ -391,12 +388,155 @@ public abstract class Natural extends Number implements CoProduct2<Natural.Zero,
 
         @Override
         public int hashCode() {
-            return Objects.hashCode(value);
+            return Objects.hashCode(value());
         }
 
         @Override
         public String toString() {
-            return "NonZero{value=" + value + '}';
+            return "NonZero{value=" + value() + '}';
+        }
+
+        private static NonZero nonZero(Number n) {
+            if (n instanceof Integer) {
+                return new I((int) n);
+            } else if (n instanceof Long) {
+                long nLong = (Long) n;
+                return nLong <= Integer.MAX_VALUE ? new I((int) nLong) : new L(nLong);
+            } else {
+                BigInteger nBigInteger = (BigInteger) n;
+                return Try.<NonZero>trying(() -> new NonZero.I(nBigInteger.intValueExact()))
+                        .catchError(__ -> Try.trying(() -> new NonZero.L(nBigInteger.longValueExact())))
+                        .recover(__ -> new NonZero.B(nBigInteger));
+            }
+        }
+
+        static final class I extends NonZero {
+            private static final I ONE = new I(1);
+
+            private final int value;
+
+            I(int value) {
+                this.value = value;
+            }
+
+            @Override
+            public NonZero plus(Natural addend) {
+                return Try.<NonZero>trying(() -> new I(addExact(value, addend.intValue())))
+                        .catchError(__ -> trying(() -> new L(addExact(value, addend.longValue()))))
+                        .catchError(__ -> success(new B(bigIntegerValue().add(addend.bigIntegerValue()))))
+                        .orThrow();
+            }
+
+            @Override
+            public Maybe<Natural> minus(NonZero subtrahend) {
+                return subtrahend instanceof I ? natural(value - ((I) subtrahend).value()) : nothing();
+            }
+
+            @Override
+            public BigInteger bigIntegerValue() {
+                return BigInteger.valueOf(value);
+            }
+
+            @Override
+            public int intValue() {
+                return value;
+            }
+
+            @Override
+            public long longValue() {
+                return value;
+            }
+
+            @Override
+            Integer value() {
+                return value;
+            }
+        }
+
+        static final class L extends NonZero {
+
+            private final long value;
+
+            L(long value) {
+                this.value = value;
+            }
+
+            @Override
+            public NonZero plus(Natural addend) {
+                return Try.<NonZero>trying(() -> new L(addExact(value, addend.longValue())))
+                        .catchError(__ -> success(new B(bigIntegerValue().add(addend.bigIntegerValue()))))
+                        .orThrow();
+            }
+
+            @Override
+            public Maybe<Natural> minus(NonZero subtrahend) {
+                return subtrahend instanceof I || subtrahend instanceof L
+                       ? natural(value - subtrahend.longValue())
+                       : nothing();
+            }
+
+            @Override
+            public BigInteger bigIntegerValue() {
+                return BigInteger.valueOf(value);
+            }
+
+            @Override
+            public int intValue() {
+                return (int) min(Integer.MAX_VALUE, value);
+            }
+
+            @Override
+            public long longValue() {
+                return value;
+            }
+
+            @Override
+            Long value() {
+                return value;
+            }
+        }
+
+        static final class B extends NonZero {
+
+            private final BigInteger value;
+
+            B(BigInteger value) {
+                this.value = value;
+            }
+
+            @Override
+            public NonZero.B plus(Natural addend) {
+                return new B(value.add(addend.bigIntegerValue()));
+            }
+
+            @Override
+            public Maybe<Natural> minus(NonZero subtrahend) {
+                return natural(value.subtract(subtrahend.bigIntegerValue()));
+            }
+
+            @Override
+            public BigInteger bigIntegerValue() {
+                return value;
+            }
+
+            @Override
+            public int intValue() {
+                return Try.trying(value::intValueExact)
+                        .catching(ArithmeticException.class, constantly(Integer.MAX_VALUE))
+                        .orThrow();
+            }
+
+            @Override
+            public long longValue() {
+                return Try.trying(value::longValueExact)
+                        .catching(ArithmeticException.class, constantly(Long.MAX_VALUE))
+                        .orThrow();
+            }
+
+            @Override
+            BigInteger value() {
+                return value;
+            }
         }
     }
 }

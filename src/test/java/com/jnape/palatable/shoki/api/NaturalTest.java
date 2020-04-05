@@ -247,6 +247,19 @@ public class NaturalTest {
     }
 
     @Test
+    public void inc() {
+        assertEquals(one(), zero().inc());
+        assertEquals(Natural.abs(2), one().inc());
+    }
+
+    @Test
+    public void dec() {
+        assertEquals(nothing(), zero().dec());
+        assertEquals(just(zero()), one().dec());
+        assertEquals(just(one()), Natural.abs(2).dec());
+    }
+
+    @Test
     public void equalsAndHashCode() {
         assertEquals(zero(), zero());
         assertEquals(new NonZero.B(ONE), new NonZero.B(ONE));

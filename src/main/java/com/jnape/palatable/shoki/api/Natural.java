@@ -78,6 +78,24 @@ public abstract class Natural extends Number
     }
 
     /**
+     * {@link Natural#plus(Natural) Add} {@link Natural#one() one} to this {@link Natural}.
+     *
+     * @return the incremented {@link NonZero non-zero} {@link Natural}
+     */
+    public final NonZero inc() {
+        return plus(one());
+    }
+
+    /**
+     * {@link Natural#minus(Natural) Subtract} {@link Natural#one() one} from this {@link Natural}.
+     *
+     * @return {@link Maybe} the decremented {@link Natural}
+     */
+    public final Maybe<Natural> dec() {
+        return minus(one());
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override

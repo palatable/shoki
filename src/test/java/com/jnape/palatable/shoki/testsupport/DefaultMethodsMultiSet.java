@@ -6,8 +6,6 @@ import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.SizeInfo;
 
-import java.math.BigInteger;
-
 /**
  * A minimum complete definition of a {@link MultiSet}, relying on a delegate to supply the required implementation
  * details, otherwise relying on default method implementations from {@link MultiSet}. Used to test default
@@ -50,7 +48,7 @@ public final class DefaultMethodsMultiSet<A> implements MultiSet<A> {
      * {@inheritDoc}
      */
     @Override
-    public SizeInfo.Known<BigInteger> sizeInfo() {
+    public SizeInfo.Known<Natural> sizeInfo() {
         return delegate.sizeInfo();
     }
 

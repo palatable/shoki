@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
+import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.Queue;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -23,6 +24,24 @@ import static java.util.Arrays.asList;
 public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer, A> {
 
     private StrictQueue() {
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(k)</code>.
+     */
+    @Override
+    public StrictQueue<A> consAll(Collection<Integer, A> other) {
+        return (StrictQueue<A>) Stack.super.consAll(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(k)</code>.
+     */
+    @Override
+    public StrictQueue<A> snocAll(Collection<Integer, A> collection) {
+        return (StrictQueue<A>) Queue.super.snocAll(collection);
     }
 
     /**
@@ -93,7 +112,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
     }
 
     /**
-     * The empty singleton instance of this {@link StrictQueue}.
+     * The empty singleton instance of this {@link StrictQueue}. <code>O(1)</code>.
      *
      * @param <A> the {@link StrictQueue} element type
      * @return an empty queue
@@ -104,8 +123,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
     }
 
     /**
-     * Convenience static factory method to construct an {@link StrictQueue} from varargs elements.
-     * <code>O(n)</code>.
+     * Convenience static factory method to construct an {@link StrictQueue} from varargs elements. <code>O(n)</code>.
      *
      * @param as  the elements from front to back
      * @param <A> the {@link StrictQueue} element type

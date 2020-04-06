@@ -3,9 +3,10 @@ package com.jnape.palatable.shoki.api;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 
-import java.math.BigInteger;
-
+import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.Natural.one;
 
 /**
@@ -15,7 +16,7 @@ import static com.jnape.palatable.shoki.api.Natural.one;
  *
  * @param <A> the element type
  */
-public interface MultiSet<A> extends RandomAccess<A, Natural>, Collection<BigInteger, Tuple2<A, NonZero>> {
+public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, RandomAccess<A, Natural> {
 
     /**
      * Add <code>k</code> occurrences of <code>a</code> to this {@link MultiSet}.
@@ -62,8 +63,9 @@ public interface MultiSet<A> extends RandomAccess<A, Natural>, Collection<BigInt
     }
 
     /**
-     * Remove all occurrences of <code>a</code> from this {@link MultiSet}, such that subsequent invocations of
-     * <code>{@link MultiSet#get(Object) get}(a)</code> return {@link Natural#zero() zero}.
+     * {@link MultiSet#remove(Object, NonZero) Remove} all occurrences of <code>a</code> from this {@link MultiSet},
+     * such that subsequent invocations of <code>{@link MultiSet#get(Object) get}(a)</code> return
+     * {@link Natural#zero() zero}.
      * <p>
      * By default, this method simply {@link MultiSet#remove(Object, NonZero) removes} the
      * {@link MultiSet#get(Object) multiplicity} of <code>a</code> from the {@link MultiSet}, although specific
@@ -75,6 +77,17 @@ public interface MultiSet<A> extends RandomAccess<A, Natural>, Collection<BigInt
      */
     default MultiSet<A> removeAll(A a) {
         return get(a).match(constantly(this), k -> remove(a, k));
+    }
+
+    /**
+     * {@link MultiSet#add Add} the {@link MultiSet#get(Object) multiplicity} of each element in <code>other</code>
+     * to that element's current {@link MultiSet#get(Object) multiplicity} in this {@link MultiSet}.
+     *
+     * @param other the {@link MultiSet} from which to {@link MultiSet#add(Object, NonZero) add} elements
+     * @return the updated {@link MultiSet}
+     */
+    default MultiSet<A> addAll(MultiSet<A> other) {
+        return foldLeft(curried(ms -> into(ms::add)), this, other);
     }
 
     /**

@@ -2,6 +2,8 @@ package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.shoki.impl.StrictQueue;
 
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+
 /**
  * A {@link Collection} offering <em>first-in, first-out</em> semantics.
  *
@@ -30,4 +32,15 @@ public interface Queue<Size extends Number, A> extends OrderedCollection<Size, A
      */
     @Override
     Queue<Size, A> reverse();
+
+    /**
+     * {@link Queue#snoc(Object) Snoc} each element in <code>collection</code> (from front to back) onto the back of
+     * this {@link Queue}.
+     *
+     * @param collection the {@link Collection} from which to {@link Queue#snoc(Object) snoc} elements
+     * @return the updated {@link Queue}
+     */
+    default Queue<Size, A> snocAll(Collection<Size, A> collection) {
+        return foldLeft(Queue<Size, A>::snoc, this, collection);
+    }
 }

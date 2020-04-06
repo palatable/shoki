@@ -131,7 +131,7 @@ public final class HashSet<A> implements Set<Integer, A> {
      */
     @Override
     public HashSet<A> difference(Set<Integer, A> other) {
-        return foldLeft(HashSet::remove, this, other);
+        return foldLeft(HashSet<A>::remove, this, other);
     }
 
     /**
@@ -168,6 +168,7 @@ public final class HashSet<A> implements Set<Integer, A> {
 
     /**
      * {@inheritDoc}
+     * <code>O(n)</code>.
      */
     @Override
     public String toString() {
@@ -176,6 +177,7 @@ public final class HashSet<A> implements Set<Integer, A> {
 
     /**
      * Create an empty {@link HashSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}.
+     * <code>O(1)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
@@ -190,7 +192,7 @@ public final class HashSet<A> implements Set<Integer, A> {
     /**
      * The empty singleton {@link HashSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively.
+     * respectively. <code>O(1)</code>.
      *
      * @param <A> the element type
      * @return the empty {@link HashSet}
@@ -202,7 +204,7 @@ public final class HashSet<A> implements Set<Integer, A> {
 
     /**
      * Create a new {@link HashSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}, populated
-     * by one or more given entries.
+     * by one or more given entries. <code>O(n)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
@@ -220,7 +222,7 @@ public final class HashSet<A> implements Set<Integer, A> {
     /**
      * Create a new {@link HashSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, populated by one or more given entries.
+     * respectively, populated by one or more given entries. <code>O(n)</code>.
      *
      * @param a   the first element
      * @param as  the rest of the elements

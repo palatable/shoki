@@ -11,7 +11,6 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
-import java.math.BigInteger;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
@@ -42,6 +41,15 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     private HashMultiSet(HashMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> addAll(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.addAll(other);
     }
 
     /**
@@ -116,8 +124,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * <code>O(n)</code>.
      */
     @Override
-    public Known<BigInteger> sizeInfo() {
-        return known(FoldLeft.<NonZero, Natural>foldLeft(Natural::plus, zero(), multiplicityMap.values()).bigIntegerValue());
+    public Known<Natural> sizeInfo() {
+        return known(FoldLeft.<NonZero, Natural>foldLeft(Natural::plus, zero(), multiplicityMap.values()));
     }
 
     /**
@@ -173,14 +181,17 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     /**
      * {@inheritDoc}
+     * <code>O(n)</code>.
      */
     @Override
     public String toString() {
-        return "HashBag[" + join(", ", map(into((a, k) -> format("(%s * %s)", a, k.bigIntegerValue())), this)) + "]";
+        return "HashMultiSet["
+                + join(", ", map(into((a, k) -> format("(%s * %s)", a, k.bigIntegerValue())), this)) + "]";
     }
 
     /**
      * Create an empty {@link HashMultiSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}.
+     * <code>O(1)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
@@ -195,7 +206,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     /**
      * The empty singleton {@link HashMultiSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively.
+     * respectively. <code>O(1)</code>.
      *
      * @param <A> the element type
      * @return the empty {@link HashMultiSet}
@@ -207,7 +218,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     /**
      * Create a new {@link HashMultiSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * populated by one or more given entries.
+     * populated by one or more given entries. <code>O(n)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
@@ -226,7 +237,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     /**
      * Create a new {@link HashMultiSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, populated by one or more given entries.
+     * respectively, populated by one or more given entries. <code>O(n)</code>.
      *
      * @param a   the first element
      * @param as  the rest of the elements

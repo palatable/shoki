@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
+import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -90,6 +91,15 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
     public abstract boolean isEmpty();
 
     /**
+     * {@inheritDoc}
+     * <code>O(o)</code>.
+     */
+    @Override
+    public StrictStack<A> consAll(Collection<Integer, A> other) {
+        return (StrictStack<A>) Stack.super.consAll(other);
+    }
+
+    /**
      * Returns true if <code>other</code> is an {@link StrictStack} with exactly the same elements in the same order
      * as this {@link StrictStack}; otherwise, returns false. <code>O(n)</code>.
      *
@@ -123,7 +133,7 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * The empty singleton instance of this {@link StrictStack}.
+     * The empty singleton instance of this {@link StrictStack}. <code>O(1)</code>.
      *
      * @param <A> the {@link StrictStack} element type
      * @return an empty stack
@@ -134,8 +144,7 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
     }
 
     /**
-     * Convenience static factory method to construct an {@link StrictStack} from varargs elements.
-     * <code>O(n)</code>.
+     * Convenience static factory method to construct an {@link StrictStack} from varargs elements. <code>O(n)</code>.
      *
      * @param as  the elements from back to front
      * @param <A> the {@link StrictStack} element type

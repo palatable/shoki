@@ -2,20 +2,17 @@ package com.jnape.palatable.shoki.impl;
 
 import org.junit.Test;
 
-import java.math.BigInteger;
-
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.identityHashCode;
+import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.clampOne;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
-import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.TEN;
-import static java.math.BigInteger.ZERO;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -116,11 +113,10 @@ public class HashMultiSetTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(ZERO), EMPTY.sizeInfo());
-        assertEquals(known(ONE), EMPTY.add("foo", one()).sizeInfo());
-        assertEquals(known(BigInteger.valueOf(2)), EMPTY.add("foo", one()).add("foo", one()).sizeInfo());
-        assertEquals(known(BigInteger.valueOf(12)),
-                     EMPTY.add("foo", one()).add("bar", clampOne(10)).add("foo", one()).sizeInfo());
+        assertEquals(known(zero()), EMPTY.sizeInfo());
+        assertEquals(known(one()), EMPTY.add("foo", one()).sizeInfo());
+        assertEquals(known(abs(2)), EMPTY.add("foo", one()).add("foo", one()).sizeInfo());
+        assertEquals(known(abs(12)), EMPTY.add("foo", one()).add("bar", clampOne(10)).add("foo", one()).sizeInfo());
     }
 
     @Test
@@ -165,7 +161,8 @@ public class HashMultiSetTest {
 
     @Test
     public void toStringIsUseful() {
-        assertEquals("HashBag[(a * 1), (b * 2), (c * 3)]", HashMultiSet.of("a", "b", "b", "c", "c", "c").toString());
-        assertEquals("HashBag[]", HashMultiSet.of("a").remove("a").toString());
+        assertEquals("HashMultiSet[(a * 1), (b * 2), (c * 3)]",
+                     HashMultiSet.of("a", "b", "b", "c", "c", "c").toString());
+        assertEquals("HashMultiSet[]", HashMultiSet.of("a").remove("a").toString());
     }
 }

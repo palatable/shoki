@@ -2,8 +2,11 @@ package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.semigroup.Semigroup;
 
+import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 
 /**
@@ -66,6 +69,31 @@ public interface Map<Size extends Number, K, V> extends
      */
     @Override
     Map<Size, K, V> tail();
+
+    /**
+     * {@link Map#put(Object, Object) Put} each entry in <code>map</code> in this {@link Map}, relying on
+     * <code>semigroup</code> to consolidate colliding values in the case of duplicate keys.
+     *
+     * @param other     the other {@link Map}
+     * @param semigroup the {@link Semigroup}
+     * @return the merged {@link Map}
+     */
+    default Map<Size, K, V> merge(Map<Size, K, V> other, Semigroup<V> semigroup) {
+        return foldLeft(curried(m -> into((k, v) -> m.put(k, m.get(k).fmap(semigroup.flip().apply(v)).orElse(v)))),
+                        this,
+                        other);
+    }
+
+    /**
+     * {@link Map#remove(Object) Remove} every key {@link Map#contains(Object) contained} in <code>keys</code> from
+     * this {@link Map}.
+     *
+     * @param keys the {@link Set} of keys to remove from this {@link Map}
+     * @return the updated {@link Map}
+     */
+    default Map<Size, K, V> removeAll(Set<Size, K> keys) {
+        return foldLeft(Map<Size, K, V>::remove, this, keys);
+    }
 
     /**
      * Determine if two {@link Map}s have the same {@link SizeInfo}, and contain the same entries. <code>O(n)</code>.

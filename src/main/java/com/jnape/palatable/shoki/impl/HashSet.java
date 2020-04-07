@@ -6,14 +6,17 @@ import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
+import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
@@ -29,7 +32,7 @@ import static java.util.Arrays.asList;
  * @param <A> the element type
  * @see HashMap
  */
-public final class HashSet<A> implements Set<Integer, A> {
+public final class HashSet<A> implements Set<Natural, A> {
 
     private static final HashSet<?> DEFAULT_EMPTY = new HashSet<>(HashMap.empty());
 
@@ -62,7 +65,7 @@ public final class HashSet<A> implements Set<Integer, A> {
      * <code>O(n)</code>.
      */
     @Override
-    public SizeInfo.Known<Integer> sizeInfo() {
+    public Known<Natural> sizeInfo() {
         return map.sizeInfo();
     }
 
@@ -108,8 +111,8 @@ public final class HashSet<A> implements Set<Integer, A> {
      * <code>O(max(n, o))</code>.
      */
     @Override
-    public HashSet<A> intersection(Set<Integer, A> other) {
-        return (sizeInfo().getSize() < other.sizeInfo().getSize() ? tuple(this, other) : tuple(other, this))
+    public HashSet<A> intersection(Set<Natural, A> other) {
+        return (lt(other.sizeInfo().getSize(), sizeInfo().getSize()) ? tuple(this, other) : tuple(other, this))
                 .into((source, filter) -> foldLeft((i, x) -> filter.contains(x) ? i.add(x) : i, empty(), source));
     }
 
@@ -118,8 +121,8 @@ public final class HashSet<A> implements Set<Integer, A> {
      * <code>O(min(n, o))</code>.
      */
     @Override
-    public HashSet<A> union(Set<Integer, A> other) {
-        return (other instanceof HashSet<?> && other.sizeInfo().getSize() > sizeInfo().getSize()
+    public HashSet<A> union(Set<Natural, A> other) {
+        return (other instanceof HashSet<?> && gt(sizeInfo().getSize(), other.sizeInfo().getSize())
                 ? tuple((HashSet<A>) other, this)
                 : tuple(this, other))
                 .into(foldLeft(HashSet::add));
@@ -130,7 +133,7 @@ public final class HashSet<A> implements Set<Integer, A> {
      * <code>O(o)</code>.
      */
     @Override
-    public HashSet<A> difference(Set<Integer, A> other) {
+    public HashSet<A> difference(Set<Natural, A> other) {
         return foldLeft(HashSet<A>::remove, this, other);
     }
 
@@ -139,7 +142,7 @@ public final class HashSet<A> implements Set<Integer, A> {
      * <code>O(n + o + min(n, o))</code>.
      */
     @Override
-    public HashSet<A> symmetricDifference(Set<Integer, A> other) {
+    public HashSet<A> symmetricDifference(Set<Natural, A> other) {
         return (HashSet<A>) Set.super.symmetricDifference(other);
     }
 

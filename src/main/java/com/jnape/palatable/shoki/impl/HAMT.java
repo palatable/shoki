@@ -14,9 +14,11 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Eq.eq;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Find.find;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
 import static com.jnape.palatable.shoki.impl.Bitmap32.fillUpTo;
 import static java.lang.Math.ceil;
@@ -242,7 +244,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                                                                        : s),
                                                            StrictStack.empty(),
                                                            kvPairs);
-            return just(withoutKey.sizeInfo().getSize() == 1
+            return just(eq(withoutKey.sizeInfo().getSize(), one())
                         ? withoutKey.iterator().next()
                         : new Collision<>(keyHash, withoutKey));
         }

@@ -9,6 +9,9 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.api.Natural.abs;
+import static com.jnape.palatable.shoki.api.Natural.one;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.HashMap.empty;
 import static com.jnape.palatable.shoki.impl.HashMap.of;
@@ -188,8 +191,8 @@ public class HashMapTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(0), empty().sizeInfo());
-        assertEquals(known(1), HashMap.empty().put(1, 1).sizeInfo());
+        assertEquals(known(zero()), empty().sizeInfo());
+        assertEquals(known(one()), HashMap.empty().put(1, 1).sizeInfo());
         HashMap<Integer, Boolean> collisionsAndNesting =
                 HashMap.<Integer, Boolean>empty(objectEquals(),
                                                 StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
@@ -199,8 +202,8 @@ public class HashMapTest {
                         .put(0, true)
                         .put(1, false)
                         .put(2, true);
-        assertEquals(known(3), collisionsAndNesting.sizeInfo());
-        assertEquals(known(0), empty().put(1, 1).remove(1).sizeInfo());
+        assertEquals(known(abs(3)), collisionsAndNesting.sizeInfo());
+        assertEquals(known(zero()), empty().put(1, 1).remove(1).sizeInfo());
     }
 
     @Test
@@ -339,6 +342,6 @@ public class HashMapTest {
                            tuple("foo", 3));
         assertEquals(just(3), doubleCollision.get("foo"));
         assertEquals(nothing(), doubleCollision.remove("foo").get("foo"));
-        assertEquals(known(2), doubleCollision.sizeInfo());
+        assertEquals(known(abs(2)), doubleCollision.sizeInfo());
     }
 }

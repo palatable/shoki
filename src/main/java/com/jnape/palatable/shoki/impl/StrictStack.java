@@ -4,6 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
+import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -15,6 +16,7 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static java.util.Arrays.asList;
 
@@ -24,7 +26,7 @@ import static java.util.Arrays.asList;
  * @param <A> the element type
  * @see StrictQueue
  */
-public abstract class StrictStack<A> implements Stack<Integer, A> {
+public abstract class StrictStack<A> implements Stack<Natural, A> {
 
     private StrictStack() {
     }
@@ -80,7 +82,7 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
      * The {@link SizeInfo} of this {@link StrictStack}. <code>O(1)</code>.
      */
     @Override
-    public abstract Known<Integer> sizeInfo();
+    public abstract Known<Natural> sizeInfo();
 
     /**
      * Returns true if this {@link StrictStack} is empty; otherwise, returns false. <code>O(1)</code>.
@@ -95,7 +97,7 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
      * <code>O(o)</code>.
      */
     @Override
-    public StrictStack<A> consAll(Collection<Integer, A> other) {
+    public StrictStack<A> consAll(Collection<Natural, A> other) {
         return (StrictStack<A>) Stack.super.consAll(other);
     }
 
@@ -158,13 +160,13 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
     private static final class Head<A> extends StrictStack<A> {
         private final A              head;
         private final StrictStack<A> tail;
-        private final Known<Integer> sizeInfo;
+        private final Natural        size;
         private final int            hashCode;
 
         private Head(A head, StrictStack<A> tail) {
             this.head = head;
             this.tail = tail;
-            sizeInfo = known(tail.sizeInfo().getSize() + 1);
+            size = tail.sizeInfo().getSize().inc();
             hashCode = tail.hashCode() * 31 + Objects.hash(head);
         }
 
@@ -189,8 +191,8 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
         }
 
         @Override
-        public Known<Integer> sizeInfo() {
-            return sizeInfo;
+        public Known<Natural> sizeInfo() {
+            return known(size);
         }
 
         @Override
@@ -226,8 +228,8 @@ public abstract class StrictStack<A> implements Stack<Integer, A> {
         }
 
         @Override
-        public Known<Integer> sizeInfo() {
-            return known(0);
+        public Known<Natural> sizeInfo() {
+            return known(zero());
         }
     }
 }

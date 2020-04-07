@@ -16,7 +16,7 @@ public class MapTest {
     @Test
     public void putAllWithSemigroup() {
         Semigroup<Integer>                          sum   = Integer::sum;
-        DefaultMethodsMap<Integer, String, Integer> empty = DefaultMethodsMap.delegate(empty());
+        DefaultMethodsMap<Natural, String, Integer> empty = DefaultMethodsMap.delegate(empty());
 
         assertTrue(Map.equals(empty.merge(empty, sum), empty, objectEquals()));
         assertTrue(Map.equals(empty.merge(HashMap.of(tuple("foo", 1)), sum),
@@ -33,7 +33,7 @@ public class MapTest {
 
     @Test
     public void removeAll() {
-        DefaultMethodsMap<Integer, String, Integer> empty = DefaultMethodsMap.delegate(empty());
+        DefaultMethodsMap<Natural, String, Integer> empty = DefaultMethodsMap.delegate(empty());
 
         assertTrue(Map.equals(empty.removeAll(HashSet.empty()), empty, objectEquals()));
         assertTrue(Map.equals(empty.removeAll(HashSet.of("foo", "bar")), empty, objectEquals()));

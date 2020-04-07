@@ -232,6 +232,9 @@ public class NaturalTest {
                      one.plus(Natural.clampZero(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))).minus(one)
                              .<NonZero>fmap(downcast())
                              .fmap(NonZero::value));
+
+        assertEquals(nothing(), Natural.abs(Integer.MAX_VALUE).minus(Natural.abs(Integer.MAX_VALUE).inc()));
+        assertEquals(nothing(), Natural.abs(Long.MAX_VALUE).minus(Natural.abs(Long.MAX_VALUE).inc()));
     }
 
     @Test
@@ -244,6 +247,12 @@ public class NaturalTest {
         assertEquals(Integer.MAX_VALUE + 1L, new NonZero.I(Integer.MAX_VALUE).plus(one()).value());
         assertEquals(Long.MAX_VALUE, new NonZero.L(Long.MAX_VALUE - 1).plus(one()).value());
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(ONE), new NonZero.L(Long.MAX_VALUE).plus(one()).value());
+
+        assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)
+                             .add(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)),
+                     new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))
+                             .plus(new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)))
+                             .value());
     }
 
     @Test

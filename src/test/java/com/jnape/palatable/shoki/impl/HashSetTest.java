@@ -8,6 +8,9 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.identityHashCode;
+import static com.jnape.palatable.shoki.api.Natural.abs;
+import static com.jnape.palatable.shoki.api.Natural.one;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -65,11 +68,11 @@ public class HashSetTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(0), HashSet.empty().sizeInfo());
-        assertEquals(known(1), HashSet.<String>empty().add("foo").sizeInfo());
-        assertEquals(known(1), HashSet.<String>empty().add("foo").add("foo").sizeInfo());
-        assertEquals(known(2), HashSet.<String>empty().add("foo").add("bar").sizeInfo());
-        assertEquals(known(0), HashSet.<String>empty().add("foo").remove("foo").sizeInfo());
+        assertEquals(known(zero()), HashSet.empty().sizeInfo());
+        assertEquals(known(one()), HashSet.<String>empty().add("foo").sizeInfo());
+        assertEquals(known(one()), HashSet.<String>empty().add("foo").add("foo").sizeInfo());
+        assertEquals(known(abs(2)), HashSet.<String>empty().add("foo").add("bar").sizeInfo());
+        assertEquals(known(zero()), HashSet.<String>empty().add("foo").remove("foo").sizeInfo());
     }
 
     @Test

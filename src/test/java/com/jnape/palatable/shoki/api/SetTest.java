@@ -30,10 +30,10 @@ public class SetTest {
 
     @Test
     public void symmetricDifference() {
-        DefaultMethodsSet<Integer, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
-        DefaultMethodsSet<Integer, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));
-        DefaultMethodsSet<Integer, Integer> _234  = DefaultMethodsSet.delegate(HashSet.of(2, 3, 4));
-        DefaultMethodsSet<Integer, Integer> _14   = DefaultMethodsSet.delegate(HashSet.of(1, 4));
+        DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
+        DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));
+        DefaultMethodsSet<Natural, Integer> _234  = DefaultMethodsSet.delegate(HashSet.of(2, 3, 4));
+        DefaultMethodsSet<Natural, Integer> _14   = DefaultMethodsSet.delegate(HashSet.of(1, 4));
 
         assertTrue(Set.equals(empty, empty.symmetricDifference(empty)));
         assertTrue(Set.equals(_123, empty.symmetricDifference(_123)));

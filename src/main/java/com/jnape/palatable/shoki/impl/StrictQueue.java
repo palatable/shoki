@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
+import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.Queue;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -12,6 +13,7 @@ import java.util.Iterator;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static java.util.Arrays.asList;
 
@@ -21,7 +23,7 @@ import static java.util.Arrays.asList;
  * @param <A> the element type
  * @see StrictStack
  */
-public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer, A> {
+public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural, A> {
 
     private StrictQueue() {
     }
@@ -31,7 +33,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
      * <code>O(k)</code>.
      */
     @Override
-    public StrictQueue<A> consAll(Collection<Integer, A> other) {
+    public StrictQueue<A> consAll(Collection<Natural, A> other) {
         return (StrictQueue<A>) Stack.super.consAll(other);
     }
 
@@ -40,7 +42,7 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
      * <code>O(k)</code>.
      */
     @Override
-    public StrictQueue<A> snocAll(Collection<Integer, A> collection) {
+    public StrictQueue<A> snocAll(Collection<Natural, A> collection) {
         return (StrictQueue<A>) Queue.super.snocAll(collection);
     }
 
@@ -166,8 +168,8 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
         }
 
         @Override
-        public Known<Integer> sizeInfo() {
-            return known(0);
+        public Known<Natural> sizeInfo() {
+            return known(zero());
         }
 
         @Override
@@ -179,13 +181,13 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
     private static final class NonEmpty<A> extends StrictQueue<A> {
         private final StrictStack<A> outgoing;
         private final StrictStack<A> incoming;
-        private final Known<Integer> sizeInfo;
+        private final Natural        size;
         private final int            hashCode;
 
         private NonEmpty(StrictStack<A> outgoing, StrictStack<A> incoming) {
             this.outgoing = outgoing;
             this.incoming = incoming;
-            sizeInfo = known(outgoing.sizeInfo().getSize() + incoming.sizeInfo().getSize());
+            size = outgoing.sizeInfo().getSize().plus(incoming.sizeInfo().getSize());
             hashCode = 31 * outgoing.hashCode() + incoming.hashCode();
         }
 
@@ -223,8 +225,8 @@ public abstract class StrictQueue<A> implements Queue<Integer, A>, Stack<Integer
         }
 
         @Override
-        public Known<Integer> sizeInfo() {
-            return sizeInfo;
+        public Known<Natural> sizeInfo() {
+            return known(size);
         }
 
         @Override

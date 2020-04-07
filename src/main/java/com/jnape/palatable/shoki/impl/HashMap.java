@@ -7,7 +7,8 @@ import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Map;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.Natural;
+import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -23,6 +24,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
 import static java.lang.String.format;
@@ -106,7 +108,7 @@ import static java.util.Arrays.asList;
  * @see EquivalenceRelation
  * @see HashingAlgorithm
  */
-public final class HashMap<K, V> implements Map<Integer, K, V> {
+public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     private static final HashMap<?, ?> EMPTY_OBJECT_DEFAULTS = empty(objectEquals(), objectHashCode());
 
@@ -228,8 +230,8 @@ public final class HashMap<K, V> implements Map<Integer, K, V> {
      * <code>O(n)</code>.
      */
     @Override
-    public SizeInfo.Known<Integer> sizeInfo() {
-        return known(size(this).intValue());
+    public Known<Natural> sizeInfo() {
+        return known(abs(size(this)));
     }
 
     @Override

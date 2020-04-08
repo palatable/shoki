@@ -131,7 +131,8 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     /**
      * Convenience static factory method to construct an {@link StrictQueue} from varargs elements. <code>O(n)</code>.
      *
-     * @param as  the elements from front to back
+     * @param a   the first element to {@link StrictQueue#snoc(Object) snoc}
+     * @param as  the remaining elements to {@link StrictQueue#snoc(Object) snoc} from front to back
      * @param <A> the {@link StrictQueue} element type
      * @return the new {@link StrictQueue}
      */

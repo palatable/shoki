@@ -141,7 +141,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     /**
      * {@inheritDoc}
      * If <code>key</code> does not currently associate to a value inside this {@link HashMap}, insert the key/value
-     * pair for <code>key</code> and <value>value</value>; otherwise, override the current value associated for
+     * pair for <code>key</code> and <code>value</code>; otherwise, override the current value associated for
      * <code>key</code> and set it to <code>value</code>. Amortized <code>O(1)</code>.
      *
      * @see HashMap#get(Object)

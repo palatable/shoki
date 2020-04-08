@@ -13,7 +13,7 @@ import static java.util.Comparator.naturalOrder;
  * <ul>
  * <li>Reflexivity: <code>eq.apply(a, a) == true</code></li>
  * <li>Symmetry: <code>eq.apply(a, b) == eq.apply(b, a)</code></li>
- * <li>Transitivity: <code>eq.apply(a, b) && eq.apply(b, c) == eq.apply(a, c)</code></li>
+ * <li>Transitivity: <code>eq.apply(a, b) &amp;&amp; eq.apply(b, c) == eq.apply(a, c)</code></li>
  * <li>Consistency: <code>eq.apply(a, b) == eq.apply(a, b)</code></li>
  * <li>Nullability: <code>eq.apply(a, null) == (a == null)</code></li>
  * </ul>

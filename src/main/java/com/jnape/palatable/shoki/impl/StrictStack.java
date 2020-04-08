@@ -1,7 +1,6 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
@@ -13,7 +12,6 @@ import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
@@ -33,14 +31,6 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
 
     private StrictStack() {
     }
-
-    /**
-     * If this {@link StrictStack} is not empty, return a {@link Tuple2} of the head and tail wrapped in {@link
-     * Maybe}. Otherwise, return {@link Maybe#nothing()}. <code>O(1)</code>.
-     *
-     * @return {@link Maybe} the head and tail of this {@link StrictStack}
-     */
-    public abstract Maybe<Tuple2<A, StrictStack<A>>> pop();
 
     /**
      * Produce a new {@link StrictStack} instance with <code>a</code> added to the front. <code>O(1)</code>.
@@ -152,7 +142,8 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     /**
      * Convenience static factory method to construct an {@link StrictStack} from varargs elements. <code>O(n)</code>.
      *
-     * @param as  the elements from back to front
+     * @param a   the first element to {@link StrictStack#cons(Object) cons}
+     * @param as  the remaining elements to {@link StrictStack#cons(Object) cons} from back to front
      * @param <A> the {@link StrictStack} element type
      * @return the new {@link StrictStack}
      */
@@ -172,11 +163,6 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
             this.tail = tail;
             size = tail.sizeInfo().getSize().inc();
             hashCode = tail.hashCode() * 31 + Objects.hash(head);
-        }
-
-        @Override
-        public Maybe<Tuple2<A, StrictStack<A>>> pop() {
-            return just(tuple(head, tail));
         }
 
         @Override
@@ -209,11 +195,6 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         private static final Empty<?> INSTANCE = new Empty<>();
 
         private Empty() {
-        }
-
-        @Override
-        public Maybe<Tuple2<A, StrictStack<A>>> pop() {
-            return nothing();
         }
 
         @Override

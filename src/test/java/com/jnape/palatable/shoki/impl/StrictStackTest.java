@@ -4,7 +4,6 @@ import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static org.junit.Assert.assertEquals;
@@ -32,12 +31,6 @@ public class StrictStackTest {
     @Test
     public void emptyReusesSameInstance() {
         assertSame(StrictStack.empty(), StrictStack.empty());
-    }
-
-    @Test
-    public void pop() {
-        assertEquals(just(tuple(1, StrictStack.of(3, 2))), StrictStack.of(3, 2, 1).pop());
-        assertEquals(nothing(), StrictStack.empty().pop());
     }
 
     @Test

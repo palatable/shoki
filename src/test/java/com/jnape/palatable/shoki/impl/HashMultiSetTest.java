@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki.impl;
 
+import com.jnape.palatable.shoki.api.Natural;
 import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -8,7 +9,6 @@ import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.identityHashCode;
 import static com.jnape.palatable.shoki.api.Natural.abs;
-import static com.jnape.palatable.shoki.api.Natural.clampOne;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
@@ -30,34 +30,34 @@ public class HashMultiSetTest {
     public void add() {
         assertEquals(zero(), EMPTY.get("foo"));
         assertEquals(one(), EMPTY.add("foo", one()).get("foo"));
-        assertEquals(clampOne(2),
+        assertEquals(Natural.atLeastOne(2),
                      EMPTY
                              .add("foo", one())
                              .add("foo", one())
                              .get("foo"));
-        assertEquals(clampOne(11),
-                     EMPTY.add("foo", one()).add("foo", clampOne(TEN)).get("foo"));
+        assertEquals(Natural.atLeastOne(11),
+                     EMPTY.add("foo", one()).add("foo", Natural.atLeastOne(TEN)).get("foo"));
     }
 
     @Test
     public void addsOneByDefault() {
         assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo"));
-        assertEquals(EMPTY.add("foo", clampOne(2)), EMPTY.add("foo").add("foo"));
+        assertEquals(EMPTY.add("foo", Natural.atLeastOne(2)), EMPTY.add("foo").add("foo"));
     }
 
     @Test
     public void remove() {
         assertEquals(EMPTY, EMPTY.remove("foo", one()));
         assertEquals(EMPTY, EMPTY.add("foo").remove("foo", one()));
-        assertEquals(EMPTY, EMPTY.add("foo").remove("foo", clampOne(10)));
-        assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo", clampOne(2)).remove("foo", one()));
+        assertEquals(EMPTY, EMPTY.add("foo").remove("foo", Natural.atLeastOne(10)));
+        assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo", Natural.atLeastOne(2)).remove("foo", one()));
         assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo", one()).remove("bar", one()));
     }
 
     @Test
     public void removesOneByDefault() {
         assertEquals(EMPTY, EMPTY.add("foo", one()).remove("foo"));
-        assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo", clampOne(2)).remove("foo"));
+        assertEquals(EMPTY.add("foo", one()), EMPTY.add("foo", Natural.atLeastOne(2)).remove("foo"));
     }
 
     @Test
@@ -71,8 +71,8 @@ public class HashMultiSetTest {
     public void removeAll() {
         assertEquals(EMPTY, EMPTY.removeAll("foo"));
         assertEquals(EMPTY, EMPTY.add("foo", one()).removeAll("foo"));
-        assertEquals(EMPTY, EMPTY.add("foo", clampOne(10)).removeAll("foo"));
-        assertEquals(EMPTY.add("bar", one()), EMPTY.add("foo", clampOne(10)).add("bar", one()).removeAll("foo"));
+        assertEquals(EMPTY, EMPTY.add("foo", Natural.atLeastOne(10)).removeAll("foo"));
+        assertEquals(EMPTY.add("bar", one()), EMPTY.add("foo", Natural.atLeastOne(10)).add("bar", one()).removeAll("foo"));
     }
 
     @Test
@@ -86,29 +86,29 @@ public class HashMultiSetTest {
     public void head() {
         assertEquals(nothing(), EMPTY.head());
         assertEquals(just(tuple("foo", one())), EMPTY.add("foo", one()).head());
-        assertEquals(just(tuple("foo", one())), EMPTY.add("foo", one()).add("bar", clampOne(10)).head());
-        assertEquals(just(tuple("bar", clampOne(10))),
-                     EMPTY.add("foo", one()).add("bar", clampOne(10)).remove("foo", one()).head());
+        assertEquals(just(tuple("foo", one())), EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).head());
+        assertEquals(just(tuple("bar", Natural.atLeastOne(10))),
+                     EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).remove("foo", one()).head());
     }
 
     @Test
     public void tail() {
         assertEquals(EMPTY, HashMultiSet.empty().tail());
         assertEquals(EMPTY, EMPTY.add("foo", one()).tail());
-        assertEquals(EMPTY.add("bar", clampOne(10)), EMPTY.add("foo", one()).add("bar", clampOne(10)).tail());
-        assertEquals(EMPTY, EMPTY.add("foo", one()).add("bar", clampOne(10)).remove("foo", one()).tail());
-        assertEquals(EMPTY.add("bar", clampOne(10)),
-                     EMPTY.add("foo", one()).add("bar", clampOne(10)).add("foo", clampOne(9)).tail());
+        assertEquals(EMPTY.add("bar", Natural.atLeastOne(10)), EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).tail());
+        assertEquals(EMPTY, EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).remove("foo", one()).tail());
+        assertEquals(EMPTY.add("bar", Natural.atLeastOne(10)),
+                     EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).add("foo", Natural.atLeastOne(9)).tail());
     }
 
     @Test
     public void iteration() {
         assertThat(EMPTY, isEmpty());
         assertThat(EMPTY.add("foo", one()), iterates(tuple("foo", one())));
-        assertThat(EMPTY.add("foo", one()).add("bar", clampOne(10)),
-                   iterates(tuple("foo", one()), tuple("bar", clampOne(10))));
-        assertThat(EMPTY.add("foo", one()).add("bar", clampOne(10)).remove("foo", one()),
-                   iterates(tuple("bar", clampOne(10))));
+        assertThat(EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)),
+                   iterates(tuple("foo", one()), tuple("bar", Natural.atLeastOne(10))));
+        assertThat(EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).remove("foo", one()),
+                   iterates(tuple("bar", Natural.atLeastOne(10))));
     }
 
     @Test
@@ -116,14 +116,14 @@ public class HashMultiSetTest {
         assertEquals(known(zero()), EMPTY.sizeInfo());
         assertEquals(known(one()), EMPTY.add("foo", one()).sizeInfo());
         assertEquals(known(abs(2)), EMPTY.add("foo", one()).add("foo", one()).sizeInfo());
-        assertEquals(known(abs(12)), EMPTY.add("foo", one()).add("bar", clampOne(10)).add("foo", one()).sizeInfo());
+        assertEquals(known(abs(12)), EMPTY.add("foo", one()).add("bar", Natural.atLeastOne(10)).add("foo", one()).sizeInfo());
     }
 
     @Test
     public void of() {
         assertEquals(EMPTY.add("a"), HashMultiSet.of("a"));
         assertEquals(EMPTY.add("a").add("b"), HashMultiSet.of("a", "b"));
-        assertEquals(EMPTY.add("a", clampOne(2)).add("b"), HashMultiSet.of("a", "b", "a"));
+        assertEquals(EMPTY.add("a", Natural.atLeastOne(2)).add("b"), HashMultiSet.of("a", "b", "a"));
     }
 
     @Test

@@ -22,6 +22,10 @@ import static java.util.Comparator.naturalOrder;
  */
 public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
 
+    default EquivalenceRelation<A> and(EquivalenceRelation<A> other) {
+        return BiPredicate.super.and(other)::apply;
+    }
+
     /**
      * An {@link EquivalenceRelation} implemented in terms of {@link Objects#equals(Object, Object)}.
      *

@@ -95,6 +95,16 @@ public final class DefaultMethodsMap<Size extends Number, K, V> implements Map<S
     }
 
     /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString() {
+        return "DefaultMethodsMap{" +
+                "delegate=" + delegate +
+                '}';
+    }
+
+    /**
      * Static factory method for creating a new {@link DefaultMethodsMap} given a <code>delegate</code> {@link Map}.
      *
      * @param delegate the delegate {@link Map}

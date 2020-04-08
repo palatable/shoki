@@ -1,6 +1,5 @@
 package com.jnape.palatable.shoki.impl;
 
-import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.testsupport.DefaultMethodsSet;
 import org.junit.Test;
 
@@ -11,11 +10,14 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.identityHashCode;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
+import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class HashSetTest {
@@ -150,8 +152,8 @@ public class HashSetTest {
     @Test
     public void symmetricDifference() {
         HashSet<Object> empty = HashSet.empty();
-        assertTrue(Set.equals(DefaultMethodsSet.delegate(empty).symmetricDifference(empty),
-                              empty.symmetricDifference(empty)));
+        assertThat(DefaultMethodsSet.delegate(empty).symmetricDifference(empty),
+                   equivalentTo(empty.symmetricDifference(empty), sameElements()));
 
     }
 }

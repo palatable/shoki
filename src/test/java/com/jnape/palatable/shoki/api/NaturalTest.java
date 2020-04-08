@@ -100,40 +100,40 @@ public class NaturalTest {
     }
 
     @Test
-    public void clampZero() {
-        assertEquals(zero(), Natural.clampZero(ZERO));
-        assertEquals(new NonZero.B(ONE), Natural.clampZero(ONE));
-        assertEquals(zero(), Natural.clampZero(ONE.negate()));
+    public void atLeastZero() {
+        assertEquals(zero(), Natural.atLeastZero(ZERO));
+        assertEquals(new NonZero.B(ONE), Natural.atLeastZero(ONE));
+        assertEquals(zero(), Natural.atLeastZero(ONE.negate()));
 
-        assertEquals(1, ((NonZero) Natural.clampZero(1)).value());
-        assertEquals(1, ((NonZero) Natural.clampZero(1L)).value());
-        assertEquals(1, ((NonZero) Natural.clampZero(ONE)).value());
+        assertEquals(1, ((NonZero) Natural.atLeastZero(1)).value());
+        assertEquals(1, ((NonZero) Natural.atLeastZero(1L)).value());
+        assertEquals(1, ((NonZero) Natural.atLeastZero(ONE)).value());
 
-        assertEquals(Integer.MAX_VALUE + 1L, ((NonZero) Natural.clampZero(Integer.MAX_VALUE + 1L)).value());
+        assertEquals(Integer.MAX_VALUE + 1L, ((NonZero) Natural.atLeastZero(Integer.MAX_VALUE + 1L)).value());
         assertEquals(Integer.MAX_VALUE + 1L,
-                     ((NonZero) Natural.clampZero(BigInteger.valueOf(Integer.MAX_VALUE + 1L))).value());
+                     ((NonZero) Natural.atLeastZero(BigInteger.valueOf(Integer.MAX_VALUE + 1L))).value());
 
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(ONE),
-                     ((NonZero) Natural.clampZero(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))).value());
+                     ((NonZero) Natural.atLeastZero(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))).value());
 
     }
 
     @Test
-    public void clampOne() {
-        assertEquals(new NonZero.B(ONE), Natural.clampOne(ZERO));
-        assertEquals(new NonZero.B(ONE), Natural.clampOne(ONE));
-        assertEquals(new NonZero.B(TEN), Natural.clampOne(TEN));
-        assertEquals(new NonZero.B(ONE), Natural.clampOne(ONE.negate()));
+    public void atLeastOne() {
+        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ZERO));
+        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ONE));
+        assertEquals(new NonZero.B(TEN), Natural.atLeastOne(TEN));
+        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ONE.negate()));
 
-        assertEquals(2, Natural.clampOne(2).value());
-        assertEquals(2, Natural.clampOne(2L).value());
-        assertEquals(2, Natural.clampOne(ONE.add(ONE)).value());
+        assertEquals(2, Natural.atLeastOne(2).value());
+        assertEquals(2, Natural.atLeastOne(2L).value());
+        assertEquals(2, Natural.atLeastOne(ONE.add(ONE)).value());
 
-        assertEquals(Integer.MAX_VALUE + 1L, Natural.clampOne(Integer.MAX_VALUE + 1L).value());
-        assertEquals(Integer.MAX_VALUE + 1L, Natural.clampOne(BigInteger.valueOf(Integer.MAX_VALUE + 1L)).value());
+        assertEquals(Integer.MAX_VALUE + 1L, Natural.atLeastOne(Integer.MAX_VALUE + 1L).value());
+        assertEquals(Integer.MAX_VALUE + 1L, Natural.atLeastOne(BigInteger.valueOf(Integer.MAX_VALUE + 1L)).value());
 
         assertEquals(BigInteger.valueOf(Long.MAX_VALUE).add(ONE),
-                     Natural.clampOne(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)).value());
+                     Natural.atLeastOne(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)).value());
     }
 
     @Test
@@ -217,19 +217,19 @@ public class NaturalTest {
 
         assertEquals(just(1), one.plus(one).minus(one).<NonZero>fmap(downcast()).fmap(NonZero::value));
         assertEquals(just(Integer.MAX_VALUE),
-                     one.plus(Natural.clampZero(Integer.MAX_VALUE)).minus(one)
+                     one.plus(Natural.atLeastZero(Integer.MAX_VALUE)).minus(one)
                              .<NonZero>fmap(downcast())
                              .fmap(NonZero::value));
         assertEquals(just(Integer.MAX_VALUE + 1L),
-                     one.plus(Natural.clampZero(Integer.MAX_VALUE + 1L)).minus(one)
+                     one.plus(Natural.atLeastZero(Integer.MAX_VALUE + 1L)).minus(one)
                              .<NonZero>fmap(downcast())
                              .fmap(NonZero::value));
         assertEquals(just(Long.MAX_VALUE),
-                     one.plus(Natural.clampZero(Long.MAX_VALUE)).minus(one)
+                     one.plus(Natural.atLeastZero(Long.MAX_VALUE)).minus(one)
                              .<NonZero>fmap(downcast())
                              .fmap(NonZero::value));
         assertEquals(just(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)),
-                     one.plus(Natural.clampZero(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))).minus(one)
+                     one.plus(Natural.atLeastZero(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))).minus(one)
                              .<NonZero>fmap(downcast())
                              .fmap(NonZero::value));
 

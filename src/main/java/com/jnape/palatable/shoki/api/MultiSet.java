@@ -38,6 +38,24 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     MultiSet<A> remove(A a, NonZero k);
 
     /**
+     * The ({@link Natural possibly zero}) multiplicity (number of occurrences) of <code>a</code> in this
+     * {@link MultiSet}.
+     *
+     * @param a the element for which to lookup the multiplicity
+     * @return the multiplicity of a in this {@link MultiSet}
+     */
+    @Override
+    Natural get(A a);
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return this {@link MultiSet} without the {@link MultiSet#head() head} occurrence pair
+     */
+    @Override
+    MultiSet<A> tail();
+
+    /**
      * {@link MultiSet#add(Object, NonZero) Add} {@link Natural#one() one} occurrence of <code>a</code> to this
      * {@link MultiSet}.
      *
@@ -89,22 +107,4 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     default MultiSet<A> addAll(MultiSet<A> other) {
         return foldLeft(curried(ms -> into(ms::add)), this, other);
     }
-
-    /**
-     * The ({@link Natural possibly zero}) multiplicity (number of occurrences) of <code>a</code> in this
-     * {@link MultiSet}.
-     *
-     * @param a the element for which to lookup the multiplicity
-     * @return the multiplicity of a in this {@link MultiSet}
-     */
-    @Override
-    Natural get(A a);
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return this {@link MultiSet} without the {@link MultiSet#head() head} occurrence pair
-     */
-    @Override
-    MultiSet<A> tail();
 }

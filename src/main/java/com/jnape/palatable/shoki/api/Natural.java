@@ -233,30 +233,30 @@ public abstract class Natural extends Number
      * @param value the value
      * @return the {@link Natural} corresponding to the given value, or {@link Zero}
      */
-    public static Natural clampZero(int value) {
-        return clampZero(value, 0);
+    public static Natural atLeastZero(int value) {
+        return atLeastZero(value, 0);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampZero(int)} allowing <code>long</code> values.
+     * Convenience overload of {@link Natural#atLeastZero(int)} allowing <code>long</code> values.
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the given value, or {@link Zero}
-     * @see Natural#clampZero(int)
+     * @see Natural#atLeastZero(int)
      */
-    public static Natural clampZero(long value) {
-        return clampZero(value, 0L);
+    public static Natural atLeastZero(long value) {
+        return atLeastZero(value, 0L);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampZero(int)} allowing {@link BigInteger} values.
+     * Convenience overload of {@link Natural#atLeastZero(int)} allowing {@link BigInteger} values.
      *
      * @param value the value
      * @return the {@link Natural} corresponding to the given value, or {@link Zero}
-     * @see Natural#clampZero(int)
+     * @see Natural#atLeastZero(int)
      */
-    public static Natural clampZero(BigInteger value) {
-        return clampZero(value, ZERO);
+    public static Natural atLeastZero(BigInteger value) {
+        return atLeastZero(value, ZERO);
     }
 
     /**
@@ -266,30 +266,30 @@ public abstract class Natural extends Number
      * @param value the value
      * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
      */
-    public static NonZero clampOne(int value) {
-        return clampOne(value, 0);
+    public static NonZero atLeastOne(int value) {
+        return atLeastOne(value, 0);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampOne(int)} allowing <code>long</code> values.
+     * Convenience overload of {@link Natural#atLeastOne(int)} allowing <code>long</code> values.
      *
      * @param value the value
      * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
-     * @see Natural#clampOne(int)
+     * @see Natural#atLeastOne(int)
      */
-    public static NonZero clampOne(long value) {
-        return clampOne(value, 0L);
+    public static NonZero atLeastOne(long value) {
+        return atLeastOne(value, 0L);
     }
 
     /**
-     * Convenience overload of {@link Natural#clampOne(int)} allowing {@link BigInteger} values.
+     * Convenience overload of {@link Natural#atLeastOne(int)} allowing {@link BigInteger} values.
      *
      * @param value the value
      * @return the {@link NonZero non-zero} {@link Natural} corresponding to the given value, or {@link Natural#one()}
-     * @see Natural#clampOne(int)
+     * @see Natural#atLeastOne(int)
      */
-    public static NonZero clampOne(BigInteger value) {
-        return clampOne(value, ZERO);
+    public static NonZero atLeastOne(BigInteger value) {
+        return atLeastOne(value, ZERO);
     }
 
     private static <N extends Number & Comparable<N>> Maybe<Natural> natural(N value, N zero) {
@@ -300,12 +300,12 @@ public abstract class Natural extends Number
         return natural(value, zero).orElseGet(() -> NonZero.nonZero(negate.apply(value)));
     }
 
-    private static <N extends Number & Comparable<N>> Natural clampZero(N value, N zero) {
+    private static <N extends Number & Comparable<N>> Natural atLeastZero(N value, N zero) {
         return natural(value, zero).orElse(zero());
     }
 
-    private static <N extends Number & Comparable<N>> NonZero clampOne(N value, N zero) {
-        return clampZero(value, zero).match(constantly(one()), id());
+    private static <N extends Number & Comparable<N>> NonZero atLeastOne(N value, N zero) {
+        return atLeastZero(value, zero).match(constantly(one()), id());
     }
 
     /**

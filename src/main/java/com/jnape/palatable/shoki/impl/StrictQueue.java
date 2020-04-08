@@ -4,7 +4,6 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
-import com.jnape.palatable.shoki.api.OrderedCollection;
 import com.jnape.palatable.shoki.api.Queue;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 import com.jnape.palatable.shoki.api.Stack;
@@ -12,8 +11,12 @@ import com.jnape.palatable.shoki.api.Stack;
 import java.util.Iterator;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.Natural.zero;
+import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static java.util.Arrays.asList;
 
@@ -91,7 +94,8 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
      */
     @Override
     public boolean equals(Object other) {
-        return other instanceof StrictQueue && OrderedCollection.equals(this, (StrictQueue<?>) other);
+        return other instanceof StrictQueue<?> &&
+                equivalent(this, downcast(other), sameElementsSameOrder(objectEquals()));
     }
 
     /**

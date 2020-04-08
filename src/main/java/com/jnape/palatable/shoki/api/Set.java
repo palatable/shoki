@@ -1,7 +1,5 @@
 package com.jnape.palatable.shoki.api;
 
-import java.util.Objects;
-
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 
 /**
@@ -83,15 +81,24 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
     }
 
     /**
-     * Determine if two {@link Set}s have the same {@link SizeInfo}, and contain the same elements. <code>O(n)</code>.
-     *
-     * @param xs  the first {@link Set}
-     * @param ys  the second {@link Set}
-     * @param <A> the element type
-     * @param <S> the {@link Set} subtype of the arguments
-     * @return true if both {@link Set}s are equal by the parameters above; false otherwise
+     * Common {@link EquivalenceRelation}s between {@link Set}s.
      */
-    static <A, S extends Set<?, A>> boolean equals(S xs, S ys) {
-        return Objects.equals(xs.sizeInfo().getSize(), ys.sizeInfo().getSize()) && and().foldMap(ys::contains, xs);
+    final class EquivalenceRelations {
+
+        private EquivalenceRelations() {
+        }
+
+        /**
+         * An {@link EquivalenceRelation} between two {@link Set}s that holds if, and only if, both {@link Set}s have
+         * the same elements. <code>O(n)</code>.
+         *
+         * @param <A> the element type
+         * @param <S> the {@link Set} subtype of the arguments
+         * @return the {@link EquivalenceRelation}
+         */
+        public static <A, S extends Set<?, A>> EquivalenceRelation<S> sameElements() {
+            EquivalenceRelation<S> sameMembership = (xs, ys) -> and().foldMap(ys::contains, xs);
+            return Sizable.EquivalenceRelations.<S>sameSizes().and(sameMembership);
+        }
     }
 }

@@ -35,7 +35,7 @@ public class StrictStackTest {
     }
 
     @Test
-    public void unshift() {
+    public void pop() {
         assertEquals(just(tuple(1, StrictStack.of(3, 2))), StrictStack.of(3, 2, 1).pop());
         assertEquals(nothing(), StrictStack.empty().pop());
     }

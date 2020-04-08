@@ -8,6 +8,7 @@ import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 
 /**
  * A {@link Collection} of key/value {@link Tuple2 pairs} supporting {@link RandomAccess random access} from a key to
@@ -96,18 +97,43 @@ public interface Map<Size extends Number, K, V> extends
     }
 
     /**
-     * Determine if two {@link Map}s have the same {@link SizeInfo}, and contain the same entries. <code>O(n)</code>.
-     *
-     * @param m1         the first {@link Map}
-     * @param m2         the second {@link Map}
-     * @param valueEqRel the {@link EquivalenceRelation} to use to compare entry values
-     * @param <K>        the key type
-     * @param <V>        the value type
-     * @param <M>        the {@link Map} subtype of the arguments
-     * @return true if both {@link Map}s have the same entries by the parameters above; false otherwise
+     * Common {@link EquivalenceRelation}s between {@link Map}s.
      */
-    static <K, V, M extends Map<?, K, V>> boolean equals(M m1, M m2, EquivalenceRelation<V> valueEqRel) {
-        return m1.sizeInfo().equals(m2.sizeInfo())
-                && and().foldMap(into((k, v) -> m2.get(k).fmap(valueEqRel.apply(v)).orElse(false)), m1);
+    final class EquivalenceRelations {
+        private EquivalenceRelations() {
+        }
+
+        /**
+         * An {@link EquivalenceRelation} between two {@link Map}s that holds if, and only if, both {@link Map}s have
+         * equivalent {@link SizeInfo}s and contain the same entries. <code>O(n)</code>.
+         *
+         * @param valueEqRel the {@link EquivalenceRelation} to use to compare entry values
+         * @param <K>        the key type
+         * @param <V>        the value type
+         * @param <M>        the {@link Map} subtype of the arguments
+         * @return the {@link EquivalenceRelation}
+         */
+        public static <K, V, M extends Map<?, K, V>> EquivalenceRelation<M> sameEntries(
+                EquivalenceRelation<V> valueEqRel) {
+            return Sizable.EquivalenceRelations.<M>sameSizes()
+                    .and((m1, m2) -> and()
+                            .foldMap(into((k, v) -> m2.get(k).fmap(valueEqRel.apply(v)).orElse(false)), m1));
+        }
+
+        /**
+         * An {@link EquivalenceRelation} between two {@link Map}s that holds if, and only if, both {@link Map}s have
+         * equivalent {@link SizeInfo}s and {@link Map#keys() key sets}.
+         *
+         * @param keySetEqRel the {@link EquivalenceRelation} to use to compare key sets
+         * @param <K>         the key type
+         * @param <V>         the value type
+         * @param <M>         the {@link Map} subtype of the arguments
+         * @return the {@link EquivalenceRelation}
+         */
+        public static <K, V, M extends Map<?, K, V>> EquivalenceRelation<M> sameKeys(
+                EquivalenceRelation<? super Set<?, K>> keySetEqRel) {
+            return Sizable.EquivalenceRelations.<M>sameSizes()
+                    .and((m1, m2) -> equivalent(m1.keys(), m2.keys(), keySetEqRel));
+        }
     }
 }

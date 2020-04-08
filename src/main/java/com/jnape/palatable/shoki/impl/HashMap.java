@@ -22,8 +22,10 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Cons.cons;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.sameEntries;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
@@ -241,17 +243,17 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     /**
      * Determine if <code>other</code> is a {@link HashMap} with the
-     * {@link Map#equals(Map, Map, EquivalenceRelation) same entries} as this {@link HashMap}, using
+     * {@link Map.EquivalenceRelations#sameEntries(EquivalenceRelation) same entries} as this {@link HashMap}, using
      * {@link Object#equals(Object) Object equality} to determine value equivalence. <code>O(n)</code>.
      *
      * @param other the {@link Object} to check for equality
      * @return the equality outcome
-     * @see Map#equals(Map, Map, EquivalenceRelation)
+     * @see Map.EquivalenceRelations#sameEntries(EquivalenceRelation)
      */
     @Override
     public boolean equals(Object other) {
         return other instanceof HashMap<?, ?> &&
-                trying(() -> Map.equals(this, downcast(other), objectEquals()))
+                trying(() -> equivalent(this, downcast(other), sameEntries(objectEquals())))
                         .catching(ClassCastException.class, constantly(false))
                         .orThrow();
     }

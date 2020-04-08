@@ -1,7 +1,7 @@
 package com.jnape.palatable.shoki.api;
 
-import java.util.Iterator;
-import java.util.Objects;
+import static com.jnape.palatable.lambda.functions.builtin.fn3.ZipWith.zipWith;
+import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 
 /**
  * A {@link Collection} that supports stable ordering of the contained elements.
@@ -27,24 +27,26 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
     OrderedCollection<Size, A> tail();
 
     /**
-     * Determine if two {@link OrderedCollection}s have the same {@link SizeInfo}, and contain the same elements in the
-     * same order. <code>O(n)</code>.
-     *
-     * @param xs   the first {@link OrderedCollection}
-     * @param ys   the second {@link OrderedCollection}
-     * @param <OC> the {@link OrderedCollection} subtype of the arguments
-     * @return true if both {@link OrderedCollection}s are equal by the parameters above; false otherwise
+     * Common {@link EquivalenceRelation}s between {@link OrderedCollection}s.
      */
-    static <OC extends OrderedCollection<?, ?>> boolean equals(OC xs, OC ys) {
-        if (Objects.equals(xs.sizeInfo(), ys.sizeInfo())) {
-            Iterator<?> xsIt = xs.iterator();
-            Iterator<?> ysIt = ys.iterator();
-
-            while (xsIt.hasNext())
-                if (!Objects.equals(xsIt.next(), ysIt.next()))
-                    return false;
-            return true;
+    final class EquivalenceRelations {
+        private EquivalenceRelations() {
         }
-        return false;
+
+        /**
+         * An {@link EquivalenceRelation} between two {@link OrderedCollection}s that holds if, and only if, both
+         * {@link OrderedCollection}s have equivalent {@link SizeInfo}s and contain the same elements in the same order.
+         * <code>O(n)</code>.
+         *
+         * @param elementEqRel the {@link EquivalenceRelation} to use to compare elements
+         * @param <A>          the element type
+         * @param <OC>         the {@link OrderedCollection} subtype of the arguments
+         * @return the {@link EquivalenceRelation}
+         */
+        public static <A, OC extends OrderedCollection<?, A>> EquivalenceRelation<OC> sameElementsSameOrder(
+                EquivalenceRelation<? super A> elementEqRel) {
+            EquivalenceRelation<OC> sameElementsInOrder = (xs, ys) -> and().reduceLeft(zipWith(elementEqRel, xs, ys));
+            return Sizable.EquivalenceRelations.<OC>sameSizes().and(sameElementsInOrder);
+        }
     }
 }

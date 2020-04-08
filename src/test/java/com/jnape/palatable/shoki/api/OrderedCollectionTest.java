@@ -3,30 +3,41 @@ package com.jnape.palatable.shoki.api;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import org.junit.Test;
+import org.junit.experimental.runners.Enclosed;
+import org.junit.runner.RunWith;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
+import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertThat;
 
+@RunWith(Enclosed.class)
 public class OrderedCollectionTest {
 
-    @Test
-    public void equality() {
-        OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
-        OrderedCollection<?, Integer> queue = StrictQueue.of(3, 2, 1);
+    public static final class EquivalenceRelations {
 
-        assertTrue(OrderedCollection.equals(stack, queue));
-        assertTrue(OrderedCollection.equals(queue, stack));
-        assertTrue(OrderedCollection.equals(queue, queue));
-        assertTrue(OrderedCollection.equals(stack, stack));
+        @Test
+        public void sameElementsSameOrder() {
+            EquivalenceRelation<? super OrderedCollection<?, Integer>> sameElementsSameOrder =
+                    OrderedCollection.EquivalenceRelations.sameElementsSameOrder(objectEquals());
 
-        assertFalse(OrderedCollection.equals(stack.reverse(), stack));
-        assertFalse(OrderedCollection.equals(stack, stack.reverse()));
-        assertFalse(OrderedCollection.equals(queue, stack.reverse()));
-        assertFalse(OrderedCollection.equals(stack.reverse(), queue));
-        assertFalse(OrderedCollection.equals(queue.reverse(), queue));
-        assertFalse(OrderedCollection.equals(queue, queue.reverse()));
-        assertFalse(OrderedCollection.equals(stack, queue.reverse()));
-        assertFalse(OrderedCollection.equals(queue.reverse(), stack));
-        assertFalse(OrderedCollection.equals(queue.reverse(), StrictQueue.empty()));
+            OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
+            OrderedCollection<?, Integer> queue = StrictQueue.of(3, 2, 1);
+
+            assertThat(stack, equivalentTo(queue, sameElementsSameOrder));
+            assertThat(queue, equivalentTo(stack, sameElementsSameOrder));
+            assertThat(queue, equivalentTo(queue, sameElementsSameOrder));
+            assertThat(stack, equivalentTo(stack, sameElementsSameOrder));
+
+            assertThat(stack.reverse(), not(equivalentTo(stack, sameElementsSameOrder)));
+            assertThat(stack, not(equivalentTo(stack.reverse(), sameElementsSameOrder)));
+            assertThat(queue, not(equivalentTo(stack.reverse(), sameElementsSameOrder)));
+            assertThat(stack.reverse(), not(equivalentTo(queue, sameElementsSameOrder)));
+            assertThat(queue.reverse(), not(equivalentTo(queue, sameElementsSameOrder)));
+            assertThat(queue, not(equivalentTo(queue.reverse(), sameElementsSameOrder)));
+            assertThat(stack, not(equivalentTo(queue.reverse(), sameElementsSameOrder)));
+            assertThat(queue.reverse(), not(equivalentTo(stack, sameElementsSameOrder)));
+            assertThat(queue.reverse(), not(equivalentTo(StrictQueue.empty(), sameElementsSameOrder)));
+        }
     }
 }

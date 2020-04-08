@@ -307,7 +307,7 @@ public class HashMapTest {
 
     @Test
     public void values() {
-        assertEquals(StrictStack.of(1, 2, 3),
+        assertEquals(StrictQueue.of(1, 2, 3),
                      of(tuple("foo", 1),
                         tuple("bar", 2),
                         tuple("baz", 3))

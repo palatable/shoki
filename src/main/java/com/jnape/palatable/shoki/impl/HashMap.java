@@ -194,8 +194,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      * <code>O(n)</code>.
      */
     @Override
-    public StrictStack<V> values() {
-        return foldLeft((keys, kv) -> keys.cons(kv._2()), StrictStack.empty(), this);
+    public StrictQueue<V> values() {
+        return foldLeft((values, kv) -> values.snoc(kv._2()), StrictQueue.empty(), this);
     }
 
     /**

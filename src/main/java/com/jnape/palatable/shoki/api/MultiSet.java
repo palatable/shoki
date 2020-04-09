@@ -1,13 +1,10 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 
-import static com.jnape.palatable.lambda.adt.Maybe.just;
-import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GTE.gte;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
@@ -16,6 +13,7 @@ import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 import static com.jnape.palatable.lambda.semigroup.builtin.Max.max;
 import static com.jnape.palatable.lambda.semigroup.builtin.Min.min;
 import static com.jnape.palatable.shoki.api.Natural.one;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 
 /**
  * A {@link MultiSet} (also referred to as a <em>Bag</em>) is a {@link Collection} of {@link Tuple2 pairs} of contained
@@ -27,23 +25,31 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, RandomAccess<A, Natural> {
 
     /**
-     * Add <code>k</code> occurrences of <code>a</code> to this {@link MultiSet}.
+     * Increment the {@link MultiSet#get(Object) multiplicity} of <code>a</code> in this {@link MultiSet} by
+     * <code>k</code>.
      *
-     * @param a the element to add
-     * @param k the number of occurrences of the element to add
+     * @param a the element for which to increment the multiplicity
+     * @param k the {@link NonZero non-zero} increment
      * @return the updated {@link MultiSet}
      */
-    MultiSet<A> add(A a, NonZero k);
+    MultiSet<A> inc(A a, NonZero k);
 
     /**
-     * Remove <code><em>min</em>(k, {@link MultiSet#get get}(a))</code> occurrences of <code>a</code> from this
-     * {@link MultiSet}.
+     * Decrement the {@link MultiSet#get(Object) multiplicity} of <code>a</code> in this {@link MultiSet} by
+     * <code><em>min</em>(k, {@link MultiSet#get get}(a))</code>.
      *
-     * @param a the element to remove
-     * @param k the number of occurrences of the element to remove
+     * @param a the element for which to decrement the multiplicity
+     * @param k the {@link NonZero non-zero} decrement
      * @return the updated {@link MultiSet}
      */
-    MultiSet<A> remove(A a, NonZero k);
+    MultiSet<A> dec(A a, NonZero k);
+
+    /**
+     * The {@link Set} of unique elements in this {@link MultiSet}
+     *
+     * @return the {@link Set} of unique elements
+     */
+    Set<Natural, A> unique();
 
     /**
      * The ({@link Natural possibly zero}) multiplicity (number of occurrences) of <code>a</code> in this
@@ -64,66 +70,44 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     MultiSet<A> tail();
 
     /**
-     * {@link MultiSet#add(Object, NonZero) Add} {@link Natural#one() one} occurrence of <code>a</code> to this
-     * {@link MultiSet}.
+     * {@link MultiSet#inc(Object, NonZero) Increment} the {@link MultiSet#get(Object) multiplicity} of <code>a</code>
+     * in this {@link MultiSet} by {@link Natural#one() one}.
      *
-     * @param a the element to add
+     * @param a the element for which to increment the multiplicity
      * @return the updated {@link MultiSet}
-     * @see MultiSet#add(Object, NonZero)
+     * @see MultiSet#inc(Object, NonZero)
      */
-    default MultiSet<A> add(A a) {
-        return add(a, one());
+    default MultiSet<A> inc(A a) {
+        return inc(a, one());
     }
 
     /**
-     * {@link MultiSet#remove(Object, NonZero) Remove}
-     * <code><em>min</em>({@link Natural#one() one}, {@link MultiSet#get get}(a))</code> occurrences of <code>a</code>
-     * from this {@link MultiSet}.
+     * {@link MultiSet#dec(Object, NonZero) Decrement} the {@link MultiSet#get(Object) multiplicity} of <code>a</code>
+     * in this {@link MultiSet} by <code><em>min</em>({@link Natural#one() one}, {@link MultiSet#get get}(a))</code>.
      *
-     * @param a the element to remove
+     * @param a the element for which to decrement the multiplicity
      * @return the updated {@link MultiSet}
-     * @see MultiSet#remove(Object, NonZero)
+     * @see MultiSet#dec(Object, NonZero)
      */
-    default MultiSet<A> remove(A a) {
-        return remove(a, one());
+    default MultiSet<A> dec(A a) {
+        return dec(a, one());
     }
 
     /**
-     * {@link MultiSet#remove(Object, NonZero) Remove} all occurrences of <code>a</code> from this {@link MultiSet},
+     * {@link MultiSet#dec(Object, NonZero) Remove} all occurrences of <code>a</code> from this {@link MultiSet},
      * such that subsequent invocations of <code>{@link MultiSet#get(Object) get}(a)</code> return
      * {@link Natural#zero() zero}.
      * <p>
-     * By default, this method simply {@link MultiSet#remove(Object, NonZero) removes} the
+     * By default, this method simply {@link MultiSet#dec(Object, NonZero) decrements} the
      * {@link MultiSet#get(Object) multiplicity} of <code>a</code> from the {@link MultiSet}, although specific
      * implementations may be able to perform this operation more directly and efficiently.
      *
      * @param a the element to remove
      * @return the updated {@link MultiSet}
-     * @see MultiSet#remove(Object, NonZero)
+     * @see MultiSet#dec(Object, NonZero)
      */
-    default MultiSet<A> removeAll(A a) {
-        return get(a).match(constantly(this), k -> remove(a, k));
-    }
-
-    /**
-     * {@link MultiSet#add Add} the {@link MultiSet#get(Object) multiplicity} of each element in <code>other</code>
-     * to that element's current {@link MultiSet#get(Object) multiplicity} in this {@link MultiSet}.
-     *
-     * @param other the {@link MultiSet} from which to {@link MultiSet#add(Object, NonZero) add} elements
-     * @return the updated {@link MultiSet}
-     */
-    default MultiSet<A> addAll(MultiSet<A> other) {
-        return foldLeft(curried(ms -> into(ms::add)), this, other);
-    }
-
-
-    /**
-     * {@inheritDoc}
-     * Amortized <code>O(1)</code>.
-     */
-    @Override
-    default boolean contains(A a) {
-        return contains(a, one());
+    default MultiSet<A> remove(A a) {
+        return get(a).match(constantly(this), k -> dec(a, k));
     }
 
     /**
@@ -139,105 +123,115 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     }
 
     /**
-     * The union of two {@link MultiSet MultiSets}
-     * <code>xs</code> and <code>ys</code> is the {@link MultiSet} of those elements present in either <code>xs</code>
-     * or <code>ys</code> with the occurrences of whichever one had more elements. This is equivalent to
-     * {@link MultiSet#merge} partially applied with {@link com.jnape.palatable.lambda.semigroup.builtin.Max#max}.
-     *
-     * @param other the {@link MultiSet} to union with this {@link MultiSet}
-     * @return the union {@link MultiSet}
-     * @see MultiSet#merge
-     */
-    default MultiSet<A> union(MultiSet<A> other) {
-        return merge(max(), other);
-    }
-
-    /**
-     * The <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement"
-     * target="_new">difference</a> (also known as "relative complement") of two {@link MultiSet MultiSets}
-     * <code>xs</code> and <code>ys</code> is the {@link MultiSet} of in <code>xs</code> with all elements of
-     * <code>ys</code> removed.
-     *
-     * @param other the {@link MultiSet} to subtract from this {@link MultiSet}
-     * @return the difference {@link MultiSet}
-     */
-    default MultiSet<A> difference(MultiSet<A> other) {
-        return foldLeft(curried(ms -> into(ms::remove)), this, other);
-    }
-
-    /**
      * Determine if another {@link MultiSet} is a subset of this {@link MultiSet}. A {@link MultiSet} <code>x</code> is
-     * a subset of <code>y</code> if for every <code>a^i</code> in <code>x</code> there exists <code>a^j</code> in
-     * <code>y</code> where ^ denotes the number of occurrences in the multiset.
+     * a subset of <code>y</code> if, for every element in <code>x</code>, the multiplicity of the element in
+     * <code>x</code> is less than or equal to the multiplicity of that element in <code>y</code>.
      *
-     * @param other the {@link MultiSet} to test whether it's a subset
-     * @return whether other is a subset
+     * @param other the {@link MultiSet} to test for inclusion in this {@link MultiSet}
+     * @return true if other is included in this {@link MultiSet}; false, otherwise
      */
     default boolean inclusion(MultiSet<A> other) {
         return and().foldMap(into(this::contains), other);
     }
 
     /**
-     * The intersection of two {@link MultiSet MultiSets}
-     * <code>xs</code> and <code>ys</code> is the {@link MultiSet} of those elements present in both <code>xs</code>
-     * and <code>ys</code> with the occurrences of whichever one had less elements. This is equivalent to
-     * {@link MultiSet#merge} partially applied with {@link com.jnape.palatable.lambda.semigroup.builtin.Min#min}.
+     * The intersection of two {@link MultiSet MultiSets} <code>xs</code> and <code>ys</code> is the {@link MultiSet}
+     * of those elements present in both <code>xs</code> and <code>ys</code> with a multiplicity corresponding to the
+     * minimum multiplicity of the element between the two {@link MultiSet MultiSets}.
      *
      * @param other the {@link MultiSet} to intersect with this {@link MultiSet}
      * @return the intersected {@link MultiSet}
      * @see MultiSet#merge
      */
     default MultiSet<A> intersection(MultiSet<A> other) {
-        return merge(min(), other);
+        return merge(other, min());
     }
 
+    /**
+     * The union of two {@link MultiSet MultiSets} <code>xs</code> and <code>ys</code> is the {@link MultiSet} of those
+     * elements present in either <code>xs</code> or <code>ys</code> with a multiplicity corresponding to the maximum
+     * multiplicity of the element between the two {@link MultiSet MultiSets}.
+     *
+     * @param other the {@link MultiSet} to union with this {@link MultiSet}
+     * @return the union {@link MultiSet}
+     * @see MultiSet#merge
+     */
+    default MultiSet<A> union(MultiSet<A> other) {
+        return merge(other, max());
+    }
+
+    /**
+     * {@link MultiSet#inc Increment} the {@link MultiSet#get(Object) multiplicity} of each element in
+     * this {@link MultiSet} by the correponding element's {@link MultiSet#get(Object) multiplicity} in
+     * <code>other</code>.
+     *
+     * @param other the {@link MultiSet} from which to {@link MultiSet#inc(Object, NonZero) increment} multiplicities
+     * @return the updated {@link MultiSet}
+     * @see MultiSet#merge
+     */
+    default MultiSet<A> sum(MultiSet<A> other) {
+        return merge(other, Natural::plus);
+    }
+
+    /**
+     * The <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement"
+     * target="_new">difference</a> (also known as "relative complement") of two {@link MultiSet MultiSets}
+     * <code>xs</code> and <code>ys</code> is the {@link MultiSet} of <code>xs</code> after subtracting the
+     * corresponding element multiplicities in <code>ys</code>.
+     *
+     * @param other the {@link MultiSet} to subtract from this {@link MultiSet}
+     * @return the difference {@link MultiSet}
+     * @see MultiSet#merge
+     */
+    default MultiSet<A> difference(MultiSet<A> other) {
+        return merge(other, (n, k) -> n.minus(k).orElse(zero()));
+    }
 
     /**
      * The symmetric difference of two {@link MultiSet MultiSets} <code>xs</code> and <code>ys</code> is the
-     * {@link MultiSet} of the occurrence elements present in either <code>xs</code> or <code>ys</code> but not the
-     * other.
+     * {@link MultiSet} of the occurrence pairs present in either <code>xs</code> or <code>ys</code> but not present in
+     * both.
      *
      * @param other the {@link MultiSet} to symmetrically subtract from this {@link MultiSet}
      * @return the {@link MultiSet} containing the symmetric difference
-     * @see MultiSet#merge
+     * @see MultiSet#difference(MultiSet)
      */
     default MultiSet<A> symmetricDifference(MultiSet<A> other) {
         return difference(other).union(other.difference(this));
     }
 
     /**
-     * {@link Set} containing the unique elements from the {@link MultiSet}
+     * Combine {@link MultiSet}s using a {@link Semigroup} to combine the multiplicities of the relevant elements.
      *
-     * @return the unique {@link Set}
-     */
-    Set<Natural, A> unique();
-
-    /**
-     * Combine {@link MultiSet}s with a {@link Semigroup} to handle the combining of the amounts.
-     * Note that if one of the {@link MultiSet}s does not contain an {@link A} it will still pass
-     * {@link com.jnape.palatable.shoki.api.Natural.Zero} to the {@link Semigroup}.
-     *
-     * @param semigroup the {@link Semigroup}
      * @param other     the other {@link MultiSet}
+     * @param semigroup the {@link Semigroup}
      * @return the merged {@link MultiSet}
      */
-    default MultiSet<A> merge(Semigroup<Natural> semigroup, MultiSet<A> other) {
+    default MultiSet<A> merge(MultiSet<A> other, Semigroup<Natural> semigroup) {
         return foldLeft((acc, a) -> {
                             Natural ourAs = get(a);
                             return semigroup
                                     .apply(ourAs, other.get(a))
-                                    .match(__ -> acc.removeAll(a),
+                                    .match(__ -> acc.remove(a),
                                            nz -> nz.minus(ourAs)
-                                                   .flatMap(n -> n.match(constantly(nothing()),
-                                                                         diff -> just(acc.add(a, diff))))
-                                                   .fmap(Maybe::just)
+                                                   .flatMap(CoProduct2::projectB)
+                                                   .fmap(diff -> acc.inc(a, diff))
                                                    .orElseGet(() -> ourAs.minus(nz)
-                                                           .flatMap(n -> n.match(constantly(nothing()),
-                                                                                 diff -> just(acc.remove(a, diff)))))
-                                                   .orElse(acc));
+                                                           .flatMap(CoProduct2::projectB)
+                                                           .fmap(diff -> acc.dec(a, diff))
+                                                           .orElse(acc)));
                         },
                         this,
                         other.unique().union(this.unique()));
+    }
+
+    /**
+     * {@inheritDoc}
+     * Amortized <code>O(1)</code>.
+     */
+    @Override
+    default boolean contains(A a) {
+        return contains(a, one());
     }
 
     /**

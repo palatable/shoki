@@ -25,16 +25,16 @@ public final class DefaultMethodsMultiSet<A> implements MultiSet<A> {
      * {@inheritDoc}
      */
     @Override
-    public DefaultMethodsMultiSet<A> add(A a, Natural.NonZero k) {
-        return new DefaultMethodsMultiSet<>(delegate.add(a, k));
+    public DefaultMethodsMultiSet<A> inc(A a, Natural.NonZero k) {
+        return new DefaultMethodsMultiSet<>(delegate.inc(a, k));
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public DefaultMethodsMultiSet<A> remove(A a, Natural.NonZero k) {
-        return new DefaultMethodsMultiSet<>(delegate.remove(a, k));
+    public DefaultMethodsMultiSet<A> dec(A a, Natural.NonZero k) {
+        return new DefaultMethodsMultiSet<>(delegate.dec(a, k));
     }
 
     /**

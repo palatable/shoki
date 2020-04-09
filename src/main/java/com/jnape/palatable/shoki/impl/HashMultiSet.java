@@ -4,12 +4,12 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft;
+import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
-import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 import java.util.Objects;
@@ -49,16 +49,16 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * <code>O(o)</code>.
      */
     @Override
-    public HashMultiSet<A> addAll(MultiSet<A> other) {
-        return (HashMultiSet<A>) MultiSet.super.addAll(other);
+    public HashMultiSet<A> sum(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.sum(other);
     }
 
     /**
      * {@inheritDoc}
-     * <code>O(n)</code>
+     * <code>O(n)</code>.
      */
     @Override
-    public Set<Natural, A> unique() {
+    public HashSet<A> unique() {
         return multiplicityMap.keys();
     }
 
@@ -67,7 +67,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public HashMultiSet<A> add(A a, NonZero k) {
+    public HashMultiSet<A> inc(A a, NonZero k) {
         return new HashMultiSet<>(multiplicityMap.put(a, multiplicityMap.get(a).fmap(k::plus).orElse(k))
         );
     }
@@ -77,7 +77,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public HashMultiSet<A> remove(A a, NonZero k) {
+    public HashMultiSet<A> dec(A a, NonZero k) {
         return multiplicityMap.get(a)
                 .fmap(n -> new HashMultiSet<>(n.minus(k).orElse(zero())
                                                       .match(zero -> multiplicityMap.remove(a),
@@ -100,7 +100,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public HashMultiSet<A> removeAll(A a) {
+    public HashMultiSet<A> remove(A a) {
         return new HashMultiSet<>(multiplicityMap.remove(a));
     }
 
@@ -109,8 +109,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public HashMultiSet<A> add(A a) {
-        return (HashMultiSet<A>) MultiSet.super.add(a);
+    public HashMultiSet<A> inc(A a) {
+        return (HashMultiSet<A>) MultiSet.super.inc(a);
     }
 
     /**
@@ -118,8 +118,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public HashMultiSet<A> remove(A a) {
-        return (HashMultiSet<A>) MultiSet.super.remove(a);
+    public HashMultiSet<A> dec(A a) {
+        return (HashMultiSet<A>) MultiSet.super.dec(a);
     }
 
     /**
@@ -156,6 +156,51 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     @Override
     public Maybe<Tuple2<A, NonZero>> head() {
         return multiplicityMap.head();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> intersection(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.intersection(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> union(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.difference(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> difference(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.difference(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> symmetricDifference(MultiSet<A> other) {
+        return (HashMultiSet<A>) MultiSet.super.symmetricDifference(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(n + o)</code>.
+     */
+    @Override
+    public HashMultiSet<A> merge(MultiSet<A> other, Semigroup<Natural> semigroup) {
+        return (HashMultiSet<A>) MultiSet.super.merge(other, semigroup);
     }
 
     /**
@@ -235,7 +280,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     public static <A> HashMultiSet<A> of(EquivalenceRelation<A> equivalenceRelation,
                                          HashingAlgorithm<A> hashingAlgorithm,
                                          A a, A... as) {
-        return foldLeft(HashMultiSet::add, empty(equivalenceRelation, hashingAlgorithm), Cons.cons(a, asList(as)));
+        return foldLeft(HashMultiSet::inc, empty(equivalenceRelation, hashingAlgorithm), Cons.cons(a, asList(as)));
     }
 
     /**

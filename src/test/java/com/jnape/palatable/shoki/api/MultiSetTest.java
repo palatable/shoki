@@ -25,37 +25,37 @@ public class MultiSetTest {
     public static final class DefaultMethods {
         @Test
         public void removeAll() {
-            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).removeAll("foo").isEmpty());
+            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).remove("foo").isEmpty());
             assertEquals(zero(),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).removeAll("foo")
+                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).remove("foo")
                                  .get("foo"));
             assertEquals(known(one()),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).removeAll("foo")
-                                 .sizeInfo());
-        }
-
-        @Test
-        public void removeOne() {
-            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).remove("foo").isEmpty());
-            assertEquals(one(),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "foo")).remove("foo").get("foo"));
-            assertEquals(known(abs(2)),
                          DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).remove("foo")
                                  .sizeInfo());
         }
 
         @Test
+        public void removeOne() {
+            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).dec("foo").isEmpty());
+            assertEquals(one(),
+                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "foo")).dec("foo").get("foo"));
+            assertEquals(known(abs(2)),
+                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).dec("foo")
+                                 .sizeInfo());
+        }
+
+        @Test
         public void addOne() {
-            assertEquals(one(), DefaultMethodsMultiSet.delegate(HashMultiSet.<String>empty()).add("foo").get("foo"));
+            assertEquals(one(), DefaultMethodsMultiSet.delegate(HashMultiSet.<String>empty()).inc("foo").get("foo"));
         }
 
         @Test
         public void addAll() {
             assertTrue(DefaultMethodsMultiSet.<String>delegate(empty())
-                               .addAll(empty()).isEmpty());
+                               .sum(empty()).isEmpty());
 
             MultiSet<String> addAll = DefaultMethodsMultiSet.<String>delegate(empty())
-                    .addAll(HashMultiSet.of("foo", "foo", "bar"));
+                    .sum(HashMultiSet.of("foo", "foo", "bar"));
             assertEquals(abs(2), addAll.get("foo"));
             assertEquals(abs(1), addAll.get("bar"));
             assertEquals(known(abs(3)), addAll.sizeInfo());
@@ -64,7 +64,7 @@ public class MultiSetTest {
         @Test
         public void merge() {
             MultiSet<String> merge = DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b"))
-                    .merge(Natural::plus, DefaultMethodsMultiSet.delegate(HashMultiSet.of("b", "c")));
+                    .merge(DefaultMethodsMultiSet.delegate(HashMultiSet.of("b", "c")), Natural::plus);
             assertEquals(one(), merge.get("a"));
             assertEquals(abs(2), merge.get("b"));
             assertEquals(one(), merge.get("c"));

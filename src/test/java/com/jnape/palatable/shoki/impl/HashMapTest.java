@@ -1,5 +1,8 @@
 package com.jnape.palatable.shoki.impl;
 
+import com.jnape.palatable.shoki.api.EquivalenceRelation;
+import com.jnape.palatable.shoki.api.HashingAlgorithm;
+import com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher;
 import com.jnape.palatable.shoki.testsupport.StubbedHashingAlgorithm;
 import org.junit.Assert;
 import org.junit.Test;
@@ -8,6 +11,8 @@ import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.identityHashCode;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.one;
@@ -296,6 +301,7 @@ public class HashMapTest {
         assertEquals(empty().put(0, 1).put(32, 2).remove(32).hashCode(), empty().put(0, 1).hashCode());
     }
 
+    @SuppressWarnings("UnnecessaryBoxing")
     @Test
     public void keys() {
         assertEquals(HashSet.empty(), HashMap.empty().keys());
@@ -303,6 +309,15 @@ public class HashMapTest {
                      of(tuple("foo", 1),
                         tuple("bar", 2),
                         tuple("baz", 3)).keys());
+        Integer first  = new Integer(1);
+        Integer second = new Integer(1);
+        assertThat(of(EquivalenceRelation.referenceEquals(),
+                      HashingAlgorithm.identityHashCode(),
+                      tuple(first, "a"),
+                      tuple(second, "b")).keys(),
+                   EquivalenceRelationMatcher
+                           .equivalentTo(HashSet.of(referenceEquals(), identityHashCode(), first, second),
+                                         HashSet.EquivalenceRelations.sameElements()));
     }
 
     @Test

@@ -119,9 +119,9 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     private final HAMT<K, V>             hamt;
 
     private HashMap(EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg, HAMT<K, V> hamt) {
-        this.keyEqRel = keyEqRel;
+        this.keyEqRel   = keyEqRel;
         this.keyHashAlg = keyHashAlg;
-        this.hamt = hamt;
+        this.hamt       = hamt;
     }
 
     /**
@@ -186,7 +186,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public HashSet<K> keys() {
-        return foldLeft((keys, kv) -> keys.add(kv._1()), HashSet.empty(), this);
+        return foldLeft((keys, kv) -> keys.add(kv._1()), HashSet.empty(keyEqRel, keyHashAlg), this);
     }
 
     /**

@@ -1,16 +1,13 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Eq.eq;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GTE.gte;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 import static com.jnape.palatable.lambda.semigroup.builtin.Max.max;
@@ -222,20 +219,12 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
      * @return the merged {@link MultiSet}
      */
     default MultiSet<A> merge(Semigroup<Natural> semigroup, MultiSet<A> other) {
-        return foldLeft(curried(ms -> into((a, k_) -> {
-                            Natural k = ms.get(a);
-                            return semigroup.apply(k, k_)
-                                    .match(__ -> ms.removeAll(a),
-                                           nzk -> eq(nzk, k)
-                                                   ? ms
-                                                   : lt(nzk, k)
-                                                   ? k.minus(nzk).flatMap(CoProduct2::projectB)
-                                                   .match(constantly(ms), diff -> ms.add(a, diff))
-                                                   : nzk.minus(k).flatMap(CoProduct2::projectB)
-                                                   .match(constantly(ms), diff -> ms.remove(a, diff)));
-                        })),
+        return foldLeft((acc, a) -> semigroup
+                                .apply(get(a), other.get(a))
+                                .match(__ -> acc.removeAll(a),
+                                       nz -> acc.removeAll(a).add(a, nz)),
                         this,
-                        other);
+                        other.unique().union(this.unique()));
     }
 
     /**
@@ -247,15 +236,15 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
 
         /**
          * An {@link EquivalenceRelation} between two {@link MultiSet}s that holds if, and only if, both
-         * {@link MultiSet MultiSets} have the same elements. <code>O(n)</code>.
+         * {@link MultiSet MultiSets} have the same elements with the same multiplicity. <code>O(n)</code>.
          *
          * @param <A> the element type
          * @param <S> the {@link MultiSet} subtype of the arguments
          * @return the {@link EquivalenceRelation}
          */
-        public static <A, S extends MultiSet<A>> EquivalenceRelation<S> sameElements() {
-            EquivalenceRelation<S> sameMembership = (xs, ys) -> and().foldMap(into(ys::contains), xs);
-            return Sizable.EquivalenceRelations.<S>sameSizes().and(sameMembership);
+        public static <A, S extends MultiSet<A>> EquivalenceRelation<S> sameElementsSameMultiplicity() {
+            EquivalenceRelation<S> sameMembershipMultiplicity = (xs, ys) -> and().foldMap(into(ys::contains), xs);
+            return Sizable.EquivalenceRelations.<S>sameSizes().and(sameMembershipMultiplicity);
         }
     }
 }

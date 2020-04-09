@@ -83,10 +83,14 @@ public class MultiSetTest {
             assertEquals(one(), union.get("c"));
             assertEquals(known(abs(4)), union.sizeInfo());
 
-            assertThat(first.union(first), equivalentTo(first, MultiSet.EquivalenceRelations.sameElements()));
-            assertThat(first.union(empty()), equivalentTo(first, MultiSet.EquivalenceRelations.sameElements()));
-            assertThat(second.union(second), equivalentTo(second, MultiSet.EquivalenceRelations.sameElements()));
-            assertThat(second.union(empty()), equivalentTo(second, MultiSet.EquivalenceRelations.sameElements()));
+            assertThat(first.union(first),
+                       equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(first.union(empty()),
+                       equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(second.union(second),
+                       equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(second.union(empty()),
+                       equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
 
         @Test
@@ -102,12 +106,14 @@ public class MultiSetTest {
             assertEquals(one(), union.get("c"));
             assertEquals(known(abs(3)), union.sizeInfo());
 
-            assertThat(first.intersection(first), equivalentTo(first, MultiSet.EquivalenceRelations.sameElements()));
+            assertThat(first.intersection(first),
+                       equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(first.intersection(empty()),
-                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElements()));
-            assertThat(second.intersection(second), equivalentTo(second, MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(second.intersection(second),
+                       equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(second.intersection(empty()),
-                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
 
         @Test
@@ -133,13 +139,16 @@ public class MultiSetTest {
         public void symmetricDifference() {
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b", "c"))
                                .symmetricDifference(HashMultiSet.of("b")),
-                       equivalentTo(HashMultiSet.of("a", "c"), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(HashMultiSet.of("a", "c"),
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a", "a"))
                                .symmetricDifference(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.of("a", "a"), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(HashMultiSet.of("a", "a"),
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a"))
                                .symmetricDifference(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.empty(), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(HashMultiSet.empty(),
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
     }
 
@@ -148,11 +157,14 @@ public class MultiSetTest {
         @Test
         public void sameElements() {
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.empty()),
-                       equivalentTo(HashMultiSet.empty(), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(HashMultiSet.empty(),
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.of("a"), MultiSet.EquivalenceRelations.sameElements()));
+                       equivalentTo(HashMultiSet.of("a"),
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a")),
-                       not(equivalentTo(HashMultiSet.of("a"), MultiSet.EquivalenceRelations.sameElements())));
+                       not(equivalentTo(HashMultiSet.of("a"),
+                                        MultiSet.EquivalenceRelations.sameElementsSameMultiplicity())));
             assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of(cmpEqBy(String::length)::apply,
                                                                        fn1(String::length)
                                                                                .fmap(integer -> Integer
@@ -160,7 +172,7 @@ public class MultiSetTest {
                                                                                                integer))::apply,
                                                                        "a", "a")),
                        equivalentTo(HashMultiSet.of("b", "b"),
-                                    MultiSet.EquivalenceRelations.sameElements()));
+                                    MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
     }
 

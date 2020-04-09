@@ -1,13 +1,16 @@
 package com.jnape.palatable.shoki.api;
 
+import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.Eq.eq;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GTE.gte;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
+import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 import static com.jnape.palatable.lambda.semigroup.builtin.Max.max;
@@ -175,13 +178,13 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     }
 
     /**
-     * The union of two {@link MultiSet MultiSets}
+     * The intersection of two {@link MultiSet MultiSets}
      * <code>xs</code> and <code>ys</code> is the {@link MultiSet} of those elements present in both <code>xs</code>
      * and <code>ys</code> with the occurrences of whichever one had less elements. This is equivalent to
      * {@link MultiSet#merge} partially applied with {@link com.jnape.palatable.lambda.semigroup.builtin.Min#min}.
      *
      * @param other the {@link MultiSet} to intersect with this {@link MultiSet}
-     * @return the union {@link MultiSet}
+     * @return the intersected {@link MultiSet}
      * @see MultiSet#merge
      */
     default MultiSet<A> intersection(MultiSet<A> other) {
@@ -195,7 +198,7 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
      * other.
      *
      * @param other the {@link MultiSet} to symmetrically subtract from this {@link MultiSet}
-     * @return the union {@link MultiSet}
+     * @return the {@link MultiSet} containing the symmetric difference
      * @see MultiSet#merge
      */
     default MultiSet<A> symmetricDifference(MultiSet<A> other) {
@@ -219,10 +222,20 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
      * @return the merged {@link MultiSet}
      */
     default MultiSet<A> merge(Semigroup<Natural> semigroup, MultiSet<A> other) {
-        return foldLeft((acc, a) -> semigroup
-                                .apply(get(a), other.get(a)).match(constantly(acc), result -> acc.add(a, result)),
-                        this.difference(this), // Empty but the correct impl.
-                        unique().union(other.unique()));
+        return foldLeft(curried(ms -> into((a, k_) -> {
+                            Natural k = ms.get(a);
+                            return semigroup.apply(k, k_)
+                                    .match(__ -> ms.removeAll(a),
+                                           nzk -> eq(nzk, k)
+                                                   ? ms
+                                                   : lt(nzk, k)
+                                                   ? k.minus(nzk).flatMap(CoProduct2::projectB)
+                                                   .match(constantly(ms), diff -> ms.add(a, diff))
+                                                   : nzk.minus(k).flatMap(CoProduct2::projectB)
+                                                   .match(constantly(ms), diff -> ms.remove(a, diff)));
+                        })),
+                        this,
+                        other);
     }
 
     /**

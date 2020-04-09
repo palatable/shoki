@@ -1,9 +1,12 @@
 package com.jnape.palatable.shoki.api;
 
+import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 
+import static com.jnape.palatable.lambda.adt.Maybe.just;
+import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GTE.gte;
@@ -219,10 +222,20 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
      * @return the merged {@link MultiSet}
      */
     default MultiSet<A> merge(Semigroup<Natural> semigroup, MultiSet<A> other) {
-        return foldLeft((acc, a) -> semigroup
-                                .apply(get(a), other.get(a))
-                                .match(__ -> acc.removeAll(a),
-                                       nz -> acc.removeAll(a).add(a, nz)),
+        return foldLeft((acc, a) -> {
+                            Natural ourAs = get(a);
+                            return semigroup
+                                    .apply(ourAs, other.get(a))
+                                    .match(__ -> acc.removeAll(a),
+                                           nz -> nz.minus(ourAs)
+                                                   .flatMap(n -> n.match(constantly(nothing()),
+                                                                         diff -> just(acc.add(a, diff))))
+                                                   .fmap(Maybe::just)
+                                                   .orElseGet(() -> ourAs.minus(nz)
+                                                           .flatMap(n -> n.match(constantly(nothing()),
+                                                                                 diff -> just(acc.remove(a, diff)))))
+                                                   .orElse(acc));
+                        },
                         this,
                         other.unique().union(this.unique()));
     }

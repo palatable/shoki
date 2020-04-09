@@ -4,6 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
+import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo;
 
 /**
@@ -66,6 +67,14 @@ public final class DefaultMethodsMultiSet<A> implements MultiSet<A> {
     @Override
     public boolean contains(A a) {
         return delegate.contains(a);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Set<Natural, A> unique() {
+        return delegate.unique();
     }
 
     /**

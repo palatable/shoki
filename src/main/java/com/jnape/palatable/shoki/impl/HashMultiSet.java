@@ -9,6 +9,7 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
+import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 import java.util.Objects;
@@ -54,11 +55,21 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     /**
      * {@inheritDoc}
+     * <code>O(n)</code>
+     */
+    @Override
+    public Set<Natural, A> unique() {
+        return multiplicityMap.keys();
+    }
+
+    /**
+     * {@inheritDoc}
      * Amortized <code>O(1)</code>.
      */
     @Override
     public HashMultiSet<A> add(A a, NonZero k) {
-        return new HashMultiSet<>(multiplicityMap.put(a, multiplicityMap.get(a).fmap(k::plus).orElse(k)));
+        return new HashMultiSet<>(multiplicityMap.put(a, multiplicityMap.get(a).fmap(k::plus).orElse(k))
+        );
     }
 
     /**
@@ -70,7 +81,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
         return multiplicityMap.get(a)
                 .fmap(n -> new HashMultiSet<>(n.minus(k).orElse(zero())
                                                       .match(zero -> multiplicityMap.remove(a),
-                                                             difference -> multiplicityMap.put(a, difference))))
+                                                             difference -> multiplicityMap.put(a, difference))
+                ))
                 .orElse(this);
     }
 
@@ -139,15 +151,6 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     /**
      * {@inheritDoc}
-     * Amortized <code>O(1)</code>.
-     */
-    @Override
-    public boolean contains(A a) {
-        return multiplicityMap.contains(a);
-    }
-
-    /**
-     * {@inheritDoc}
      * <code>O(1)</code>.
      */
     @Override
@@ -200,7 +203,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      */
     public static <A> HashMultiSet<A> empty(EquivalenceRelation<A> equivalenceRelation,
                                             HashingAlgorithm<A> hashingAlgorithm) {
-        return new HashMultiSet<>(HashMap.empty(equivalenceRelation, hashingAlgorithm));
+        return new HashMultiSet<>(HashMap.empty(equivalenceRelation, hashingAlgorithm)
+        );
     }
 
     /**

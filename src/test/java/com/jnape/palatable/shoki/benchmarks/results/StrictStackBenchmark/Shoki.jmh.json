@@ -1,0 +1,244 @@
+[
+    {
+        "jmhVersion" : "1.19",
+        "benchmark" : "com.jnape.palatable.shoki.benchmarks.StrictStackBenchmark.Shoki.cons",
+        "mode" : "thrpt",
+        "threads" : 4,
+        "forks" : 5,
+        "jvm" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/bin/java",
+        "jvmArgs" : [
+            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=57546:/Applications/IntelliJ IDEA.app/Contents/bin",
+            "-Dfile.encoding=UTF-8"
+        ],
+        "jdkVersion" : "1.8.0_152",
+        "vmVersion" : "25.152-b16",
+        "warmupIterations" : 5,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 43.770498868849025,
+            "scoreError" : 8.83369559399257,
+            "scoreConfidence" : [
+                34.93680327485646,
+                52.60419446284159
+            ],
+            "scorePercentiles" : {
+                "0.0" : 23.214468524581893,
+                "50.0" : 45.44609665085919,
+                "90.0" : 58.39453146586805,
+                "95.0" : 59.01618905869715,
+                "99.0" : 59.203450128037716,
+                "99.9" : 59.203450128037716,
+                "99.99" : 59.203450128037716,
+                "99.999" : 59.203450128037716,
+                "99.9999" : 59.203450128037716,
+                "100.0" : 59.203450128037716
+            },
+            "scoreUnit" : "ops/us",
+            "rawData" : [
+                [
+                    25.265069913092937,
+                    25.23577952243716,
+                    25.500268485676948,
+                    25.74964102942941,
+                    23.214468524581893
+                ],
+                [
+                    45.44609665085919,
+                    46.61416168002324,
+                    34.92128278657765,
+                    49.925757125602395,
+                    57.51397717148776
+                ],
+                [
+                    41.79540917306096,
+                    41.182222544511674,
+                    40.01716493765736,
+                    41.13308784445353,
+                    40.031678456089764
+                ],
+                [
+                    48.833213222855115,
+                    58.57924656356917,
+                    59.203450128037716,
+                    55.191058049945184,
+                    56.771248456515266
+                ],
+                [
+                    39.354745334022425,
+                    54.52690238008537,
+                    51.31558870879546,
+                    58.271388067400636,
+                    48.66956496445762
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.19",
+        "benchmark" : "com.jnape.palatable.shoki.benchmarks.StrictStackBenchmark.Shoki.head",
+        "mode" : "thrpt",
+        "threads" : 4,
+        "forks" : 5,
+        "jvm" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/bin/java",
+        "jvmArgs" : [
+            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=57546:/Applications/IntelliJ IDEA.app/Contents/bin",
+            "-Dfile.encoding=UTF-8"
+        ],
+        "jdkVersion" : "1.8.0_152",
+        "vmVersion" : "25.152-b16",
+        "warmupIterations" : 5,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 317.8990348019715,
+            "scoreError" : 36.13401796796536,
+            "scoreConfidence" : [
+                281.76501683400613,
+                354.03305276993683
+            ],
+            "scorePercentiles" : {
+                "0.0" : 228.05723576960278,
+                "50.0" : 327.1324600984863,
+                "90.0" : 381.79953729593666,
+                "95.0" : 389.5107306066851,
+                "99.0" : 392.57108167974,
+                "99.9" : 392.57108167974,
+                "99.99" : 392.57108167974,
+                "99.999" : 392.57108167974,
+                "99.9999" : 392.57108167974,
+                "100.0" : 392.57108167974
+            },
+            "scoreUnit" : "ops/us",
+            "rawData" : [
+                [
+                    277.9998366522856,
+                    353.6674062730848,
+                    337.40286711459385,
+                    353.47501749118544,
+                    382.36991143622373
+                ],
+                [
+                    258.5059332638265,
+                    327.1324600984863,
+                    329.72418807530084,
+                    376.13573569514347,
+                    381.4192878690786
+                ],
+                [
+                    281.24971896282324,
+                    296.6284595651579,
+                    242.24394028871495,
+                    312.4444409799332,
+                    268.1195056081972
+                ],
+                [
+                    329.60568539571216,
+                    360.52391829162775,
+                    263.960262380037,
+                    344.54584015778346,
+                    314.14208764330834
+                ],
+                [
+                    374.707842500206,
+                    261.79045340688555,
+                    299.05275345034636,
+                    228.05723576960278,
+                    392.57108167974
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    },
+    {
+        "jmhVersion" : "1.19",
+        "benchmark" : "com.jnape.palatable.shoki.benchmarks.StrictStackBenchmark.Shoki.tail",
+        "mode" : "thrpt",
+        "threads" : 4,
+        "forks" : 5,
+        "jvm" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/bin/java",
+        "jvmArgs" : [
+            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=57546:/Applications/IntelliJ IDEA.app/Contents/bin",
+            "-Dfile.encoding=UTF-8"
+        ],
+        "jdkVersion" : "1.8.0_152",
+        "vmVersion" : "25.152-b16",
+        "warmupIterations" : 5,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 89.84756331933544,
+            "scoreError" : 8.49465885840159,
+            "scoreConfidence" : [
+                81.35290446093384,
+                98.34222217773703
+            ],
+            "scorePercentiles" : {
+                "0.0" : 57.56755872419617,
+                "50.0" : 91.28229281565979,
+                "90.0" : 104.93033648616549,
+                "95.0" : 106.01531637320606,
+                "99.0" : 106.3063934637611,
+                "99.9" : 106.3063934637611,
+                "99.99" : 106.3063934637611,
+                "99.999" : 106.3063934637611,
+                "99.9999" : 106.3063934637611,
+                "100.0" : 106.3063934637611
+            },
+            "scoreUnit" : "ops/us",
+            "rawData" : [
+                [
+                    92.26962139262272,
+                    93.24885669890082,
+                    86.92002773716615,
+                    86.41640293036446,
+                    106.3063934637611
+                ],
+                [
+                    57.56755872419617,
+                    97.94914180665516,
+                    84.23717416930681,
+                    79.91293860276927,
+                    79.16953384646582
+                ],
+                [
+                    75.09238718206515,
+                    76.18385807622357,
+                    91.28229281565979,
+                    92.22379710002872,
+                    81.62843050384615
+                ],
+                [
+                    97.5370223943314,
+                    101.30043264134203,
+                    105.33613649524433,
+                    104.3305032468833,
+                    104.65980314677958
+                ],
+                [
+                    88.88034905226182,
+                    84.64318275412029,
+                    94.35509415153416,
+                    95.95988801335268,
+                    88.77825603750452
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+

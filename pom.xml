@@ -62,17 +62,17 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.jnape.palatable</groupId>
+            <artifactId>lambda</artifactId>
+            <version>${lambda.version}</version>
+        </dependency>
+        <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>com.jnape.palatable</groupId>
-            <artifactId>lambda</artifactId>
-            <version>${lambda.version}</version>
         </dependency>
         <dependency>
             <groupId>com.jnape.palatable</groupId>

@@ -1,8 +1,12 @@
 package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+<<<<<<< HEAD:src/main/java/com/jnape/palatable/shoki/api/Sequence.java
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
+=======
+import com.jnape.palatable.lambda.functor.Functor;
+>>>>>>> 3d1cb4de2b036dbf895d6a04aca7abfb826c75b1:src/main/java/com/jnape/palatable/shoki/Sequence.java
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -16,7 +20,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
  * @see StrictStack
  * @see StrictQueue
  */
-public interface Sequence<A> extends Iterable<A> {
+public interface Sequence<A> extends Iterable<A>, Functor<A, Sequence<?>> {
 
     /**
      * If this {@link Sequence} is not empty, return the next element wrapped in {@link Maybe#just}, according to the

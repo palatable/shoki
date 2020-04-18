@@ -13,9 +13,11 @@ import java.util.Objects;
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Size.size;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
@@ -155,14 +157,13 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     private static final class Head<A> extends StrictStack<A> {
         private final A              head;
         private final StrictStack<A> tail;
-        private final Natural        size;
-        private final int            hashCode;
+
+        private volatile Natural size;
+        private volatile Integer hashCode;
 
         private Head(A head, StrictStack<A> tail) {
             this.head = head;
             this.tail = tail;
-            size = tail.sizeInfo().getSize().inc();
-            hashCode = tail.hashCode() * 31 + Objects.hash(head);
         }
 
         @Override
@@ -182,11 +183,29 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
 
         @Override
         public Known<Natural> sizeInfo() {
+            Natural size = this.size;
+            if (size == null) {
+                synchronized (this) {
+                    size = this.size;
+                    if (size == null) {
+                        this.size = size = abs(size(this));
+                    }
+                }
+            }
             return known(size);
         }
 
         @Override
         public int hashCode() {
+            Integer hashCode = this.hashCode;
+            if (hashCode == null) {
+                synchronized (this) {
+                    hashCode = this.hashCode;
+                    if (hashCode == null) {
+                        this.hashCode = hashCode = foldLeft((hc, a) -> hc * 31 + Objects.hashCode(a), 0, this);
+                    }
+                }
+            }
             return hashCode;
         }
     }

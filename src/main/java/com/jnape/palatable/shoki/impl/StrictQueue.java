@@ -186,14 +186,13 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     private static final class NonEmpty<A> extends StrictQueue<A> {
         private final StrictStack<A> outgoing;
         private final StrictStack<A> incoming;
-        private final Natural        size;
-        private final int            hashCode;
+
+        private volatile Natural size;
+        private volatile Integer hashCode;
 
         private NonEmpty(StrictStack<A> outgoing, StrictStack<A> incoming) {
             this.outgoing = outgoing;
             this.incoming = incoming;
-            size = outgoing.sizeInfo().getSize().plus(incoming.sizeInfo().getSize());
-            hashCode = 31 * outgoing.hashCode() + incoming.hashCode();
         }
 
         @Override
@@ -231,6 +230,15 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
 
         @Override
         public Known<Natural> sizeInfo() {
+            Natural size = this.size;
+            if (size == null) {
+                synchronized (this) {
+                    size = this.size;
+                    if (size == null) {
+                        this.size = size = outgoing.sizeInfo().getSize().plus(incoming.sizeInfo().getSize());
+                    }
+                }
+            }
             return known(size);
         }
 
@@ -241,6 +249,15 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
 
         @Override
         public int hashCode() {
+            Integer hashCode = this.hashCode;
+            if (hashCode == null) {
+                synchronized (this) {
+                    hashCode = this.hashCode;
+                    if (hashCode == null) {
+                        this.hashCode = hashCode = 31 * outgoing.hashCode() + incoming.hashCode();
+                    }
+                }
+            }
             return hashCode;
         }
     }

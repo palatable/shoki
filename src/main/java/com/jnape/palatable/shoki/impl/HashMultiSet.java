@@ -173,7 +173,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      */
     @Override
     public HashMultiSet<A> union(MultiSet<A> other) {
-        return (HashMultiSet<A>) MultiSet.super.difference(other);
+        return (HashMultiSet<A>) MultiSet.super.union(other);
     }
 
     /**

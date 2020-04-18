@@ -4,10 +4,12 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Empty;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
+import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
+import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
 import java.util.Iterator;
@@ -229,6 +231,24 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     /**
      * {@inheritDoc}
+     * Amortized <code>O(o)</code>.
+     */
+    @Override
+    public HashMap<K, V> merge(Map<Natural, K, V> other, Semigroup<V> semigroup) {
+        return (HashMap<K, V>) Map.super.merge(other, semigroup);
+    }
+
+    /**
+     * {@inheritDoc}
+     * Amortized <code>O(o)</code>.
+     */
+    @Override
+    public HashMap<K, V> removeAll(Set<Natural, K> keys) {
+        return (HashMap<K, V>) Map.super.removeAll(keys);
+    }
+
+    /**
+     * {@inheritDoc}
      * <code>O(n)</code>.
      */
     @Override
@@ -236,6 +256,9 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
         return known(abs(size(this)));
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<Tuple2<K, V>> iterator() {
         return hamt.iterator();

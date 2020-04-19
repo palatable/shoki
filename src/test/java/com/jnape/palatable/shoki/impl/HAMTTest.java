@@ -15,8 +15,7 @@ import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
-import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
-import static com.jnape.palatable.shoki.impl.Bitmap32.empty;
+import static com.jnape.palatable.shoki.impl.Bitmap32.populateAtIndex;
 import static com.jnape.palatable.shoki.impl.HAMT.MAX_LEVEL;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static org.junit.Assert.assertEquals;
@@ -49,32 +48,31 @@ public class HAMTTest {
 
         @Test
         public void get() {
-            assertEquals(just(1), entry.get("foo", Bitmap32.empty(), objectEquals(), -1));
-            assertEquals(nothing(), entry.get("bar", Bitmap32.empty(), objectEquals(), -1));
-            assertEquals(nothing(), entry.get("foo", Bitmap32.empty(), (x, y) -> false, -1));
+            assertEquals(just(1), entry.get("foo", 0, objectEquals(), -1));
+            assertEquals(nothing(), entry.get("bar", 0, objectEquals(), -1));
+            assertEquals(nothing(), entry.get("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
         public void remove() {
-            assertEquals(nothing(), entry.remove("foo", Bitmap32.empty(), objectEquals(), -1));
-            assertEquals(just(entry), entry.remove("bar", Bitmap32.empty(), objectEquals(), -1));
-            assertEquals(just(entry), entry.remove("foo", Bitmap32.empty(), (x, y) -> false, -1));
+            assertEquals(nothing(), entry.remove("foo", 0, objectEquals(), -1));
+            assertEquals(just(entry), entry.remove("bar", 0, objectEquals(), -1));
+            assertEquals(just(entry), entry.remove("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
         public void put() {
             assertEquals(new Entry<>("foo", 2),
-                         entry.put("foo", 2, bitmap32("foo".hashCode()), objectEquals(), objectHashCode(), 1));
-            assertEquals(new Node<>(empty()
-                                            .populateAtIndex("foo".hashCode() & 31)
-                                            .populateAtIndex("bar".hashCode() & 31),
+                         entry.put("foo", 2, "foo".hashCode(), objectEquals(), objectHashCode(), 1));
+            assertEquals(new Node<>(populateAtIndex(populateAtIndex(0, "foo".hashCode() & 31),
+                                                    "bar".hashCode() & 31),
                                     new Object[]{new Entry<>("foo", 1), new Entry<>("bar", 2)}),
-                         entry.put("bar", 2, bitmap32("bar".hashCode()), objectEquals(), objectHashCode(), 1));
-            assertEquals(new Node<>(bitmap32(1),
-                                    new Object[]{new Collision<>(bitmap32("foo".hashCode()),
+                         entry.put("bar", 2, "bar".hashCode(), objectEquals(), objectHashCode(), 1));
+            assertEquals(new Node<>(1,
+                                    new Object[]{new Collision<>("foo".hashCode(),
                                                                  StrictStack.of(new Entry<>("foo", 1),
                                                                                 new Entry<>("bar", 2)))}),
-                         entry.put("bar", 2, empty(), objectEquals(), objectHashCode(), MAX_LEVEL));
+                         entry.put("bar", 2, 0, objectEquals(), objectHashCode(), MAX_LEVEL));
         }
     }
 
@@ -84,9 +82,9 @@ public class HAMTTest {
 
         @Before
         public void setUp() {
-            collision = new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("baz", 3),
-                                                                    new Entry<>("bar", 2),
-                                                                    new Entry<>("foo", 1)));
+            collision = new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
+                                                          new Entry<>("bar", 2),
+                                                          new Entry<>("foo", 1)));
         }
 
         @Test
@@ -99,79 +97,79 @@ public class HAMTTest {
 
         @Test
         public void get() {
-            assertEquals(just(1), collision.get("foo", bitmap32(0), objectEquals(), -1));
-            assertEquals(just(2), collision.get("bar", bitmap32(0), objectEquals(), -1));
-            assertEquals(just(3), collision.get("baz", bitmap32(0), objectEquals(), -1));
-            assertEquals(nothing(), collision.get("foo", bitmap32(1), objectEquals(), -1));
-            assertEquals(nothing(), collision.get("foo", bitmap32(0), (x, y) -> false, -1));
+            assertEquals(just(1), collision.get("foo", 0, objectEquals(), -1));
+            assertEquals(just(2), collision.get("bar", 0, objectEquals(), -1));
+            assertEquals(just(3), collision.get("baz", 0, objectEquals(), -1));
+            assertEquals(nothing(), collision.get("foo", 1, objectEquals(), -1));
+            assertEquals(nothing(), collision.get("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
         public void put() {
-            assertEquals(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", -1),
-                                                                     new Entry<>("bar", 2),
-                                                                     new Entry<>("baz", 3))),
-                         collision.put("foo", -1, bitmap32(0), objectEquals(), objectHashCode(), -1));
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", -1),
+                                                           new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
+                         collision.put("foo", -1, 0, objectEquals(), objectHashCode(), -1));
 
-            assertEquals(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("qux", 0),
-                                                                     new Entry<>("foo", 1),
-                                                                     new Entry<>("bar", 2),
-                                                                     new Entry<>("baz", 3))),
-                         collision.put("qux", 0, bitmap32(0), objectEquals(), objectHashCode(), -1));
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("qux", 0),
+                                                           new Entry<>("foo", 1),
+                                                           new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
+                         collision.put("qux", 0, 0, objectEquals(), objectHashCode(), -1));
 
-            assertEquals(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", 0),
-                                                                     new Entry<>("foo", 1),
-                                                                     new Entry<>("bar", 2),
-                                                                     new Entry<>("baz", 3))),
-                         collision.put("foo", 0, bitmap32(0), (x, y) -> false, objectHashCode(), -1));
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 0),
+                                                           new Entry<>("foo", 1),
+                                                           new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
+                         collision.put("foo", 0, 0, (x, y) -> false, objectHashCode(), -1));
         }
 
         @Test
         public void remove() {
-            assertEquals(just(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("bar", 2),
-                                                                          new Entry<>("baz", 3)))),
-                         collision.remove("foo", bitmap32(0), objectEquals(), 1));
-            assertEquals(just(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", 1),
-                                                                          new Entry<>("baz", 3)))),
-                         collision.remove("bar", bitmap32(0), objectEquals(), 1));
-            assertEquals(just(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", 1),
-                                                                          new Entry<>("bar", 2)))),
-                         collision.remove("baz", bitmap32(0), objectEquals(), 1));
+            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("bar", 2),
+                                                                new Entry<>("baz", 3)))),
+                         collision.remove("foo", 0, objectEquals(), 1));
+            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                                new Entry<>("baz", 3)))),
+                         collision.remove("bar", 0, objectEquals(), 1));
+            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                                new Entry<>("bar", 2)))),
+                         collision.remove("baz", 0, objectEquals(), 1));
 
-            assertEquals(just(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", 1),
-                                                                          new Entry<>("bar", 2),
-                                                                          new Entry<>("baz", 3)))),
-                         collision.remove("missing", bitmap32(0), objectEquals(), 1));
+            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                                new Entry<>("bar", 2),
+                                                                new Entry<>("baz", 3)))),
+                         collision.remove("missing", 0, objectEquals(), 1));
 
-            assertEquals(just(new Collision<>(bitmap32(0), StrictStack.of(new Entry<>("foo", 1),
-                                                                          new Entry<>("bar", 2),
-                                                                          new Entry<>("baz", 3)))),
-                         collision.remove("foo", bitmap32(0), (x, y) -> false, 1));
+            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                                new Entry<>("bar", 2),
+                                                                new Entry<>("baz", 3)))),
+                         collision.remove("foo", 0, (x, y) -> false, 1));
 
-            assertEquals(just(collision), collision.remove("foo", bitmap32(-1), objectEquals(), 1));
-
-            assertEquals(just(new Entry<>("baz", 3)),
-                         collision
-                                 .remove("foo", bitmap32(0), objectEquals(), 1)
-                                 .flatMap(c -> c.remove("bar", bitmap32(0), objectEquals(), 1)));
+            assertEquals(just(collision), collision.remove("foo", -1, objectEquals(), 1));
 
             assertEquals(just(new Entry<>("baz", 3)),
                          collision
-                                 .remove("foo", bitmap32(0), objectEquals(), 1)
-                                 .flatMap(c -> c.remove("bar", bitmap32(0), objectEquals(), 1)));
+                                 .remove("foo", 0, objectEquals(), 1)
+                                 .flatMap(c -> c.remove("bar", 0, objectEquals(), 1)));
+
+            assertEquals(just(new Entry<>("baz", 3)),
+                         collision
+                                 .remove("foo", 0, objectEquals(), 1)
+                                 .flatMap(c -> c.remove("bar", 0, objectEquals(), 1)));
         }
 
         @Test
         public void equalsAndHashCode() {
-            assertEquals(new Collision<>(empty(), StrictStack.empty()), new Collision<>(empty(), StrictStack.empty()));
-            assertNotEquals(new Collision<>(empty(), StrictStack.empty()),
-                            new Collision<>(bitmap32(1), StrictStack.empty()));
-            assertEquals(new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))),
-                         new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))));
-            assertNotEquals(new Collision<>(empty(), StrictStack.empty()),
-                            new Collision<>(empty(), StrictStack.of(new Entry<>("foo", 1))));
+            assertEquals(new Collision<>(0, StrictStack.empty()), new Collision<>(0, StrictStack.empty()));
+            assertNotEquals(new Collision<>(0, StrictStack.empty()),
+                            new Collision<>(1, StrictStack.empty()));
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))),
+                         new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))));
+            assertNotEquals(new Collision<>(0, StrictStack.empty()),
+                            new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))));
 
-            assertNotEquals(new Collision<>(empty(), StrictStack.empty()), new Object());
+            assertNotEquals(new Collision<>(0, StrictStack.empty()), new Object());
         }
     }
 
@@ -184,11 +182,11 @@ public class HAMTTest {
 
         @Test
         public void iteratesAllEntries() {
-            assertThat(new Node<>(empty(), new Object[]{
+            assertThat(new Node<>(0, new Object[]{
                                new Entry<>("foo", 1),
-                               new Node<>(empty(), new Object[]{new Entry<>("bar", 2)}),
-                               new Collision<>(empty(), StrictStack.of(new Entry<>("quux", 4),
-                                                                       new Entry<>("baz", 3)))}),
+                               new Node<>(0, new Object[]{new Entry<>("bar", 2)}),
+                               new Collision<>(0, StrictStack.of(new Entry<>("quux", 4),
+                                                                 new Entry<>("baz", 3)))}),
                        iterates(tuple("foo", 1),
                                 tuple("bar", 2),
                                 tuple("baz", 3),
@@ -202,55 +200,55 @@ public class HAMTTest {
 
         @Test
         public void get() {
-            Node<Integer, String> node = new Node<Integer, String>(empty(), new Object[0])
-                    .put(foo, "foo", bitmap32(foo), referenceEquals(), objectHashCode(), 1)
-                    .put(bar, "bar", bitmap32(bar), referenceEquals(), objectHashCode(), 1)
-                    .put(baz, "baz", bitmap32(baz), referenceEquals(), objectHashCode(), 1)
-                    .put(quux, "quux", bitmap32(quux), referenceEquals(), objectHashCode(), 1);
+            Node<Integer, String> node = new Node<Integer, String>(0, new Object[0])
+                    .put(foo, "foo", foo, referenceEquals(), objectHashCode(), 1)
+                    .put(bar, "bar", bar, referenceEquals(), objectHashCode(), 1)
+                    .put(baz, "baz", baz, referenceEquals(), objectHashCode(), 1)
+                    .put(quux, "quux", quux, referenceEquals(), objectHashCode(), 1);
 
-            assertEquals(just("foo"), node.get(foo, bitmap32(foo), referenceEquals(), 1));
-            assertEquals(just("bar"), node.get(bar, bitmap32(bar), referenceEquals(), 1));
-            assertEquals(just("baz"), node.get(baz, bitmap32(baz), referenceEquals(), 1));
-            assertEquals(just("quux"), node.get(quux, bitmap32(quux), referenceEquals(), 1));
+            assertEquals(just("foo"), node.get(foo, foo, referenceEquals(), 1));
+            assertEquals(just("bar"), node.get(bar, bar, referenceEquals(), 1));
+            assertEquals(just("baz"), node.get(baz, baz, referenceEquals(), 1));
+            assertEquals(just("quux"), node.get(quux, quux, referenceEquals(), 1));
 
-            assertEquals(nothing(), node.get(-1, bitmap32(foo), referenceEquals(), 1));
-            assertEquals(nothing(), node.get(foo, bitmap32(-1), referenceEquals(), 1));
+            assertEquals(nothing(), node.get(-1, foo, referenceEquals(), 1));
+            assertEquals(nothing(), node.get(foo, -1, referenceEquals(), 1));
         }
 
         @Test
         public void put() {
-            assertEquals(new Node<>(bitmap32(1), new Object[]{new Entry<>(foo, "foo")}),
-                         rootNode().put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1));
-            assertEquals(new Node<>(bitmap32(2), new Object[]{new Entry<>(bar, "bar")}),
-                         rootNode().put(bar, "bar", bitmap32(bar), objectEquals(), objectHashCode(), 1));
-            assertEquals(new Node<>(bitmap32(3), new Object[]{new Entry<>(foo, "foo"), new Entry<>(bar, "bar")}),
+            assertEquals(new Node<>(1, new Object[]{new Entry<>(foo, "foo")}),
+                         rootNode().put(foo, "foo", foo, objectEquals(), objectHashCode(), 1));
+            assertEquals(new Node<>(2, new Object[]{new Entry<>(bar, "bar")}),
+                         rootNode().put(bar, "bar", bar, objectEquals(), objectHashCode(), 1));
+            assertEquals(new Node<>(3, new Object[]{new Entry<>(foo, "foo"), new Entry<>(bar, "bar")}),
                          rootNode()
-                                 .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)
-                                 .put(bar, "bar", bitmap32(bar), objectEquals(), objectHashCode(), 1));
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
+                                 .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1));
 
-            assertEquals(new Node<>(bitmap32(3), new Object[]{
+            assertEquals(new Node<>(3, new Object[]{
                                  new Entry<>(foo, "foo"),
-                                 new Node<>(bitmap32(3), new Object[]{
+                                 new Node<>(3, new Object[]{
                                          new Entry<>(bar, "bar"),
                                          new Entry<>(baz, "baz")
                                  })}),
                          rootNode()
-                                 .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)
-                                 .put(bar, "bar", bitmap32(bar), objectEquals(), objectHashCode(), 1)
-                                 .put(baz, "baz", bitmap32(baz), objectEquals(), objectHashCode(), 1));
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
+                                 .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1)
+                                 .put(baz, "baz", baz, objectEquals(), objectHashCode(), 1));
 
             assertEquals(
-                    new Node<>(bitmap32(3), new Object[]{
+                    new Node<>(3, new Object[]{
                             new Entry<>(foo, "foo"),
-                            new Node<>(bitmap32(3), new Object[]{
+                            new Node<>(3, new Object[]{
                                     new Entry<>(bar, "bar"),
-                                    new Node<>(bitmap32(0b00_00000_00000_00010_00000_00000_00000), new Object[]{
-                                            new Node<>(bitmap32(1), new Object[]{
-                                                    new Node<>(bitmap32(1), new Object[]{
-                                                            new Node<>(bitmap32(1), new Object[]{
-                                                                    new Node<>(bitmap32(1), new Object[]{
+                                    new Node<>(0b00_00000_00000_00010_00000_00000_00000, new Object[]{
+                                            new Node<>(1, new Object[]{
+                                                    new Node<>(1, new Object[]{
+                                                            new Node<>(1, new Object[]{
+                                                                    new Node<>(1, new Object[]{
                                                                             new Collision<>(
-                                                                                    bitmap32(0b10000_00001_00001),
+                                                                                    0b10000_00001_00001,
                                                                                     StrictStack.of(
                                                                                             new Entry<>(baz, "baz"),
                                                                                             new Entry<>(quux, "quux")))
@@ -261,42 +259,42 @@ public class HAMTTest {
                                     })
                             })}),
                     rootNode()
-                            .put(foo, "foo", bitmap32(foo), referenceEquals(), objectHashCode(), 1)
-                            .put(bar, "bar", bitmap32(bar), referenceEquals(), objectHashCode(), 1)
-                            .put(baz, "baz", bitmap32(baz), referenceEquals(), objectHashCode(), 1)
-                            .put(quux, "quux", bitmap32(quux), referenceEquals(), objectHashCode(), 1));
+                            .put(foo, "foo", foo, referenceEquals(), objectHashCode(), 1)
+                            .put(bar, "bar", bar, referenceEquals(), objectHashCode(), 1)
+                            .put(baz, "baz", baz, referenceEquals(), objectHashCode(), 1)
+                            .put(quux, "quux", quux, referenceEquals(), objectHashCode(), 1));
         }
 
         @Test
         public void remove() {
             assertEquals(just(Node.<Integer, String>rootNode()),
-                         Node.<Integer, String>rootNode().remove(-1, bitmap32(-1), objectEquals(), -1));
+                         Node.<Integer, String>rootNode().remove(-1, -1, objectEquals(), -1));
 
             assertEquals(just(Node.<Integer, String>rootNode()),
                          Node.<Integer, String>rootNode()
-                                 .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)
-                                 .remove(foo, bitmap32(foo), objectEquals(), 1));
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
+                                 .remove(foo, foo, objectEquals(), 1));
 
             assertEquals(just(Node.<Integer, String>rootNode()
-                                      .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)),
+                                      .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)),
                          Node.<Integer, String>rootNode()
-                                 .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)
-                                 .remove(foo, bitmap32(-1), objectEquals(), 1));
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
+                                 .remove(foo, -1, objectEquals(), 1));
 
             assertEquals(just(Node.<Integer, String>rootNode()
-                                      .put(bar, "bar", bitmap32(bar), objectEquals(), objectHashCode(), 1)),
+                                      .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1)),
                          Node.<Integer, String>rootNode()
-                                 .put(foo, "foo", bitmap32(foo), objectEquals(), objectHashCode(), 1)
-                                 .put(bar, "bar", bitmap32(bar), objectEquals(), objectHashCode(), 1)
-                                 .remove(foo, bitmap32(foo), objectEquals(), 1));
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
+                                 .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1)
+                                 .remove(foo, foo, objectEquals(), 1));
 
-            assertEquals(just(new Node<>(bitmap32(2), new Object[]{
-                                 new Node<>(bitmap32(2), new Object[]{
-                                         new Node<>(bitmap32(0b10_00000_00000_00000), new Object[]{
-                                                 new Node<>(bitmap32(1), new Object[]{
-                                                         new Node<>(bitmap32(1), new Object[]{
-                                                                 new Node<>(bitmap32(1), new Object[]{
-                                                                         new Node<>(bitmap32(1), new Object[]{
+            assertEquals(just(new Node<>(2, new Object[]{
+                                 new Node<>(2, new Object[]{
+                                         new Node<>(0b10_00000_00000_00000, new Object[]{
+                                                 new Node<>(1, new Object[]{
+                                                         new Node<>(1, new Object[]{
+                                                                 new Node<>(1, new Object[]{
+                                                                         new Node<>(1, new Object[]{
                                                                                  new Entry<>(baz, "baz")
                                                                          })
                                                                  })
@@ -306,9 +304,9 @@ public class HAMTTest {
                                  })
                          })),
                          Node.<Integer, String>rootNode()
-                                 .put(baz, "baz", bitmap32(baz), referenceEquals(), objectHashCode(), 1)
-                                 .put(quux, "quux", bitmap32(quux), referenceEquals(), objectHashCode(), 1)
-                                 .remove(quux, bitmap32(quux), referenceEquals(), 1));
+                                 .put(baz, "baz", baz, referenceEquals(), objectHashCode(), 1)
+                                 .put(quux, "quux", quux, referenceEquals(), objectHashCode(), 1)
+                                 .remove(quux, quux, referenceEquals(), 1));
         }
     }
 }

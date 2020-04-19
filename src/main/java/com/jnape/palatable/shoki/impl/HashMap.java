@@ -30,7 +30,6 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.sameEntries;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
-import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Arrays.asList;
@@ -137,7 +136,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public Maybe<V> get(K key) {
-        return hamt.get(key, bitmap32(keyHashAlg.apply(key)), keyEqRel, 1);
+        return hamt.get(key, keyHashAlg.apply(key), keyEqRel, 1);
     }
 
     /**
@@ -152,8 +151,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     @Override
     public HashMap<K, V> put(K key, V value) {
         return new HashMap<>(keyEqRel, keyHashAlg,
-                             hamt.put(key, value, bitmap32(keyHashAlg.apply(key)),
-                                      keyEqRel, keyHashAlg, 1));
+                             hamt.put(key, value, keyHashAlg.apply(key), keyEqRel, keyHashAlg, 1));
     }
 
     /**
@@ -168,8 +166,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     @Override
     public HashMap<K, V> remove(K key) {
         return new HashMap<>(keyEqRel, keyHashAlg,
-                             hamt.remove(key, bitmap32(keyHashAlg.apply(key)), keyEqRel, 1)
-                                     .orElse(HAMT.Node.rootNode()));
+                             hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 1).orElse(HAMT.Node.rootNode()));
     }
 
     /**

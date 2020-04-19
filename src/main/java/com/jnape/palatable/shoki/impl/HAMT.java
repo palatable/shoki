@@ -19,50 +19,55 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Find.find;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.Natural.one;
-import static com.jnape.palatable.shoki.impl.Bitmap32.bitmap32;
-import static com.jnape.palatable.shoki.impl.Bitmap32.fillUpTo;
+import static com.jnape.palatable.shoki.impl.Bitmap32.evictAtIndex;
+import static com.jnape.palatable.shoki.impl.Bitmap32.lowerBits;
+import static com.jnape.palatable.shoki.impl.Bitmap32.populateAtIndex;
+import static com.jnape.palatable.shoki.impl.Bitmap32.populatedAtIndex;
+import static java.lang.Integer.bitCount;
 import static java.lang.Math.ceil;
+import static java.lang.Math.pow;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
     int LEVEL_SIZE = 5;
+    int FULL_LEVEL = (int) pow(2, LEVEL_SIZE) - 1;
     int MAX_LEVEL  = (int) ceil(32D / LEVEL_SIZE);
 
-    HAMT<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
+    HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
                    int level);
 
-    Maybe<V> get(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
-    Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
     final class Node<K, V> implements HAMT<K, V> {
 
-        private static final Node<?, ?> ROOT = new Node<>(Bitmap32.empty(), new Object[0]);
+        private static final Node<?, ?> ROOT = new Node<>(0, new Object[0]);
 
-        private final Bitmap32 bitmap;
+        private final int      bitmap;
         private final Object[] table;
 
-        public Node(Bitmap32 bitmap, Object[] table) {
+        public Node(int bitmap, Object[] table) {
             this.bitmap = bitmap;
-            this.table = table;
+            this.table  = table;
         }
 
         @Override
-        public Maybe<V> get(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
-            return bitmap.populatedAtIndex(bitmapIndex)
+            return populatedAtIndex(bitmap, bitmapIndex)
                    ? valueAtIndex(tableIndex(bitmapIndex)).get(key, keyHash, keyEqRel, level + 1)
                    : Maybe.nothing();
         }
 
         @Override
-        public Node<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel,
+        public Node<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel,
                               HashingAlgorithm<K> keyHashAlg, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
             int tableIndex  = tableIndex(bitmapIndex);
-            return bitmap.populatedAtIndex(bitmapIndex)
+            return populatedAtIndex(bitmap, bitmapIndex)
                    ? overrideAt(tableIndex,
                                 valueAtIndex(tableIndex).put(key, value, keyHash, keyEqRel, keyHashAlg, level + 1))
                    : insertAt(tableIndex, bitmapIndex, new Entry<>(key, value));
@@ -76,9 +81,9 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
-            if (!bitmap.populatedAtIndex(bitmapIndex))
+            if (!populatedAtIndex(bitmap, bitmapIndex))
                 return just(this);
 
             int tableIndex = tableIndex(bitmapIndex);
@@ -100,20 +105,16 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
         @Override
         public int hashCode() {
-            int result = Objects.hash(bitmap);
-            result = 31 * result + java.util.Arrays.hashCode(table);
-            return result;
+            return 31 * bitmap + java.util.Arrays.hashCode(table);
         }
 
         private int tableIndex(int bitmapIndex) {
-            return bitmap.lowerBits(bitmapIndex).populationCount();
+            return bitCount(lowerBits(bitmap, bitmapIndex));
         }
 
-        private int bitmapIndex(Bitmap32 keyHash, int level) {
+        private int bitmapIndex(int keyHash, int level) {
             int shift = (level - 1) * LEVEL_SIZE;
-            return keyHash.and(fillUpTo(LEVEL_SIZE).shiftL(shift))
-                    .signedShiftR(shift)
-                    .bits();
+            return (keyHash & FULL_LEVEL << shift) >>> shift;
         }
 
         @SuppressWarnings("unchecked")
@@ -122,7 +123,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         private Node<K, V> insertAt(int tableIndex, int bitmapIndex, HAMT<K, V> valueForSlot) {
-            return new Node<>(bitmap.populateAtIndex(bitmapIndex), Arrays.insertAt(tableIndex, table, valueForSlot));
+            return new Node<>(populateAtIndex(bitmap, bitmapIndex), Arrays.insertAt(tableIndex, table, valueForSlot));
         }
 
         private Node<K, V> overrideAt(int tableIndex, HAMT<K, V> valueForSlot) {
@@ -130,7 +131,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         private Node<K, V> deleteAt(int bitmapIndex, int tableIndex) {
-            return new Node<>(bitmap.evictAtIndex(bitmapIndex), Arrays.deleteAt(tableIndex, table));
+            return new Node<>(evictAtIndex(bitmap, bitmapIndex), Arrays.deleteAt(tableIndex, table));
         }
 
         @SuppressWarnings("unchecked")
@@ -160,15 +161,15 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public HAMT<K, V> put(K newKey, V newValue, Bitmap32 keyHash,
+        public HAMT<K, V> put(K newKey, V newValue, int keyHash,
                               EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
                               int level) {
             if (keyEqRel.apply(newKey, k))
                 return new Entry<>(newKey, newValue);
 
-            Bitmap32 existingKeyHash = bitmap32(keyHashAlg.apply(k));
+            Integer existingKeyHash = keyHashAlg.apply(k);
             return level <= MAX_LEVEL
-                   ? new Node<K, V>(Bitmap32.empty(), new Object[0])
+                   ? new Node<K, V>(0, new Object[0])
                            .put(k, v, existingKeyHash, keyEqRel, keyHashAlg, level)
                            .put(newKey, newValue, keyHash, keyEqRel, keyHashAlg, level)
                    : new Collision<>(existingKeyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
@@ -180,12 +181,12 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<V> get(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             return keyEqRel.apply(key, k) ? just(v) : nothing();
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             return keyEqRel.apply(key, k) ? nothing() : just(this);
         }
 
@@ -205,17 +206,17 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
     }
 
     final class Collision<K, V> implements HAMT<K, V> {
-        private final Bitmap32                 keyHash;
+        private final int                      keyHash;
         private final StrictStack<Entry<K, V>> kvPairs;
 
-        Collision(Bitmap32 keyHash,
+        Collision(int keyHash,
                   StrictStack<Entry<K, V>> kvPairs) {
             this.keyHash = keyHash;
             this.kvPairs = kvPairs;
         }
 
         @Override
-        public HAMT<K, V> put(K key, V value, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel,
+        public HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel,
                               HashingAlgorithm<K> keyHashAlg, int level) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
                                                      StrictStack.of(new Entry<>(key, value)),
@@ -228,15 +229,15 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<V> get(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            return keyHash.equals(this.keyHash)
+        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+            return keyHash == this.keyHash
                    ? find(kvPair -> keyEqRel.apply(key, kvPair._1()), kvPairs).fmap(Entry::_2)
                    : nothing();
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, Bitmap32 keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            if (!keyHash.equals(this.keyHash))
+        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+            if (keyHash != this.keyHash)
                 return just(this);
 
             StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1())

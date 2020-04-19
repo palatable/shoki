@@ -9,8 +9,6 @@ import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
-import static com.jnape.palatable.lambda.adt.Maybe.just;
-import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
@@ -20,6 +18,7 @@ import static com.jnape.palatable.shoki.impl.HAMT.MAX_LEVEL;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static testsupport.matchers.IterableMatcher.iterates;
@@ -48,16 +47,16 @@ public class HAMTTest {
 
         @Test
         public void get() {
-            assertEquals(just(1), entry.get("foo", 0, objectEquals(), -1));
-            assertEquals(nothing(), entry.get("bar", 0, objectEquals(), -1));
-            assertEquals(nothing(), entry.get("foo", 0, (x, y) -> false, -1));
+            assertEquals((Integer) 1, entry.get("foo", 0, objectEquals(), -1));
+            assertNull(entry.get("bar", 0, objectEquals(), -1));
+            assertNull(entry.get("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
         public void remove() {
-            assertEquals(nothing(), entry.remove("foo", 0, objectEquals(), -1));
-            assertEquals(just(entry), entry.remove("bar", 0, objectEquals(), -1));
-            assertEquals(just(entry), entry.remove("foo", 0, (x, y) -> false, -1));
+            assertNull(entry.remove("foo", 0, objectEquals(), -1));
+            assertEquals(entry, entry.remove("bar", 0, objectEquals(), -1));
+            assertEquals(entry, entry.remove("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
@@ -97,11 +96,11 @@ public class HAMTTest {
 
         @Test
         public void get() {
-            assertEquals(just(1), collision.get("foo", 0, objectEquals(), -1));
-            assertEquals(just(2), collision.get("bar", 0, objectEquals(), -1));
-            assertEquals(just(3), collision.get("baz", 0, objectEquals(), -1));
-            assertEquals(nothing(), collision.get("foo", 1, objectEquals(), -1));
-            assertEquals(nothing(), collision.get("foo", 0, (x, y) -> false, -1));
+            assertEquals((Integer) 1, collision.get("foo", 0, objectEquals(), -1));
+            assertEquals((Integer) 2, collision.get("bar", 0, objectEquals(), -1));
+            assertEquals((Integer) 3, collision.get("baz", 0, objectEquals(), -1));
+            assertNull(collision.get("foo", 1, objectEquals(), -1));
+            assertNull(collision.get("foo", 0, (x, y) -> false, -1));
         }
 
         @Test
@@ -126,37 +125,37 @@ public class HAMTTest {
 
         @Test
         public void remove() {
-            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("bar", 2),
-                                                                new Entry<>("baz", 3)))),
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
                          collision.remove("foo", 0, objectEquals(), 1));
-            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
-                                                                new Entry<>("baz", 3)))),
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                           new Entry<>("baz", 3))),
                          collision.remove("bar", 0, objectEquals(), 1));
-            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
-                                                                new Entry<>("bar", 2)))),
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                           new Entry<>("bar", 2))),
                          collision.remove("baz", 0, objectEquals(), 1));
 
-            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
-                                                                new Entry<>("bar", 2),
-                                                                new Entry<>("baz", 3)))),
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                           new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
                          collision.remove("missing", 0, objectEquals(), 1));
 
-            assertEquals(just(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
-                                                                new Entry<>("bar", 2),
-                                                                new Entry<>("baz", 3)))),
+            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
+                                                           new Entry<>("bar", 2),
+                                                           new Entry<>("baz", 3))),
                          collision.remove("foo", 0, (x, y) -> false, 1));
 
-            assertEquals(just(collision), collision.remove("foo", -1, objectEquals(), 1));
+            assertEquals(collision, collision.remove("foo", -1, objectEquals(), 1));
 
-            assertEquals(just(new Entry<>("baz", 3)),
+            assertEquals(new Entry<>("baz", 3),
                          collision
                                  .remove("foo", 0, objectEquals(), 1)
-                                 .flatMap(c -> c.remove("bar", 0, objectEquals(), 1)));
+                                 .remove("bar", 0, objectEquals(), 1));
 
-            assertEquals(just(new Entry<>("baz", 3)),
+            assertEquals(new Entry<>("baz", 3),
                          collision
                                  .remove("foo", 0, objectEquals(), 1)
-                                 .flatMap(c -> c.remove("bar", 0, objectEquals(), 1)));
+                                 .remove("bar", 0, objectEquals(), 1));
         }
 
         @Test
@@ -206,13 +205,13 @@ public class HAMTTest {
                     .put(baz, "baz", baz, referenceEquals(), objectHashCode(), 1)
                     .put(quux, "quux", quux, referenceEquals(), objectHashCode(), 1);
 
-            assertEquals(just("foo"), node.get(foo, foo, referenceEquals(), 1));
-            assertEquals(just("bar"), node.get(bar, bar, referenceEquals(), 1));
-            assertEquals(just("baz"), node.get(baz, baz, referenceEquals(), 1));
-            assertEquals(just("quux"), node.get(quux, quux, referenceEquals(), 1));
+            assertEquals("foo", node.get(foo, foo, referenceEquals(), 1));
+            assertEquals("bar", node.get(bar, bar, referenceEquals(), 1));
+            assertEquals("baz", node.get(baz, baz, referenceEquals(), 1));
+            assertEquals("quux", node.get(quux, quux, referenceEquals(), 1));
 
-            assertEquals(nothing(), node.get(-1, foo, referenceEquals(), 1));
-            assertEquals(nothing(), node.get(foo, -1, referenceEquals(), 1));
+            assertNull(node.get(-1, foo, referenceEquals(), 1));
+            assertNull(node.get(foo, -1, referenceEquals(), 1));
         }
 
         @Test
@@ -267,28 +266,28 @@ public class HAMTTest {
 
         @Test
         public void remove() {
-            assertEquals(just(Node.<Integer, String>rootNode()),
+            assertEquals(Node.<Integer, String>rootNode(),
                          Node.<Integer, String>rootNode().remove(-1, -1, objectEquals(), -1));
 
-            assertEquals(just(Node.<Integer, String>rootNode()),
+            assertEquals(Node.<Integer, String>rootNode(),
                          Node.<Integer, String>rootNode()
                                  .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
                                  .remove(foo, foo, objectEquals(), 1));
 
-            assertEquals(just(Node.<Integer, String>rootNode()
-                                      .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)),
+            assertEquals(Node.<Integer, String>rootNode()
+                                 .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1),
                          Node.<Integer, String>rootNode()
                                  .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
                                  .remove(foo, -1, objectEquals(), 1));
 
-            assertEquals(just(Node.<Integer, String>rootNode()
-                                      .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1)),
+            assertEquals(Node.<Integer, String>rootNode()
+                                 .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1),
                          Node.<Integer, String>rootNode()
                                  .put(foo, "foo", foo, objectEquals(), objectHashCode(), 1)
                                  .put(bar, "bar", bar, objectEquals(), objectHashCode(), 1)
                                  .remove(foo, foo, objectEquals(), 1));
 
-            assertEquals(just(new Node<>(2, new Object[]{
+            assertEquals(new Node<>(2, new Object[]{
                                  new Node<>(2, new Object[]{
                                          new Node<>(0b10_00000_00000_00000, new Object[]{
                                                  new Node<>(1, new Object[]{
@@ -302,7 +301,7 @@ public class HAMTTest {
                                                  })
                                          })
                                  })
-                         })),
+                         }),
                          Node.<Integer, String>rootNode()
                                  .put(baz, "baz", baz, referenceEquals(), objectHashCode(), 1)
                                  .put(quux, "quux", quux, referenceEquals(), objectHashCode(), 1)

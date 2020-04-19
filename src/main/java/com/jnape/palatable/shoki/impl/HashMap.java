@@ -15,6 +15,7 @@ import com.jnape.palatable.shoki.api.SizeInfo.Known;
 import java.util.Iterator;
 import java.util.Objects;
 
+import static com.jnape.palatable.lambda.adt.Maybe.maybe;
 import static com.jnape.palatable.lambda.adt.Try.trying;
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
@@ -136,7 +137,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public Maybe<V> get(K key) {
-        return hamt.get(key, keyHashAlg.apply(key), keyEqRel, 1);
+        return maybe(hamt.get(key, keyHashAlg.apply(key), keyEqRel, 1));
     }
 
     /**
@@ -165,8 +166,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public HashMap<K, V> remove(K key) {
-        return new HashMap<>(keyEqRel, keyHashAlg,
-                             hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 1).orElse(HAMT.Node.rootNode()));
+        HAMT<K, V> removed = hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 1);
+        return new HashMap<>(keyEqRel, keyHashAlg, removed != null ? removed : HAMT.Node.rootNode());
     }
 
     /**

@@ -1,6 +1,5 @@
 package com.jnape.palatable.shoki.impl;
 
-import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.adt.product.Product2;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
@@ -10,8 +9,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
-import static com.jnape.palatable.lambda.adt.Maybe.just;
-import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Flatten.flatten;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Eq.eq;
@@ -38,9 +35,9 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
     HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
                    int level);
 
-    Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
-    Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
 
     final class Node<K, V> implements HAMT<K, V> {
 
@@ -55,11 +52,11 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
             return populatedAtIndex(bitmap, bitmapIndex)
                    ? valueAtIndex(tableIndex(bitmapIndex)).get(key, keyHash, keyEqRel, level + 1)
-                   : Maybe.nothing();
+                   : null;
         }
 
         @Override
@@ -81,16 +78,14 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             int bitmapIndex = bitmapIndex(keyHash, level);
             if (!populatedAtIndex(bitmap, bitmapIndex))
-                return just(this);
+                return this;
 
-            int tableIndex = tableIndex(bitmapIndex);
-            return just(valueAtIndex(tableIndex)
-                                .remove(key, keyHash, keyEqRel, level + 1)
-                                .fmap(override -> overrideAt(tableIndex, override))
-                                .orElseGet(() -> deleteAt(bitmapIndex, tableIndex)));
+            int        tableIndex = tableIndex(bitmapIndex);
+            HAMT<K, V> override   = valueAtIndex(tableIndex).remove(key, keyHash, keyEqRel, level + 1);
+            return override == null ? deleteAt(bitmapIndex, tableIndex) : overrideAt(tableIndex, override);
         }
 
         @Override
@@ -181,13 +176,13 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            return keyEqRel.apply(key, k) ? just(v) : nothing();
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+            return keyEqRel.apply(key, k) ? v : null;
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            return keyEqRel.apply(key, k) ? nothing() : just(this);
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+            return !keyEqRel.apply(key, k) ? this : null;
         }
 
         @Override
@@ -229,25 +224,23 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public Maybe<V> get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             return keyHash == this.keyHash
-                   ? find(kvPair -> keyEqRel.apply(key, kvPair._1()), kvPairs).fmap(Entry::_2)
-                   : nothing();
+                   ? find(kvPair -> keyEqRel.apply(key, kvPair._1()), kvPairs).fmap(Entry::_2).orElse(null)
+                   : null;
         }
 
         @Override
-        public Maybe<HAMT<K, V>> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
             if (keyHash != this.keyHash)
-                return just(this);
+                return this;
 
-            StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1())
-                                                                       ? s.cons(kv)
-                                                                       : s),
+            StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
                                                            StrictStack.empty(),
                                                            kvPairs);
-            return just(eq(withoutKey.sizeInfo().getSize(), one())
-                        ? withoutKey.iterator().next()
-                        : new Collision<>(keyHash, withoutKey));
+            return eq(withoutKey.sizeInfo().getSize(), one())
+                   ? withoutKey.iterator().next()
+                   : new Collision<>(keyHash, withoutKey);
         }
 
         @Override

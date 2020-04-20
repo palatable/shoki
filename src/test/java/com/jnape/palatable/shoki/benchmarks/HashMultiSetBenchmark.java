@@ -65,10 +65,9 @@ public class HashMultiSetBenchmark {
             public void doSetup() {
                 hashMultiSet = HashMultiSet.empty();
                 for (int i = 0; i < K100; i++) {
-                    hashMultiSet.inc(i);
+                    hashMultiSet = hashMultiSet.inc(i);
                 }
             }
         }
-
     }
 }

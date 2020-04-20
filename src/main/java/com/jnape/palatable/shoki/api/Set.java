@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 
 /**
@@ -43,7 +44,9 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
      * @param other the {@link Set} to intersect this {@link Set} with
      * @return the intersection {@link Set}
      */
-    Set<Size, A> intersection(Set<Size, A> other);
+    default Set<Size, A> intersection(Set<Size, A> other) {
+        return foldLeft((intersection, a) -> other.contains(a) ? intersection : intersection.remove(a), this, this);
+    }
 
     /**
      * The <a href="https://en.wikipedia.org/wiki/Union_(set_theory)" target="_new">union</a> of two {@link Set Sets}
@@ -53,7 +56,9 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
      * @param other the {@link Set} to union this {@link Set} with
      * @return the union {@link Set}
      */
-    Set<Size, A> union(Set<Size, A> other);
+    default Set<Size, A> union(Set<Size, A> other) {
+        return foldLeft(Set<Size, A>::add, this, other);
+    }
 
     /**
      * The <a href="https://en.wikipedia.org/wiki/Complement_(set_theory)#Relative_complement"
@@ -64,7 +69,9 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
      * @param other the {@link Set} to subtract from this {@link Set}
      * @return the difference {@link Set}
      */
-    Set<Size, A> difference(Set<Size, A> other);
+    default Set<Size, A> difference(Set<Size, A> other) {
+        return foldLeft(Set<Size, A>::remove, this, other);
+    }
 
     /**
      * The <a href="https://en.wikipedia.org/wiki/Symmetric_difference" target="_new">symmetric difference</a> of two

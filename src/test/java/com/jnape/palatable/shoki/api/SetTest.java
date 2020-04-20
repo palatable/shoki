@@ -19,6 +19,52 @@ public class SetTest {
     public static final class DefaultMethods {
 
         @Test
+        public void intersection() {
+            DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
+            DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));
+            DefaultMethodsSet<Natural, Integer> _234  = DefaultMethodsSet.delegate(HashSet.of(2, 3, 4));
+            DefaultMethodsSet<Natural, Integer> _23   = DefaultMethodsSet.delegate(HashSet.of(2, 3));
+
+            assertThat(empty, equivalentTo(empty.intersection(empty), sameElements()));
+            assertThat(empty, equivalentTo(empty.intersection(_123), sameElements()));
+            assertThat(empty, equivalentTo(_123.intersection(empty), sameElements()));
+            assertThat(_123, equivalentTo(_123.intersection(_123), sameElements()));
+            assertThat(_23, equivalentTo(_123.intersection(_234), sameElements()));
+            assertThat(_23, equivalentTo(_234.intersection(_123), sameElements()));
+        }
+
+        @Test
+        public void union() {
+            DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
+            DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));
+            DefaultMethodsSet<Natural, Integer> _234  = DefaultMethodsSet.delegate(HashSet.of(2, 3, 4));
+            DefaultMethodsSet<Natural, Integer> _1234 = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3, 4));
+
+            assertThat(empty, equivalentTo(empty.union(empty), sameElements()));
+            assertThat(_123, equivalentTo(empty.union(_123), sameElements()));
+            assertThat(_123, equivalentTo(_123.union(empty), sameElements()));
+            assertThat(_123, equivalentTo(_123.union(_123), sameElements()));
+            assertThat(_1234, equivalentTo(_123.union(_234), sameElements()));
+            assertThat(_1234, equivalentTo(_234.union(_123), sameElements()));
+        }
+
+        @Test
+        public void difference() {
+            DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
+            DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));
+            DefaultMethodsSet<Natural, Integer> _234  = DefaultMethodsSet.delegate(HashSet.of(2, 3, 4));
+            DefaultMethodsSet<Natural, Integer> _1    = DefaultMethodsSet.delegate(HashSet.of(1));
+            DefaultMethodsSet<Natural, Integer> _4    = DefaultMethodsSet.delegate(HashSet.of(4));
+
+            assertThat(empty, equivalentTo(empty.difference(empty), sameElements()));
+            assertThat(empty, equivalentTo(empty.difference(_123), sameElements()));
+            assertThat(_123, equivalentTo(_123.difference(empty), sameElements()));
+            assertThat(empty, equivalentTo(_123.difference(_123), sameElements()));
+            assertThat(_1, equivalentTo(_123.difference(_234), sameElements()));
+            assertThat(_4, equivalentTo(_234.difference(_123), sameElements()));
+        }
+
+        @Test
         public void symmetricDifference() {
             DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(HashSet.empty());
             DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(HashSet.of(1, 2, 3));

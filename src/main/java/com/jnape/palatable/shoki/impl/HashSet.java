@@ -13,10 +13,7 @@ import com.jnape.palatable.shoki.api.SizeInfo.Known;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
-import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
@@ -108,24 +105,20 @@ public final class HashSet<A> implements Set<Natural, A> {
 
     /**
      * {@inheritDoc}
-     * <code>O(max(n, o))</code>.
+     * <code>O(o)</code>.
      */
     @Override
     public HashSet<A> intersection(Set<Natural, A> other) {
-        return (lt(other.sizeInfo().getSize(), sizeInfo().getSize()) ? tuple(this, other) : tuple(other, this))
-                .into((source, filter) -> foldLeft((i, x) -> filter.contains(x) ? i.add(x) : i, empty(), source));
+        return (HashSet<A>) Set.super.intersection(other);
     }
 
     /**
      * {@inheritDoc}
-     * <code>O(min(n, o))</code>.
+     * <code>O(o)</code>.
      */
     @Override
     public HashSet<A> union(Set<Natural, A> other) {
-        return (other instanceof HashSet<?> && gt(sizeInfo().getSize(), other.sizeInfo().getSize())
-                ? tuple((HashSet<A>) other, this)
-                : tuple(this, other))
-                .into(foldLeft(HashSet::add));
+        return (HashSet<A>) Set.super.union(other);
     }
 
     /**
@@ -134,7 +127,7 @@ public final class HashSet<A> implements Set<Natural, A> {
      */
     @Override
     public HashSet<A> difference(Set<Natural, A> other) {
-        return foldLeft(HashSet<A>::remove, this, other);
+        return (HashSet<A>) Set.super.difference(other);
     }
 
     /**

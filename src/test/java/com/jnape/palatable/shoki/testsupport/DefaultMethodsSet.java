@@ -62,30 +62,6 @@ public final class DefaultMethodsSet<Size extends Number, A> implements Set<Size
      * {@inheritDoc}
      */
     @Override
-    public DefaultMethodsSet<Size, A> intersection(Set<Size, A> other) {
-        return delegate(delegate.intersection(other));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DefaultMethodsSet<Size, A> union(Set<Size, A> other) {
-        return delegate(delegate.union(other));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public DefaultMethodsSet<Size, A> difference(Set<Size, A> other) {
-        return delegate(delegate.difference(other));
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public boolean contains(A a) {
         return delegate.contains(a);
     }

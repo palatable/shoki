@@ -62,7 +62,7 @@ public final class HashSet<A> implements Set<Natural, A> {
 
     /**
      * {@inheritDoc}
-     * <code>O(n)</code>.
+     * Amortized <code>O(1)</code>.
      */
     @Override
     public Known<Natural> sizeInfo() {
@@ -160,7 +160,8 @@ public final class HashSet<A> implements Set<Natural, A> {
     }
 
     /**
-     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashSet}. <code>O(n)</code>.
+     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashSet}.
+     * Amortized <code>O(1)</code>.
      *
      * @return the hash code
      */

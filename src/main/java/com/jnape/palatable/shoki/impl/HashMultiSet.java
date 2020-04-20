@@ -3,7 +3,6 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
-import com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
@@ -39,6 +38,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     private static final HashMultiSet<?> EMPTY_OBJECT_DEFAULTS = new HashMultiSet<>(HashMap.empty());
 
     private final HashMap<A, NonZero> multiplicityMap;
+
+    private volatile Natural size;
 
     private HashMultiSet(HashMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
@@ -133,11 +134,20 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     /**
      * {@inheritDoc}
-     * <code>O(n)</code>.
+     * Amortized <code>O(1)</code>.
      */
     @Override
     public Known<Natural> sizeInfo() {
-        return known(FoldLeft.<NonZero, Natural>foldLeft(Natural::plus, zero(), multiplicityMap.values()));
+        Natural size = this.size;
+        if (size == null) {
+            synchronized (this) {
+                size = this.size;
+                if (size == null) {
+                    this.size = size = foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values());
+                }
+            }
+        }
+        return known(size);
     }
 
     /**
@@ -218,13 +228,14 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     }
 
     /**
-     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashMultiSet}. <code>O(n)</code>.
+     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashMultiSet}.
+     * Amortized <code>O(1)</code>.
      *
      * @return the hash code
      */
     @Override
     public int hashCode() {
-        return Objects.hash(multiplicityMap);
+        return multiplicityMap.hashCode();
     }
 
     /**

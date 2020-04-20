@@ -74,7 +74,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     public abstract Maybe<A> head();
 
     /**
-     * The {@link SizeInfo} of this {@link StrictStack}. <code>O(1)</code>.
+     * The {@link SizeInfo} of this {@link StrictStack}. Amortized <code>O(1)</code>.
      */
     @Override
     public abstract Known<Natural> sizeInfo();
@@ -108,6 +108,15 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         return other instanceof StrictStack<?> &&
                 equivalent(this, downcast(other), sameElementsSameOrder(objectEquals()));
     }
+
+    /**
+     * {@inheritDoc}
+     * Amortized <code>O(1)</code>.
+     *
+     * @return the hash code
+     */
+    @Override
+    public abstract int hashCode();
 
     /**
      * Provide a debug-friendly string representation of this {@link StrictStack}. <code>O(n)</code>
@@ -182,6 +191,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         }
 
         @Override
+        @SuppressWarnings("DuplicatedCode")
         public Known<Natural> sizeInfo() {
             Natural size = this.size;
             if (size == null) {
@@ -234,6 +244,11 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         @Override
         public Known<Natural> sizeInfo() {
             return known(zero());
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
         }
     }
 }

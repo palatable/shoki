@@ -99,6 +99,15 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     }
 
     /**
+     * {@inheritDoc}
+     * Amortized <code>O(1)</code>.
+     *
+     * @return the hash code
+     */
+    @Override
+    public abstract int hashCode();
+
+    /**
      * Provide a debug-friendly string representation of this {@link StrictQueue}. <code>O(n)</code>
      *
      * @return the string representation of this {@link StrictQueue}
@@ -180,6 +189,11 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         @Override
         public boolean isEmpty() {
             return true;
+        }
+
+        @Override
+        public int hashCode() {
+            return 0;
         }
     }
 

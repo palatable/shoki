@@ -120,6 +120,9 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     private final HashingAlgorithm<K>    keyHashAlg;
     private final HAMT<K, V>             hamt;
 
+    private volatile Natural size;
+    private volatile Integer hashCode;
+
     private HashMap(EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg, HAMT<K, V> hamt) {
         this.keyEqRel   = keyEqRel;
         this.keyHashAlg = keyHashAlg;
@@ -247,11 +250,21 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     /**
      * {@inheritDoc}
-     * <code>O(n)</code>.
+     * Amortized <code>O(1)</code>.
      */
     @Override
+    @SuppressWarnings("DuplicatedCode")
     public Known<Natural> sizeInfo() {
-        return known(abs(size(this)));
+        Natural size = this.size;
+        if (size == null) {
+            synchronized (this) {
+                size = this.size;
+                if (size == null) {
+                    this.size = size = abs(size(this));
+                }
+            }
+        }
+        return known(size);
     }
 
     /**
@@ -280,13 +293,25 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     }
 
     /**
-     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashMap}. <code>O(n)</code>.
+     * Compute the corresponding {@link Object#hashCode() hash code} for this {@link HashMap}.
+     * Amortized <code>O(1)</code>.
      *
      * @return the hash code
      */
     @Override
     public int hashCode() {
-        return foldLeft(Integer::sum, 0, map(into((k, v) -> 31 * keyHashAlg.apply(k) + Objects.hashCode(v)), this));
+        Integer hashCode = this.hashCode;
+        if (hashCode == null) {
+            synchronized (this) {
+                hashCode = this.hashCode;
+                if (hashCode == null) {
+                    this.hashCode = hashCode =
+                            foldLeft(Integer::sum, 0,
+                                     map(into((k, v) -> 31 * keyHashAlg.apply(k) + Objects.hashCode(v)), this));
+                }
+            }
+        }
+        return hashCode;
     }
 
     /**

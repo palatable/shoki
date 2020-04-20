@@ -11,6 +11,7 @@ import org.openjdk.jmh.annotations.OutputTimeUnit;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
@@ -52,16 +53,21 @@ public class HashMultiSetBenchmark {
             return hashMultiSet;
         }
 
+        @Benchmark
+        public void iteration(State state, Blackhole bh) {
+            state.hashMultiSet.forEach(bh::consume);
+        }
+
         public static void main(String[] args) throws RunnerException {
             new Runner(shokiOptions(b(HashMultiSetBenchmark.Shoki.class),
                                     HashMultiSetBenchmark.Shoki.class)).run();
         }
 
-        @org.openjdk.jmh.annotations.State(Scope.Thread)
+        @org.openjdk.jmh.annotations.State(Scope.Benchmark)
         public static class State {
             HashMultiSet<Integer> hashMultiSet;
 
-            @Setup(Level.Invocation)
+            @Setup(Level.Trial)
             public void doSetup() {
                 hashMultiSet = HashMultiSet.empty();
                 for (int i = 0; i < K100; i++) {

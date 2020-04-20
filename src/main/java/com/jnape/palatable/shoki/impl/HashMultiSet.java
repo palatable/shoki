@@ -11,6 +11,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
@@ -210,6 +211,14 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     @Override
     public HashMultiSet<A> merge(MultiSet<A> other, Semigroup<Natural> semigroup) {
         return (HashMultiSet<A>) MultiSet.super.merge(other, semigroup);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<Tuple2<A, NonZero>> iterator() {
+        return multiplicityMap.iterator();
     }
 
     /**

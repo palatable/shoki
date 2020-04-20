@@ -10,6 +10,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 
+import java.util.Iterator;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
@@ -137,6 +138,14 @@ public final class HashSet<A> implements Set<Natural, A> {
     @Override
     public HashSet<A> symmetricDifference(Set<Natural, A> other) {
         return (HashSet<A>) Set.super.symmetricDifference(other);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Iterator<A> iterator() {
+        return map(Tuple2::_1, map).iterator();
     }
 
     /**

@@ -4,10 +4,14 @@ import com.jnape.palatable.shoki.impl.HashSet;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
+import org.openjdk.jmh.annotations.Level;
 import org.openjdk.jmh.annotations.Measurement;
 import org.openjdk.jmh.annotations.OperationsPerInvocation;
 import org.openjdk.jmh.annotations.OutputTimeUnit;
+import org.openjdk.jmh.annotations.Scope;
+import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
+import org.openjdk.jmh.infra.Blackhole;
 import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
@@ -41,8 +45,35 @@ public class HashSetBenchmark {
             return hashSet;
         }
 
+        @Benchmark
+        public HashSet<Integer> remove(State state) {
+            HashSet<Integer> hashSet = state.hashSet;
+            for (int i = 0; i < K100; i++) {
+                hashSet = hashSet.remove(i);
+            }
+            return hashSet;
+        }
+
+        @Benchmark
+        public void iteration(State state, Blackhole bh) {
+            state.hashSet.forEach(bh::consume);
+        }
+
         public static void main(String[] args) throws RunnerException {
             new Runner(shokiOptions(b(HashSetBenchmark.Shoki.class), HashSetBenchmark.Shoki.class)).run();
+        }
+
+        @org.openjdk.jmh.annotations.State(Scope.Benchmark)
+        public static class State {
+            HashSet<Integer> hashSet;
+
+            @Setup(Level.Trial)
+            public void doSetup() {
+                hashSet = HashSet.empty();
+                for (int i = 0; i < K100; i++) {
+                    hashSet = hashSet.add(i);
+                }
+            }
         }
     }
 

@@ -16,28 +16,24 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Find.find;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.Natural.one;
-import static com.jnape.palatable.shoki.impl.Bitmap32.evictAtIndex;
+import static com.jnape.palatable.shoki.impl.Bitmap32.bitIsSet;
 import static com.jnape.palatable.shoki.impl.Bitmap32.lowerBits;
-import static com.jnape.palatable.shoki.impl.Bitmap32.populateAtIndex;
-import static com.jnape.palatable.shoki.impl.Bitmap32.populatedAtIndex;
+import static com.jnape.palatable.shoki.impl.Bitmap32.setBit;
+import static com.jnape.palatable.shoki.impl.Bitmap32.unsetBit;
 import static java.lang.Integer.bitCount;
-import static java.lang.Math.ceil;
-import static java.lang.Math.pow;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 
 interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
     int LEVEL_SIZE = 5;
-    int FULL_LEVEL = (int) pow(2, LEVEL_SIZE) - 1;
-    int MAX_LEVEL  = (int) ceil(32D / LEVEL_SIZE);
 
     HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
-                   int level);
+                   int shift);
 
-    V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift);
 
-    HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level);
+    HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift);
 
     final class Node<K, V> implements HAMT<K, V> {
 
@@ -52,21 +48,21 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            int bitmapIndex = bitmapIndex(keyHash, level);
-            return populatedAtIndex(bitmap, bitmapIndex)
-                   ? valueAtIndex(tableIndex(bitmapIndex)).get(key, keyHash, keyEqRel, level + 1)
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
+            int bitmapIndex = bitmapIndex(keyHash, shift);
+            return bitIsSet(bitmap, bitmapIndex)
+                   ? valueAtIndex(tableIndex(bitmapIndex)).get(key, keyHash, keyEqRel, shift + LEVEL_SIZE)
                    : null;
         }
 
         @Override
         public Node<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel,
-                              HashingAlgorithm<K> keyHashAlg, int level) {
-            int bitmapIndex = bitmapIndex(keyHash, level);
+                              HashingAlgorithm<K> keyHashAlg, int shift) {
+            int bitmapIndex = bitmapIndex(keyHash, shift);
             int tableIndex  = tableIndex(bitmapIndex);
-            return populatedAtIndex(bitmap, bitmapIndex)
+            return bitIsSet(bitmap, bitmapIndex)
                    ? overrideAt(tableIndex,
-                                valueAtIndex(tableIndex).put(key, value, keyHash, keyEqRel, keyHashAlg, level + 1))
+                                valueAtIndex(tableIndex).put(key, value, keyHash, keyEqRel, keyHashAlg, shift + LEVEL_SIZE))
                    : insertAt(tableIndex, bitmapIndex, new Entry<>(key, value));
         }
 
@@ -78,13 +74,13 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
-            int bitmapIndex = bitmapIndex(keyHash, level);
-            if (!populatedAtIndex(bitmap, bitmapIndex))
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
+            int bitmapIndex = bitmapIndex(keyHash, shift);
+            if (!bitIsSet(bitmap, bitmapIndex))
                 return this;
 
             int        tableIndex = tableIndex(bitmapIndex);
-            HAMT<K, V> override   = valueAtIndex(tableIndex).remove(key, keyHash, keyEqRel, level + 1);
+            HAMT<K, V> override   = valueAtIndex(tableIndex).remove(key, keyHash, keyEqRel, shift + LEVEL_SIZE);
             return override == null ? deleteAt(bitmapIndex, tableIndex) : overrideAt(tableIndex, override);
         }
 
@@ -107,18 +103,13 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             return bitCount(lowerBits(bitmap, bitmapIndex));
         }
 
-        private int bitmapIndex(int keyHash, int level) {
-            int shift = (level - 1) * LEVEL_SIZE;
-            return (keyHash & FULL_LEVEL << shift) >>> shift;
-        }
-
         @SuppressWarnings("unchecked")
         private HAMT<K, V> valueAtIndex(int tableIndex) {
             return (HAMT<K, V>) table[tableIndex];
         }
 
         private Node<K, V> insertAt(int tableIndex, int bitmapIndex, HAMT<K, V> valueForSlot) {
-            return new Node<>(populateAtIndex(bitmap, bitmapIndex), Arrays.insertAt(tableIndex, table, valueForSlot));
+            return new Node<>(setBit(bitmap, bitmapIndex), Arrays.insertAt(tableIndex, table, valueForSlot));
         }
 
         private Node<K, V> overrideAt(int tableIndex, HAMT<K, V> valueForSlot) {
@@ -126,12 +117,16 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         private Node<K, V> deleteAt(int bitmapIndex, int tableIndex) {
-            return new Node<>(evictAtIndex(bitmap, bitmapIndex), Arrays.deleteAt(tableIndex, table));
+            return new Node<>(unsetBit(bitmap, bitmapIndex), Arrays.deleteAt(tableIndex, table));
         }
 
         @SuppressWarnings("unchecked")
         static <K, V> HAMT<K, V> rootNode() {
             return (HAMT<K, V>) ROOT;
+        }
+
+        private static int bitmapIndex(int keyHash, int shift) {
+            return (keyHash >>> shift) & 31;
         }
     }
 
@@ -157,17 +152,17 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
         @Override
         public HAMT<K, V> put(K newKey, V newValue, int keyHash,
-                              EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg,
-                              int level) {
+                              EquivalenceRelation<K> keyEqRel, HashingAlgorithm<K> keyHashAlg, int shift) {
             if (keyEqRel.apply(newKey, k))
                 return new Entry<>(newKey, newValue);
 
+            if (shift > 30)
+                return new Collision<>(keyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
+
             Integer existingKeyHash = keyHashAlg.apply(k);
-            return level <= MAX_LEVEL
-                   ? new Node<K, V>(0, new Object[0])
-                           .put(k, v, existingKeyHash, keyEqRel, keyHashAlg, level)
-                           .put(newKey, newValue, keyHash, keyEqRel, keyHashAlg, level)
-                   : new Collision<>(existingKeyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
+            return new Node<K, V>(0, new Object[0])
+                    .put(k, v, existingKeyHash, keyEqRel, keyHashAlg, shift)
+                    .put(newKey, newValue, keyHash, keyEqRel, keyHashAlg, shift);
         }
 
         @Override
@@ -176,12 +171,12 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
             return keyEqRel.apply(key, k) ? v : null;
         }
 
         @Override
-        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
             return !keyEqRel.apply(key, k) ? this : null;
         }
 
@@ -212,7 +207,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
 
         @Override
         public HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel,
-                              HashingAlgorithm<K> keyHashAlg, int level) {
+                              HashingAlgorithm<K> keyHashAlg, int shift) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
                                                      StrictStack.of(new Entry<>(key, value)),
                                                      kvPairs));
@@ -224,14 +219,14 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         }
 
         @Override
-        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public V get(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
             return keyHash == this.keyHash
                    ? find(kvPair -> keyEqRel.apply(key, kvPair._1()), kvPairs).fmap(Entry::_2).orElse(null)
                    : null;
         }
 
         @Override
-        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int level) {
+        public HAMT<K, V> remove(K key, int keyHash, EquivalenceRelation<K> keyEqRel, int shift) {
             if (keyHash != this.keyHash)
                 return this;
 

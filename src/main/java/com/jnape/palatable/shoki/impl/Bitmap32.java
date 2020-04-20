@@ -28,20 +28,20 @@ final class Bitmap32 {
                                flatten(intersperse(singleton("_"), inGroupsOf(5, drop(2, bitStrings))))));
     }
 
-    public static int evictAtIndex(int bits, int index) {
-        return bits & ~(1 << index);
+    public static int unsetBit(int bitmap, int index) {
+        return bitmap & ~(1 << index);
     }
 
-    public static int populateAtIndex(int bits, int index) {
-        return bits | (1 << index);
+    public static int setBit(int bitmap, int index) {
+        return bitmap | (1 << index);
     }
 
-    public static boolean populatedAtIndex(int bits, int index) {
-        return ((bits & (1 << index)) >>> index) == 1;
+    public static boolean bitIsSet(int bitmap, int index) {
+        return (bitmap & 1 << index) != 0;
     }
 
-    public static int lowerBits(int bits, int index) {
-        return index <= 0 ? 0 : index >= 32 ? bits : bits & (-1 >>> (32 - index));
+    public static int lowerBits(int bitmap, int index) {
+        return bitmap & (1 << index) - 1;
     }
 
     public enum Bit {

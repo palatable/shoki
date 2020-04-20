@@ -69,8 +69,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      */
     @Override
     public HashMultiSet<A> inc(A a, NonZero k) {
-        return new HashMultiSet<>(multiplicityMap.put(a, multiplicityMap.get(a).fmap(k::plus).orElse(k))
-        );
+        return new HashMultiSet<>(multiplicityMap.put(a, multiplicityMap.get(a).fmap(k::plus).orElse(k)));
     }
 
     /**

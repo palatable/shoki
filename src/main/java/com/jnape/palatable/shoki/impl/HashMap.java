@@ -140,7 +140,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public Maybe<V> get(K key) {
-        return maybe(hamt.get(key, keyHashAlg.apply(key), keyEqRel, 1));
+        return maybe(hamt.get(key, keyHashAlg.apply(key), keyEqRel, 0));
     }
 
     /**
@@ -155,7 +155,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     @Override
     public HashMap<K, V> put(K key, V value) {
         return new HashMap<>(keyEqRel, keyHashAlg,
-                             hamt.put(key, value, keyHashAlg.apply(key), keyEqRel, keyHashAlg, 1));
+                             hamt.put(key, value, keyHashAlg.apply(key), keyEqRel, keyHashAlg, 0));
     }
 
     /**
@@ -169,7 +169,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public HashMap<K, V> remove(K key) {
-        HAMT<K, V> removed = hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 1);
+        HAMT<K, V> removed = hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 0);
         return new HashMap<>(keyEqRel, keyHashAlg, removed != null ? removed : HAMT.Node.rootNode());
     }
 

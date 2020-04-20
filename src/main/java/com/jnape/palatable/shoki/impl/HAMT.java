@@ -160,7 +160,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                 return new Collision<>(keyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
 
             Integer existingKeyHash = keyHashAlg.apply(k);
-            return new Node<K, V>(0, new Object[0])
+            return Node.<K, V>rootNode()
                     .put(k, v, existingKeyHash, keyEqRel, keyHashAlg, shift)
                     .put(newKey, newValue, keyHash, keyEqRel, keyHashAlg, shift);
         }

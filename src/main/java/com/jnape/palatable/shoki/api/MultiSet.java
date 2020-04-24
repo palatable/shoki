@@ -70,41 +70,42 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
     MultiSet<A> tail();
 
     /**
-     * {@link MultiSet#inc(Object, NonZero) Increment} the {@link MultiSet#get(Object) multiplicity} of <code>a</code>
-     * in this {@link MultiSet} by {@link Natural#one() one}.
+     * {@link MultiSet#inc(Object, Natural.NonZero) Increment} the {@link MultiSet#get(Object) multiplicity} of
+     * <code>a</code> in this {@link MultiSet} by {@link Natural#one() one}.
      *
      * @param a the element for which to increment the multiplicity
      * @return the updated {@link MultiSet}
-     * @see MultiSet#inc(Object, NonZero)
+     * @see MultiSet#inc(Object, Natural.NonZero)
      */
     default MultiSet<A> inc(A a) {
         return inc(a, one());
     }
 
     /**
-     * {@link MultiSet#dec(Object, NonZero) Decrement} the {@link MultiSet#get(Object) multiplicity} of <code>a</code>
-     * in this {@link MultiSet} by <code><em>min</em>({@link Natural#one() one}, {@link MultiSet#get get}(a))</code>.
+     * {@link MultiSet#dec(Object, Natural.NonZero) Decrement} the {@link MultiSet#get(Object) multiplicity} of
+     * <code>a</code> in this {@link MultiSet} by <code><em>min</em>({@link Natural#one() one},
+     * {@link MultiSet#get get}(a))</code>.
      *
      * @param a the element for which to decrement the multiplicity
      * @return the updated {@link MultiSet}
-     * @see MultiSet#dec(Object, NonZero)
+     * @see MultiSet#dec(Object, Natural.NonZero)
      */
     default MultiSet<A> dec(A a) {
         return dec(a, one());
     }
 
     /**
-     * {@link MultiSet#dec(Object, NonZero) Remove} all occurrences of <code>a</code> from this {@link MultiSet},
-     * such that subsequent invocations of <code>{@link MultiSet#get(Object) get}(a)</code> return
+     * {@link MultiSet#dec(Object, Natural.NonZero) Remove} all occurrences of <code>a</code> from this
+     * {@link MultiSet}, such that subsequent invocations of <code>{@link MultiSet#get(Object) get}(a)</code> return
      * {@link Natural#zero() zero}.
      * <p>
-     * By default, this method simply {@link MultiSet#dec(Object, NonZero) decrements} the
+     * By default, this method simply {@link MultiSet#dec(Object, Natural.NonZero) decrements} the
      * {@link MultiSet#get(Object) multiplicity} of <code>a</code> from the {@link MultiSet}, although specific
      * implementations may be able to perform this operation more directly and efficiently.
      *
      * @param a the element to remove
      * @return the updated {@link MultiSet}
-     * @see MultiSet#dec(Object, NonZero)
+     * @see MultiSet#dec(Object, Natural.NonZero)
      */
     default MultiSet<A> remove(A a) {
         return get(a).match(constantly(this), k -> dec(a, k));
@@ -112,7 +113,7 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
 
     /**
      * Determine if some value <code>k</code> <code>a</code>s are elements of this {@link MultiSet}.
-     * Equivalent to <code>get(a) >= k</code>
+     * Equivalent to <code>get(a) &gt;= k</code>
      *
      * @param a the value
      * @param k the amount of a
@@ -162,10 +163,11 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
 
     /**
      * {@link MultiSet#inc Increment} the {@link MultiSet#get(Object) multiplicity} of each element in
-     * this {@link MultiSet} by the correponding element's {@link MultiSet#get(Object) multiplicity} in
+     * this {@link MultiSet} by the corresponding element's {@link MultiSet#get(Object) multiplicity} in
      * <code>other</code>.
      *
-     * @param other the {@link MultiSet} from which to {@link MultiSet#inc(Object, NonZero) increment} multiplicities
+     * @param other the {@link MultiSet} from which to {@link MultiSet#inc(Object, Natural.NonZero) increment}
+     *              multiplicities
      * @return the updated {@link MultiSet}
      * @see MultiSet#merge
      */

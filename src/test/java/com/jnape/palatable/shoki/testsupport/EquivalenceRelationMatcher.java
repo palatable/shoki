@@ -19,8 +19,8 @@ public final class EquivalenceRelationMatcher<A> extends TypeSafeMatcher<A> {
     private final EquivalenceRelation<? super A> equivalenceRelation;
 
     private EquivalenceRelationMatcher(A expected, EquivalenceRelation<? super A> equivalenceRelation) {
+        this.expected            = expected;
         this.equivalenceRelation = equivalenceRelation;
-        this.expected = expected;
     }
 
     /**

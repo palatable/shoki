@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
+import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.ZipWith.zipWith;
 import static com.jnape.palatable.lambda.monoid.builtin.And.and;
 
@@ -47,6 +48,28 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
                 EquivalenceRelation<? super A> elementEqRel) {
             EquivalenceRelation<OC> sameElementsInOrder = (xs, ys) -> and().reduceLeft(zipWith(elementEqRel, xs, ys));
             return Sizable.EquivalenceRelations.<OC>sameSizes().and(sameElementsInOrder);
+        }
+    }
+
+    /**
+     * Common {@link HashingAlgorithm}s between {@link OrderedCollection}s.
+     */
+    final class HashingAlgorithms {
+        private HashingAlgorithms() {
+        }
+
+        /**
+         * A {@link HashingAlgorithm} that is derived from the elements contained in an {@link OrderedCollection} and
+         * their relative positions in the {@link OrderedCollection}.
+         *
+         * @param elementHashAlg the {@link HashingAlgorithm} to use for each element
+         * @param <A>            the element type
+         * @param <OC>           the {@link OrderedCollection} subtype of the argument
+         * @return the {@link HashingAlgorithm}
+         */
+        public static <A, OC extends OrderedCollection<?, A>> HashingAlgorithm<OC> elementsInOrder(
+                HashingAlgorithm<? super A> elementHashAlg) {
+            return xs -> foldLeft((hash, x) -> (hash * 31) + elementHashAlg.apply(x), 1, xs);
         }
     }
 }

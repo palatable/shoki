@@ -57,17 +57,22 @@ public class StrictQueueBenchmark {
         @Benchmark
         public void head(State state, Blackhole bh) {
             for (int i = 0; i < K100; i++) {
-                bh.consume(state.strictStack.head());
+                bh.consume(state.strictQueue.head());
             }
         }
 
         @Benchmark
         public StrictQueue<Integer> tail(State state) {
-            StrictQueue<Integer> stack = state.strictStack;
+            StrictQueue<Integer> stack = state.strictQueue;
             for (int i = 0; i < K100; i++) {
                 stack = stack.tail();
             }
             return stack;
+        }
+
+        @Benchmark
+        public void iteration(State state, Blackhole bh) {
+            state.strictQueue.forEach(bh::consume);
         }
 
         public static void main(String[] args) throws RunnerException {
@@ -76,13 +81,13 @@ public class StrictQueueBenchmark {
 
         @org.openjdk.jmh.annotations.State(Scope.Thread)
         public static class State {
-            StrictQueue<Integer> strictStack;
+            StrictQueue<Integer> strictQueue;
 
             @Setup(Level.Invocation)
             public void doSetup() {
-                strictStack = StrictQueue.empty();
+                strictQueue = StrictQueue.empty();
                 for (int i = 0; i < K100; i++) {
-                    strictStack = strictStack.cons(i);
+                    strictQueue = strictQueue.cons(i);
                 }
             }
         }
@@ -126,6 +131,11 @@ public class StrictQueueBenchmark {
                 for (int i = 0; i < K100; i++) {
                     bh.consume(javaState.arrayList.remove(0));
                 }
+            }
+
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.arrayList.forEach(bh::consume);
             }
 
             public static void main(String[] args) throws RunnerException {
@@ -180,6 +190,11 @@ public class StrictQueueBenchmark {
                 }
             }
 
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.linkedList.forEach(bh::consume);
+            }
+
             public static void main(String[] args) throws RunnerException {
                 new Runner(shokiOptions(b(StrictQueueBenchmark.Java.LinkedList.class),
                                         StrictQueueBenchmark.Java.LinkedList.class)).run();
@@ -229,6 +244,11 @@ public class StrictQueueBenchmark {
                 for (int i = 0; i < K100; i++) {
                     bh.consume(javaState.arrayDeque.pop());
                 }
+            }
+
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.arrayDeque.forEach(bh::consume);
             }
 
             public static void main(String[] args) throws RunnerException {

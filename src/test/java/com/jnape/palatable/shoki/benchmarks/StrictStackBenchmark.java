@@ -60,6 +60,11 @@ public class StrictStackBenchmark {
             return stack;
         }
 
+        @Benchmark
+        public void iteration(State state, Blackhole bh) {
+            state.strictStack.forEach(bh::consume);
+        }
+
         public static void main(String[] args) throws RunnerException {
             new Runner(shokiOptions(b(StrictStackBenchmark.Shoki.class), StrictStackBenchmark.Shoki.class)).run();
         }
@@ -113,6 +118,11 @@ public class StrictStackBenchmark {
                 }
             }
 
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.arrayList.forEach(bh::consume);
+            }
+
             public static void main(String[] args) throws RunnerException {
                 new Runner(shokiOptions(b(StrictStackBenchmark.Java.ArrayList.class),
                                         StrictStackBenchmark.Java.ArrayList.class)).run();
@@ -160,6 +170,11 @@ public class StrictStackBenchmark {
                 }
             }
 
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.linkedList.forEach(bh::consume);
+            }
+
             public static void main(String[] args) throws RunnerException {
                 new Runner(shokiOptions(b(StrictStackBenchmark.Java.LinkedList.class),
                                         StrictStackBenchmark.Java.LinkedList.class)).run();
@@ -204,6 +219,11 @@ public class StrictStackBenchmark {
                 for (int i = 0; i < K100; i++) {
                     bh.consume(javaState.arrayDeque.pop());
                 }
+            }
+
+            @Benchmark
+            public void iteration(State javaState, Blackhole bh) {
+                javaState.arrayDeque.forEach(bh::consume);
             }
 
             public static void main(String[] args) throws RunnerException {

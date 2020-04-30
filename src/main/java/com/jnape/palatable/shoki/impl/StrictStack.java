@@ -8,6 +8,8 @@ import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
 import com.jnape.palatable.shoki.api.Stack;
 
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
@@ -107,6 +109,32 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     public final boolean equals(Object other) {
         return other instanceof StrictStack<?> &&
                 equivalent(this, downcast(other), sameElementsSameOrder(objectEquals()));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final Iterator<A> iterator() {
+        return new Iterator<A>() {
+            StrictStack<A> rest = StrictStack.this;
+
+            @Override
+            public boolean hasNext() {
+                return rest instanceof Head<?>;
+            }
+
+            @Override
+            public A next() {
+                if (!hasNext())
+                    throw new NoSuchElementException();
+
+                Head<A> head = (Head<A>) this.rest;
+                A       next = head.head;
+                rest = head.tail;
+                return next;
+            }
+        };
     }
 
     /**

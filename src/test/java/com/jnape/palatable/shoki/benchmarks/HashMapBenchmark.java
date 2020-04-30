@@ -13,13 +13,11 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
-import static com.jnape.palatable.lambda.adt.choice.Choice2.b;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
-import static com.jnape.palatable.shoki.benchmarks.Benchmark.shokiOptions;
+import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -86,8 +84,7 @@ public class HashMapBenchmark {
         }
 
         public static void main(String[] args) throws RunnerException {
-            new Runner(shokiOptions(b(HashMapBenchmark.Shoki.class),
-                                    HashMapBenchmark.Shoki.class)).run();
+            runBenchmarks(HashMapBenchmark.Shoki.class);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -212,8 +209,7 @@ public class HashMapBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(HashMapBenchmark.Java.HashMap.class),
-                                        HashMapBenchmark.Java.HashMap.class)).run();
+                runBenchmarks(HashMapBenchmark.Java.HashMap.class);
             }
         }
 
@@ -265,8 +261,7 @@ public class HashMapBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(HashMapBenchmark.Java.LinkedHashMap.class),
-                                        HashMapBenchmark.Java.LinkedHashMap.class)).run();
+                runBenchmarks(HashMapBenchmark.Java.LinkedHashMap.class);
             }
         }
 
@@ -318,8 +313,7 @@ public class HashMapBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(HashMapBenchmark.Java.TreeMap.class),
-                                        HashMapBenchmark.Java.TreeMap.class)).run();
+                runBenchmarks(HashMapBenchmark.Java.TreeMap.class);
             }
         }
     }

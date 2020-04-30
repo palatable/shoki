@@ -12,12 +12,10 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
-import static com.jnape.palatable.lambda.adt.choice.Choice2.b;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
-import static com.jnape.palatable.shoki.benchmarks.Benchmark.shokiOptions;
+import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -59,8 +57,7 @@ public class HashMultiSetBenchmark {
         }
 
         public static void main(String[] args) throws RunnerException {
-            new Runner(shokiOptions(b(HashMultiSetBenchmark.Shoki.class),
-                                    HashMultiSetBenchmark.Shoki.class)).run();
+            runBenchmarks(HashMultiSetBenchmark.Shoki.class);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Benchmark)

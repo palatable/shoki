@@ -1,13 +1,13 @@
 package com.jnape.palatable.shoki.benchmarks;
 
-import com.jnape.palatable.lambda.adt.choice.Choice2;
 import org.openjdk.jmh.results.format.ResultFormatType;
+import org.openjdk.jmh.runner.Runner;
+import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
 import java.io.File;
 
-import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static java.lang.String.join;
 import static java.util.Arrays.copyOf;
 
@@ -18,9 +18,13 @@ public final class Benchmark {
     private static final String ROOT_PACKAGE_PATH = join("/", "src", "test", "java");
     private static final String RESULTS_DIR_NAME  = "results";
 
-    public static Options shokiOptions(Choice2<String, Class<?>> include, Class<?> benchmarkClass) {
+    public static void runBenchmarks(Class<?> benchmarkClass) throws RunnerException {
+        new Runner(shokiOptions(benchmarkClass)).run();
+    }
+
+    private static Options shokiOptions(Class<?> benchmarkClass) {
         return new OptionsBuilder()
-                .include(include.match(id(), Class::getCanonicalName))
+                .include(benchmarkClass.getCanonicalName())
                 .threads(Runtime.getRuntime().availableProcessors())
                 .resultFormat(ResultFormatType.JSON)
                 .result(resultsFilePath(benchmarkClass))

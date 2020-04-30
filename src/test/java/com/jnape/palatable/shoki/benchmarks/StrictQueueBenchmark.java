@@ -14,14 +14,12 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
 import java.util.Deque;
 
-import static com.jnape.palatable.lambda.adt.choice.Choice2.b;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
-import static com.jnape.palatable.shoki.benchmarks.Benchmark.shokiOptions;
+import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static com.jnape.palatable.shoki.benchmarks.QueueOps.snocRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.QueueOps.snocRangeShoki;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
@@ -76,7 +74,7 @@ public class StrictQueueBenchmark {
         }
 
         public static void main(String[] args) throws RunnerException {
-            new Runner(shokiOptions(b(StrictQueueBenchmark.Shoki.class), StrictQueueBenchmark.Shoki.class)).run();
+            runBenchmarks(StrictQueueBenchmark.Shoki.class);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -139,8 +137,7 @@ public class StrictQueueBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictQueueBenchmark.Java.ArrayList.class),
-                                        StrictQueueBenchmark.Java.ArrayList.class)).run();
+                runBenchmarks(StrictQueueBenchmark.Java.ArrayList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -196,8 +193,7 @@ public class StrictQueueBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictQueueBenchmark.Java.LinkedList.class),
-                                        StrictQueueBenchmark.Java.LinkedList.class)).run();
+                runBenchmarks(StrictQueueBenchmark.Java.LinkedList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -252,8 +248,7 @@ public class StrictQueueBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictQueueBenchmark.Java.ArrayDeque.class),
-                                        StrictQueueBenchmark.Java.ArrayDeque.class)).run();
+                runBenchmarks(StrictQueueBenchmark.Java.ArrayDeque.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)

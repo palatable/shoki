@@ -13,12 +13,10 @@ import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.infra.Blackhole;
-import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 
-import static com.jnape.palatable.lambda.adt.choice.Choice2.b;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
-import static com.jnape.palatable.shoki.benchmarks.Benchmark.shokiOptions;
+import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeShoki;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
@@ -66,7 +64,7 @@ public class StrictStackBenchmark {
         }
 
         public static void main(String[] args) throws RunnerException {
-            new Runner(shokiOptions(b(StrictStackBenchmark.Shoki.class), StrictStackBenchmark.Shoki.class)).run();
+            runBenchmarks(StrictStackBenchmark.Shoki.class);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -124,8 +122,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictStackBenchmark.Java.ArrayList.class),
-                                        StrictStackBenchmark.Java.ArrayList.class)).run();
+                runBenchmarks(StrictStackBenchmark.Java.ArrayList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -176,8 +173,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictStackBenchmark.Java.LinkedList.class),
-                                        StrictStackBenchmark.Java.LinkedList.class)).run();
+                runBenchmarks(StrictStackBenchmark.Java.LinkedList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -227,8 +223,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                new Runner(shokiOptions(b(StrictStackBenchmark.Java.ArrayDeque.class),
-                                        StrictStackBenchmark.Java.ArrayDeque.class)).run();
+                runBenchmarks(StrictStackBenchmark.Java.ArrayDeque.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)

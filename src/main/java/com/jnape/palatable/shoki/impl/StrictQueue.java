@@ -9,6 +9,7 @@ import com.jnape.palatable.shoki.api.SizeInfo.Known;
 import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
@@ -19,6 +20,7 @@ import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyIterator;
 
 /**
  * A strictly-evaluated, structure-sharing implementation of a {@link Queue} that can also be used as a {@link Stack}.
@@ -195,6 +197,11 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         public int hashCode() {
             return 0;
         }
+
+        @Override
+        public Iterator<A> iterator() {
+            return emptyIterator();
+        }
     }
 
     private static final class NonEmpty<A> extends StrictQueue<A> {
@@ -273,6 +280,30 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
                 }
             }
             return hashCode;
+        }
+
+        @Override
+        public Iterator<A> iterator() {
+            return new Iterator<A>() {
+                final Iterator<A> outgoing = NonEmpty.this.outgoing.iterator();
+                Iterator<A> incoming;
+
+                @Override
+                public boolean hasNext() {
+                    if (outgoing.hasNext())
+                        return true;
+                    if (incoming == null)
+                        incoming = NonEmpty.this.incoming.reverse().iterator();
+                    return incoming.hasNext();
+                }
+
+                @Override
+                public A next() {
+                    if (!hasNext())
+                        throw new NoSuchElementException();
+                    return outgoing.hasNext() ? outgoing.next() : incoming.next();
+                }
+            };
         }
     }
 }

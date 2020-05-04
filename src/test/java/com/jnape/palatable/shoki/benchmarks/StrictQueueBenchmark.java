@@ -91,6 +91,7 @@ public class StrictQueueBenchmark {
         }
     }
 
+
     public static class Java {
 
         public static void main(String[] args) throws RunnerException {

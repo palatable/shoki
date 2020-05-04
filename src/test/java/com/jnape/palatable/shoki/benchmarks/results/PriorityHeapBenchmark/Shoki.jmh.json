@@ -1,0 +1,84 @@
+[
+    {
+        "jmhVersion" : "1.19",
+        "benchmark" : "com.jnape.palatable.shoki.benchmarks.PriorityHeapBenchmark.Shoki.insert",
+        "mode" : "thrpt",
+        "threads" : 4,
+        "forks" : 5,
+        "jvm" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/bin/java",
+        "jvmArgs" : [
+            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=50283:/Applications/IntelliJ IDEA.app/Contents/bin",
+            "-Dfile.encoding=UTF-8"
+        ],
+        "jdkVersion" : "1.8.0_152",
+        "vmVersion" : "25.152-b16",
+        "warmupIterations" : 5,
+        "warmupTime" : "1 s",
+        "warmupBatchSize" : 1,
+        "measurementIterations" : 5,
+        "measurementTime" : "1 s",
+        "measurementBatchSize" : 1,
+        "primaryMetric" : {
+            "score" : 3.737436225989458,
+            "scoreError" : 0.5262350885009849,
+            "scoreConfidence" : [
+                3.211201137488473,
+                4.263671314490443
+            ],
+            "scorePercentiles" : {
+                "0.0" : 1.7350690368432713,
+                "50.0" : 3.9039754485350224,
+                "90.0" : 4.333224215128659,
+                "95.0" : 4.51434416202679,
+                "99.0" : 4.5917184072928725,
+                "99.9" : 4.5917184072928725,
+                "99.99" : 4.5917184072928725,
+                "99.999" : 4.5917184072928725,
+                "99.9999" : 4.5917184072928725,
+                "100.0" : 4.5917184072928725
+            },
+            "scoreUnit" : "ops/us",
+            "rawData" : [
+                [
+                    4.310768834654456,
+                    4.1312965440947815,
+                    4.148663658442223,
+                    4.22570830769427,
+                    4.002130761392737
+                ],
+                [
+                    1.7350690368432713,
+                    3.052423076652013,
+                    3.165502535962708,
+                    3.9039754485350224,
+                    4.5917184072928725
+                ],
+                [
+                    4.333804256405931,
+                    4.332837520943811,
+                    4.282140170591492,
+                    4.252203142333674,
+                    1.8813426281336314
+                ],
+                [
+                    3.2587324738935193,
+                    3.4513350732630945,
+                    3.516668555137363,
+                    3.8021517211080984,
+                    3.574436091387152
+                ],
+                [
+                    3.950534233539299,
+                    3.7803031416319643,
+                    3.789733493972758,
+                    3.833908216084561,
+                    4.12851831974574
+                ]
+            ]
+        },
+        "secondaryMetrics" : {
+        }
+    }
+]
+
+

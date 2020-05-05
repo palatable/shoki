@@ -8,7 +8,7 @@ import java.util.NoSuchElementException;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 
 /**
- * A recursive, homogeneous data structure supporting singly-linked iteration.
+ * A recursive, homogeneous data structure supporting sequential access iteration.
  *
  * @param <A> the element type
  * @see Collection

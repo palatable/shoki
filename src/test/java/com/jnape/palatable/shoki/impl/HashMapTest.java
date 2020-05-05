@@ -222,7 +222,7 @@ public class HashMapTest {
     public void toStringIsUseful() {
         assertEquals("HashMap[]", empty().toString());
         assertEquals("HashMap[(key=value)]", empty().put("key", "value").toString());
-        assertEquals("HashMap[(foo=foo value), (baz=baz value), (bar=bar value)]",
+        assertEquals("HashMap[(foo=foo value), (bar=bar value), (baz=baz value)]",
                      empty(objectEquals(),
                            StubbedHashingAlgorithm.<String>stubbedHashingAlgorithm()
                                    .stub("foo", 0b00_00000_00000_00000_00000_00000_00000)
@@ -246,7 +246,7 @@ public class HashMapTest {
                            .put("foo", 1)
                            .put("bar", 2)
                            .put("baz", 3),
-                   iterates(tuple("foo", 1), tuple("baz", 3), tuple("bar", 2)));
+                   iterates(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
     }
 
     @Test

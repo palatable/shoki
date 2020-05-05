@@ -16,8 +16,8 @@ public class StackTest {
     public void consAll() {
         assertThat(DefaultMethodsStack.delegate(empty()).consAll(StrictStack.of(1, 2, 3)),
                    equivalentTo(StrictStack.of(3, 2, 1), sameElementsSameOrder(objectEquals())));
-        assertThat(DefaultMethodsStack.delegate(StrictStack.of(5, 4)).consAll(StrictStack.of(1, 2, 3)),
-                   equivalentTo(StrictStack.of(5, 4, 3, 2, 1), sameElementsSameOrder(objectEquals())));
+        assertThat(DefaultMethodsStack.delegate(StrictStack.of(4, 5)).consAll(StrictStack.of(3, 2, 1)),
+                   equivalentTo(StrictStack.of(1, 2, 3, 4, 5), sameElementsSameOrder(objectEquals())));
         assertThat(DefaultMethodsStack.delegate(StrictStack.of(5, 4)).consAll(StrictStack.empty()),
                    equivalentTo(StrictStack.of(5, 4), sameElementsSameOrder(objectEquals())));
     }

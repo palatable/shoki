@@ -1,7 +1,6 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.SizeInfo;
@@ -23,7 +22,6 @@ import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
-import static java.util.Arrays.asList;
 
 /**
  * A strictly-evaluated, structure-sharing implementation of {@link Stack}.
@@ -188,7 +186,10 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      */
     @SafeVarargs
     public static <A> StrictStack<A> of(A a, A... as) {
-        return foldLeft(StrictStack::cons, empty(), Cons.cons(a, asList(as)));
+        StrictStack<A> result = empty();
+        for (int i = as.length - 1; i >= 0; i--)
+             result = result.cons(as[i]);
+        return result.cons(a);
     }
 
     private static final class Head<A> extends StrictStack<A> {

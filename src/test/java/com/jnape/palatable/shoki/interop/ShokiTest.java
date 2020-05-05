@@ -36,7 +36,7 @@ public class ShokiTest {
     public void strictStack() {
         assertEquals(StrictStack.empty(), Shoki.strictStack(emptyList()));
 
-        StrictStack<Integer> stackOneThroughFive = StrictStack.of(1, 2, 3, 4, 5).reverse();
+        StrictStack<Integer> stackOneThroughFive = StrictStack.of(1, 2, 3, 4, 5);
         List<Integer>        listOneThroughFive  = asList(1, 2, 3, 4, 5);
 
         AtomicBoolean descendingIteratorUsed = new AtomicBoolean();

@@ -64,7 +64,7 @@ public class StrictStackTest {
 
     @Test
     public void convenienceStaticFactoryMethod() {
-        assertEquals(StrictStack.empty().cons(1).cons(2).cons(3), StrictStack.of(1, 2, 3));
+        assertEquals(StrictStack.empty().cons(3).cons(2).cons(1), StrictStack.of(1, 2, 3));
     }
 
     @Test
@@ -79,6 +79,6 @@ public class StrictStackTest {
     @Test
     public void toStringImplementation() {
         assertEquals("StrictStack[]", StrictStack.empty().toString());
-        assertEquals("StrictStack[1, 2, 3]", StrictStack.of(3, 2, 1).toString());
+        assertEquals("StrictStack[1, 2, 3]", StrictStack.of(1, 2, 3).toString());
     }
 }

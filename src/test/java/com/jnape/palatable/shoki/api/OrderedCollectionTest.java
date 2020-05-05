@@ -24,7 +24,7 @@ public class OrderedCollectionTest {
                     OrderedCollection.EquivalenceRelations.sameElementsSameOrder(objectEquals());
 
             OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
-            OrderedCollection<?, Integer> queue = StrictQueue.of(3, 2, 1);
+            OrderedCollection<?, Integer> queue = StrictQueue.of(1, 2, 3);
 
             assertThat(stack, equivalentTo(queue, sameElementsSameOrder));
             assertThat(queue, equivalentTo(stack, sameElementsSameOrder));
@@ -51,7 +51,7 @@ public class OrderedCollectionTest {
                     OrderedCollection.HashingAlgorithms.elementsInOrder(objectHashCode());
 
             OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
-            OrderedCollection<?, Integer> queue = StrictQueue.of(3, 2, 1);
+            OrderedCollection<?, Integer> queue = StrictQueue.of(1, 2, 3);
 
             assertThat(stack, hashesEquivalentlyTo(queue, elementsInOrder));
             assertThat(queue, hashesEquivalentlyTo(stack, elementsInOrder));

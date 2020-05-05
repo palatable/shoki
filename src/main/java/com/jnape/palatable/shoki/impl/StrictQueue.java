@@ -21,7 +21,7 @@ import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.Collections.emptyIterator;
 
 /**
- * A strictly-evaluated, structure-sharing implementation of a {@link Queue} that can also be used as a {@link Stack}.
+ * A strictly-evaluated {@link Queue} that can also be used as a {@link Stack}.
  *
  * @param <A> the element type
  * @see StrictStack

@@ -24,7 +24,7 @@ import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelatio
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 
 /**
- * A strictly-evaluated, structure-sharing implementation of {@link Stack}.
+ * A strictly-evaluated {@link Stack}.
  *
  * @param <A> the element type
  * @see StrictQueue

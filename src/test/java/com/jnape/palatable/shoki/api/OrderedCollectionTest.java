@@ -1,13 +1,13 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.impl.StrictQueue;
-import com.jnape.palatable.shoki.impl.StrictStack;
 import org.junit.Test;
 import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static com.jnape.palatable.shoki.testsupport.HashingAlgorithmMatcher.hashesEquivalentlyTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -23,8 +23,8 @@ public class OrderedCollectionTest {
             EquivalenceRelation<? super OrderedCollection<?, Integer>> sameElementsSameOrder =
                     OrderedCollection.EquivalenceRelations.sameElementsSameOrder(objectEquals());
 
-            OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
-            OrderedCollection<?, Integer> queue = StrictQueue.of(1, 2, 3);
+            OrderedCollection<?, Integer> stack = strictStack(1, 2, 3);
+            OrderedCollection<?, Integer> queue = strictQueue(1, 2, 3);
 
             assertThat(stack, equivalentTo(queue, sameElementsSameOrder));
             assertThat(queue, equivalentTo(stack, sameElementsSameOrder));
@@ -39,7 +39,7 @@ public class OrderedCollectionTest {
             assertThat(queue, not(equivalentTo(queue.reverse(), sameElementsSameOrder)));
             assertThat(stack, not(equivalentTo(queue.reverse(), sameElementsSameOrder)));
             assertThat(queue.reverse(), not(equivalentTo(stack, sameElementsSameOrder)));
-            assertThat(queue.reverse(), not(equivalentTo(StrictQueue.empty(), sameElementsSameOrder)));
+            assertThat(queue.reverse(), not(equivalentTo(strictQueue(), sameElementsSameOrder)));
         }
     }
 
@@ -50,8 +50,8 @@ public class OrderedCollectionTest {
             HashingAlgorithm<? super OrderedCollection<?, Integer>> elementsInOrder =
                     OrderedCollection.HashingAlgorithms.elementsInOrder(objectHashCode());
 
-            OrderedCollection<?, Integer> stack = StrictStack.of(1, 2, 3);
-            OrderedCollection<?, Integer> queue = StrictQueue.of(1, 2, 3);
+            OrderedCollection<?, Integer> stack = strictStack(1, 2, 3);
+            OrderedCollection<?, Integer> queue = strictQueue(1, 2, 3);
 
             assertThat(stack, hashesEquivalentlyTo(queue, elementsInOrder));
             assertThat(queue, hashesEquivalentlyTo(stack, elementsInOrder));
@@ -66,7 +66,7 @@ public class OrderedCollectionTest {
             assertThat(queue, not(hashesEquivalentlyTo(queue.reverse(), elementsInOrder)));
             assertThat(stack, not(hashesEquivalentlyTo(queue.reverse(), elementsInOrder)));
             assertThat(queue.reverse(), not(hashesEquivalentlyTo(stack, elementsInOrder)));
-            assertThat(queue.reverse(), not(hashesEquivalentlyTo(StrictQueue.empty(), elementsInOrder)));
+            assertThat(queue.reverse(), not(hashesEquivalentlyTo(strictQueue(), elementsInOrder)));
         }
     }
 }

@@ -5,15 +5,13 @@ import com.jnape.palatable.shoki.impl.HashMap;
 
 import java.util.Objects;
 
-import static com.jnape.palatable.shoki.impl.HashMap.empty;
-
 /**
  * A {@link HashingAlgorithm} that can be used to stub custom hash results for values.
  *
  * @param <A> the type to hash
  */
 public final class StubbedHashingAlgorithm<A> implements HashingAlgorithm<A> {
-    private static final StubbedHashingAlgorithm<?> INSTANCE = new StubbedHashingAlgorithm<>(empty());
+    private static final StubbedHashingAlgorithm<?> INSTANCE = new StubbedHashingAlgorithm<>(HashMap.hashMap());
 
     private final HashMap<A, Integer> table;
 

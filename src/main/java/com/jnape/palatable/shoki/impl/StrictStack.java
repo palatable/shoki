@@ -46,8 +46,8 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     }
 
     /**
-     * The remaining elements after removing the head of this {@link StrictStack}, or {@link StrictStack#empty()}
-     * if there are no elements. <code>O(1)</code>.
+     * The remaining elements after removing the head of this {@link StrictStack}, or an empty {@link StrictStack} if
+     * there is no head. <code>O(1)</code>.
      *
      * @return the tail of this {@link StrictStack}
      */
@@ -61,7 +61,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      */
     @Override
     public StrictStack<A> reverse() {
-        return foldLeft(StrictStack::cons, StrictStack.empty(), this);
+        return foldLeft(StrictStack::cons, strictStack(), this);
     }
 
     /**
@@ -166,30 +166,20 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     }
 
     /**
-     * The empty singleton instance of this {@link StrictStack}. <code>O(1)</code>.
+     * Create a {@link StrictStack} of zero or more elements, with the elements queued for removal from left to right.
+     * <code>O(n)</code>.
      *
-     * @param <A> the {@link StrictStack} element type
-     * @return an empty stack
-     */
-    @SuppressWarnings("unchecked")
-    public static <A> StrictStack<A> empty() {
-        return (StrictStack<A>) Empty.INSTANCE;
-    }
-
-    /**
-     * Convenience static factory method to construct an {@link StrictStack} from varargs elements. <code>O(n)</code>.
-     *
-     * @param a   the first element to {@link StrictStack#cons(Object) cons}
-     * @param as  the remaining elements to {@link StrictStack#cons(Object) cons} from back to front
-     * @param <A> the {@link StrictStack} element type
-     * @return the new {@link StrictStack}
+     * @param as  the elements to {@link StrictStack#cons(Object) cons} from back to front
+     * @param <A> the element type
+     * @return the {@link StrictStack}
      */
     @SafeVarargs
-    public static <A> StrictStack<A> of(A a, A... as) {
-        StrictStack<A> result = empty();
+    public static <A> StrictStack<A> strictStack(A... as) {
+        @SuppressWarnings("unchecked")
+        StrictStack<A> result = (StrictStack<A>) Empty.INSTANCE;
         for (int i = as.length - 1; i >= 0; i--)
              result = result.cons(as[i]);
-        return result.cons(a);
+        return result;
     }
 
     private static final class Head<A> extends StrictStack<A> {

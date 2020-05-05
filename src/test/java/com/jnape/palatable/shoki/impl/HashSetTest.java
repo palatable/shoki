@@ -12,6 +12,7 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -24,134 +25,134 @@ public class HashSetTest {
 
     @Test
     public void add() {
-        assertEquals(HashSet.of("foo"), HashSet.<String>empty().add("foo"));
-        assertEquals(HashSet.of("foo"), HashSet.<String>empty().add("foo").add("foo"));
-        assertEquals(HashSet.of("foo", "bar"), HashSet.<String>empty().add("foo").add("bar"));
+        assertEquals(hashSet("foo"), HashSet.<String>hashSet().add("foo"));
+        assertEquals(hashSet("foo"), HashSet.<String>hashSet().add("foo").add("foo"));
+        assertEquals(hashSet("foo", "bar"), HashSet.<String>hashSet().add("foo").add("bar"));
     }
 
     @Test
     public void remove() {
-        assertEquals(HashSet.<String>empty(), HashSet.<String>empty().remove("foo"));
-        assertEquals(HashSet.<String>empty(), HashSet.<String>empty().add("foo").remove("foo"));
-        assertEquals(HashSet.of("bar"), HashSet.<String>empty().add("foo").add("bar").remove("foo"));
+        assertEquals(HashSet.<String>hashSet(), HashSet.<String>hashSet().remove("foo"));
+        assertEquals(HashSet.<String>hashSet(), HashSet.<String>hashSet().add("foo").remove("foo"));
+        assertEquals(hashSet("bar"), HashSet.<String>hashSet().add("foo").add("bar").remove("foo"));
     }
 
     @Test
     public void head() {
-        assertEquals(nothing(), HashSet.empty().head());
-        assertEquals(just("foo"), HashSet.<String>empty().add("foo").head());
-        assertEquals(just("foo"), HashSet.<String>empty().add("foo").add("bar").head());
-        assertEquals(just("foo"), HashSet.<String>empty().add("bar").add("foo").head());
+        assertEquals(nothing(), hashSet().head());
+        assertEquals(just("foo"), HashSet.<String>hashSet().add("foo").head());
+        assertEquals(just("foo"), HashSet.<String>hashSet().add("foo").add("bar").head());
+        assertEquals(just("foo"), HashSet.<String>hashSet().add("bar").add("foo").head());
     }
 
     @Test
     public void tail() {
-        assertEquals(HashSet.empty(), HashSet.empty().tail());
-        assertEquals(HashSet.empty(), HashSet.<String>empty().add("foo").tail());
-        assertEquals(HashSet.of("bar"), HashSet.<String>empty().add("foo").add("bar").tail());
-        assertEquals(HashSet.of("bar"), HashSet.<String>empty().add("bar").add("foo").tail());
+        assertEquals(hashSet(), hashSet().tail());
+        assertEquals(hashSet(), HashSet.<String>hashSet().add("foo").tail());
+        assertEquals(hashSet("bar"), HashSet.<String>hashSet().add("foo").add("bar").tail());
+        assertEquals(hashSet("bar"), HashSet.<String>hashSet().add("bar").add("foo").tail());
     }
 
     @Test
     public void contains() {
-        assertFalse(HashSet.<String>empty().contains("foo"));
-        assertFalse(HashSet.<String>empty().add("bar").contains("foo"));
-        assertTrue(HashSet.<String>empty().add("foo").contains("foo"));
-        assertTrue(HashSet.<String>empty().add("foo").add("bar").contains("foo"));
-        assertFalse(HashSet.<String>empty().add("foo").remove("foo").contains("foo"));
+        assertFalse(HashSet.<String>hashSet().contains("foo"));
+        assertFalse(HashSet.<String>hashSet().add("bar").contains("foo"));
+        assertTrue(HashSet.<String>hashSet().add("foo").contains("foo"));
+        assertTrue(HashSet.<String>hashSet().add("foo").add("bar").contains("foo"));
+        assertFalse(HashSet.<String>hashSet().add("foo").remove("foo").contains("foo"));
     }
 
     @Test
     public void isEmpty() {
-        assertTrue(HashSet.empty().isEmpty());
-        assertFalse(HashSet.<String>empty().add("foo").isEmpty());
-        assertTrue(HashSet.<String>empty().add("foo").remove("foo").isEmpty());
+        assertTrue(hashSet().isEmpty());
+        assertFalse(HashSet.<String>hashSet().add("foo").isEmpty());
+        assertTrue(HashSet.<String>hashSet().add("foo").remove("foo").isEmpty());
     }
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(zero()), HashSet.empty().sizeInfo());
-        assertEquals(known(one()), HashSet.<String>empty().add("foo").sizeInfo());
-        assertEquals(known(one()), HashSet.<String>empty().add("foo").add("foo").sizeInfo());
-        assertEquals(known(abs(2)), HashSet.<String>empty().add("foo").add("bar").sizeInfo());
-        assertEquals(known(zero()), HashSet.<String>empty().add("foo").remove("foo").sizeInfo());
+        assertEquals(known(zero()), hashSet().sizeInfo());
+        assertEquals(known(one()), HashSet.<String>hashSet().add("foo").sizeInfo());
+        assertEquals(known(one()), HashSet.<String>hashSet().add("foo").add("foo").sizeInfo());
+        assertEquals(known(abs(2)), HashSet.<String>hashSet().add("foo").add("bar").sizeInfo());
+        assertEquals(known(zero()), HashSet.<String>hashSet().add("foo").remove("foo").sizeInfo());
     }
 
     @Test
     public void equalsAndHashCode() {
-        assertEquals(HashSet.empty(), HashSet.empty());
-        assertNotEquals(HashSet.empty(), HashSet.<String>empty().add("foo"));
-        assertEquals(HashSet.<String>empty(), HashSet.<String>empty().add("foo").remove("foo"));
-        assertEquals(HashSet.<String>empty().add("foo"), HashSet.<String>empty().add("foo"));
-        assertNotEquals(HashSet.<String>empty().add("foo"), HashSet.<String>empty().add("bar"));
-        assertNotEquals(HashSet.<String>empty().add("foo"), new Object());
+        assertEquals(hashSet(), hashSet());
+        assertNotEquals(hashSet(), HashSet.<String>hashSet().add("foo"));
+        assertEquals(HashSet.<String>hashSet(), HashSet.<String>hashSet().add("foo").remove("foo"));
+        assertEquals(HashSet.<String>hashSet().add("foo"), HashSet.<String>hashSet().add("foo"));
+        assertNotEquals(HashSet.<String>hashSet().add("foo"), HashSet.<String>hashSet().add("bar"));
+        assertNotEquals(HashSet.<String>hashSet().add("foo"), new Object());
 
-        assertEquals(HashSet.empty().hashCode(), HashSet.empty().hashCode());
-        assertNotEquals(HashSet.empty().hashCode(), HashSet.of("foo").hashCode());
-        assertNotEquals(HashSet.of("foo").hashCode(), HashSet.of("bar").hashCode());
-        assertEquals(HashSet.of("foo").hashCode(), HashSet.of("foo", "foo").hashCode());
+        assertEquals(hashSet().hashCode(), hashSet().hashCode());
+        assertNotEquals(hashSet().hashCode(), hashSet("foo").hashCode());
+        assertNotEquals(hashSet("foo").hashCode(), hashSet("bar").hashCode());
+        assertEquals(hashSet("foo").hashCode(), hashSet("foo", "foo").hashCode());
     }
 
     @Test
     public void usefulToString() {
-        assertEquals("HashSet[]", HashSet.empty().toString());
-        assertEquals("HashSet[foo, bar, baz]", HashSet.<String>empty().add("foo").add("bar").add("baz").toString());
-        assertEquals("HashSet[foo, bar, baz]", HashSet.<String>empty().add("bar").add("baz").add("foo").toString());
+        assertEquals("HashSet[]", hashSet().toString());
+        assertEquals("HashSet[foo, bar, baz]", HashSet.<String>hashSet().add("foo").add("bar").add("baz").toString());
+        assertEquals("HashSet[foo, bar, baz]", HashSet.<String>hashSet().add("bar").add("baz").add("foo").toString());
     }
 
     @Test
     public void emptySingleton() {
-        assertSame(HashSet.empty(), HashSet.empty());
+        assertSame(hashSet(), hashSet());
     }
 
     @Test
     public void customEquivalenceRelationAndHashCode() {
         Integer saboteur = 666;
-        HashSet<Integer> identityHashSet = HashSet.<Integer>empty(referenceEquals(), identityHashCode())
+        HashSet<Integer> identityHashSet = HashSet.<Integer>hashSet(referenceEquals(), identityHashCode())
                 .add(1)
                 .add(saboteur);
         assertTrue(identityHashSet.contains(1));
         assertFalse(identityHashSet.contains(666));
         assertTrue(identityHashSet.contains(saboteur));
 
-        assertEquals(identityHashSet, HashSet.of(referenceEquals(), identityHashCode(), 1, saboteur));
-        assertNotEquals(HashSet.of(1, 666), identityHashSet);
-        assertEquals(identityHashSet, HashSet.of(1, 666));
+        assertEquals(identityHashSet, hashSet(referenceEquals(), identityHashCode(), 1, saboteur));
+        assertNotEquals(hashSet(1, 666), identityHashSet);
+        assertEquals(identityHashSet, hashSet(1, 666));
     }
 
     @Test
     public void intersection() {
-        assertEquals(HashSet.empty(), HashSet.empty().intersection(HashSet.empty()));
-        assertEquals(HashSet.empty(), HashSet.empty().intersection(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.empty(), HashSet.of(1, 2, 3).intersection(HashSet.empty()));
-        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).intersection(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.of(2, 3), HashSet.of(1, 2, 3).intersection(HashSet.of(2, 3, 4)));
-        assertEquals(HashSet.of(2, 3), HashSet.of(2, 3, 4).intersection(HashSet.of(1, 2, 3)));
+        assertEquals(hashSet(), hashSet().intersection(hashSet()));
+        assertEquals(hashSet(), hashSet().intersection(hashSet(1, 2, 3)));
+        assertEquals(hashSet(), hashSet(1, 2, 3).intersection(hashSet()));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).intersection(hashSet(1, 2, 3)));
+        assertEquals(hashSet(2, 3), hashSet(1, 2, 3).intersection(hashSet(2, 3, 4)));
+        assertEquals(hashSet(2, 3), hashSet(2, 3, 4).intersection(hashSet(1, 2, 3)));
     }
 
     @Test
     public void union() {
-        assertEquals(HashSet.empty(), HashSet.empty().union(HashSet.empty()));
-        assertEquals(HashSet.of(1, 2, 3), HashSet.empty().union(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).union(HashSet.empty()));
-        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).union(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.of(1, 2, 3, 4), HashSet.of(1, 2, 3).union(HashSet.of(2, 3, 4)));
-        assertEquals(HashSet.of(1, 2, 3, 4), HashSet.of(2, 3, 4).union(HashSet.of(1, 2, 3)));
+        assertEquals(hashSet(), hashSet().union(hashSet()));
+        assertEquals(hashSet(1, 2, 3), hashSet().union(hashSet(1, 2, 3)));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).union(hashSet()));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).union(hashSet(1, 2, 3)));
+        assertEquals(hashSet(1, 2, 3, 4), hashSet(1, 2, 3).union(hashSet(2, 3, 4)));
+        assertEquals(hashSet(1, 2, 3, 4), hashSet(2, 3, 4).union(hashSet(1, 2, 3)));
     }
 
     @Test
     public void difference() {
-        assertEquals(HashSet.empty(), HashSet.empty().difference(HashSet.empty()));
-        assertEquals(HashSet.empty(), HashSet.empty().difference(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.of(1, 2, 3), HashSet.of(1, 2, 3).difference(HashSet.empty()));
-        assertEquals(HashSet.empty(), HashSet.of(1, 2, 3).difference(HashSet.of(1, 2, 3)));
-        assertEquals(HashSet.of(1), HashSet.of(1, 2, 3).difference(HashSet.of(2, 3, 4)));
-        assertEquals(HashSet.of(4), HashSet.of(2, 3, 4).difference(HashSet.of(1, 2, 3)));
+        assertEquals(hashSet(), hashSet().difference(hashSet()));
+        assertEquals(hashSet(), hashSet().difference(hashSet(1, 2, 3)));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).difference(hashSet()));
+        assertEquals(hashSet(), hashSet(1, 2, 3).difference(hashSet(1, 2, 3)));
+        assertEquals(hashSet(1), hashSet(1, 2, 3).difference(hashSet(2, 3, 4)));
+        assertEquals(hashSet(4), hashSet(2, 3, 4).difference(hashSet(1, 2, 3)));
     }
 
     @Test
     public void symmetricDifference() {
-        HashSet<Object> empty = HashSet.empty();
+        HashSet<Object> empty = hashSet();
         assertThat(DefaultMethodsSet.delegate(empty).symmetricDifference(empty),
                    equivalentTo(empty.symmetricDifference(empty), sameElements()));
 

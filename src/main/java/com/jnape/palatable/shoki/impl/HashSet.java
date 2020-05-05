@@ -3,7 +3,6 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
-import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Natural;
@@ -16,11 +15,8 @@ import java.util.Objects;
 import static com.jnape.palatable.lambda.adt.Unit.UNIT;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static java.lang.String.join;
-import static java.util.Arrays.asList;
 
 /**
  * A {@link Set} that stores elements internally in a {@link HashMap}, supporting the same time/space performance
@@ -32,7 +28,7 @@ import static java.util.Arrays.asList;
  */
 public final class HashSet<A> implements Set<Natural, A> {
 
-    private static final HashSet<?> DEFAULT_EMPTY = new HashSet<>(HashMap.empty());
+    private static final HashSet<?> EMPTY_OBJECT_DEFAULTS = new HashSet<>(hashMap());
 
     private final HashMap<A, Unit> map;
 
@@ -182,61 +178,43 @@ public final class HashSet<A> implements Set<Natural, A> {
     }
 
     /**
-     * Create an empty {@link HashSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}.
-     * <code>O(1)</code>.
+     * Create a {@link HashSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}, populated by
+     * zero or more given entries. <code>O(n)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
+     * @param as                  the elements
      * @param <A>                 the element type
-     * @return the empty {@link HashSet}
-     */
-    public static <A> HashSet<A> empty(EquivalenceRelation<A> equivalenceRelation,
-                                       HashingAlgorithm<A> hashingAlgorithm) {
-        return new HashSet<>(HashMap.empty(equivalenceRelation, hashingAlgorithm));
-    }
-
-    /**
-     * The empty singleton {@link HashSet} using {@link Objects#equals(Object, Object) Object equality} and
-     * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively. <code>O(1)</code>.
-     *
-     * @param <A> the element type
-     * @return the empty {@link HashSet}
-     */
-    @SuppressWarnings("unchecked")
-    public static <A> HashSet<A> empty() {
-        return (HashSet<A>) DEFAULT_EMPTY;
-    }
-
-    /**
-     * Create a new {@link HashSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}, populated
-     * by one or more given entries. <code>O(n)</code>.
-     *
-     * @param equivalenceRelation the {@link EquivalenceRelation}
-     * @param hashingAlgorithm    the {@link HashingAlgorithm}
-     * @param a                   the first element
-     * @param as                  the rest of the elements
-     * @param <A>                 the element type
-     * @return the populated {@link HashSet}
+     * @return the {@link HashSet}
      */
     @SafeVarargs
-    public static <A> HashSet<A> of(EquivalenceRelation<A> equivalenceRelation, HashingAlgorithm<A> hashingAlgorithm,
-                                    A a, A... as) {
-        return foldLeft(HashSet::add, HashSet.empty(equivalenceRelation, hashingAlgorithm), Cons.cons(a, asList(as)));
+    public static <A> HashSet<A> hashSet(EquivalenceRelation<A> equivalenceRelation,
+                                         HashingAlgorithm<A> hashingAlgorithm,
+                                         A... as) {
+        return new HashSet<>(backingHashMap(hashMap(equivalenceRelation, hashingAlgorithm), as));
     }
 
     /**
-     * Create a new {@link HashSet} using {@link Objects#equals(Object, Object) Object equality} and
+     * Create a {@link HashSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, populated by one or more given entries. <code>O(n)</code>.
+     * respectively, populated by zero or more given entries. <code>O(n)</code>.
      *
-     * @param a   the first element
-     * @param as  the rest of the elements
+     * @param as  the elements
      * @param <A> the element type
-     * @return the populated {@link HashSet}
+     * @return the {@link HashSet}
      */
     @SafeVarargs
-    public static <A> HashSet<A> of(A a, A... as) {
-        return of(objectEquals(), objectHashCode(), a, as);
+    public static <A> HashSet<A> hashSet(A... as) {
+        @SuppressWarnings("unchecked")
+        HashSet<A> emptyObjectDefaults = (HashSet<A>) EMPTY_OBJECT_DEFAULTS;
+        return as.length == 0
+               ? emptyObjectDefaults
+               : new HashSet<>(backingHashMap(hashMap(), as));
+    }
+
+    private static <A> HashMap<A, Unit> backingHashMap(HashMap<A, Unit> hashMap, A[] as) {
+        for (A a : as)
+            hashMap = hashMap.put(a, UNIT);
+        return hashMap;
     }
 }

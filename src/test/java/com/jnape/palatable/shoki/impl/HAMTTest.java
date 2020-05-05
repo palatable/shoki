@@ -15,6 +15,7 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.referenceEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.impl.Bitmap32.setBit;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
@@ -68,8 +69,8 @@ public class HAMTTest {
                          entry.put("bar", 2, "bar".hashCode(), objectEquals(), objectHashCode(), 0));
             assertEquals(new Node<>(1,
                                     new Object[]{new Collision<>("bar".hashCode(),
-                                                                 StrictStack.of(new Entry<>("foo", 1),
-                                                                                new Entry<>("bar", 2)))}),
+                                                                 strictStack(new Entry<>("foo", 1),
+                                                                             new Entry<>("bar", 2)))}),
                          entry.put("bar", 2, "bar".hashCode(), objectEquals(), objectHashCode(), 30));
         }
     }
@@ -80,9 +81,9 @@ public class HAMTTest {
 
         @Before
         public void setUp() {
-            collision = new Collision<>(0, StrictStack.of(new Entry<>("foo", 1),
-                                                          new Entry<>("bar", 2),
-                                                          new Entry<>("baz", 3)));
+            collision = new Collision<>(0, strictStack(new Entry<>("foo", 1),
+                                                       new Entry<>("bar", 2),
+                                                       new Entry<>("baz", 3)));
         }
 
         @Test
@@ -104,44 +105,44 @@ public class HAMTTest {
 
         @Test
         public void put() {
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2),
-                                                           new Entry<>("foo", -1))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2),
+                                                        new Entry<>("foo", -1))),
                          collision.put("foo", -1, 0, objectEquals(), objectHashCode(), -1));
 
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2),
-                                                           new Entry<>("foo", 1),
-                                                           new Entry<>("qux", 0))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2),
+                                                        new Entry<>("foo", 1),
+                                                        new Entry<>("qux", 0))),
                          collision.put("qux", 0, 0, objectEquals(), objectHashCode(), -1));
 
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2),
-                                                           new Entry<>("foo", 1),
-                                                           new Entry<>("foo", 0))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2),
+                                                        new Entry<>("foo", 1),
+                                                        new Entry<>("foo", 0))),
                          collision.put("foo", 0, 0, (x, y) -> false, objectHashCode(), -1));
         }
 
         @Test
         public void remove() {
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2))),
                          collision.remove("foo", 0, objectEquals(), 0));
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("foo", 1))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("foo", 1))),
                          collision.remove("bar", 0, objectEquals(), 0));
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("bar", 2),
-                                                           new Entry<>("foo", 1))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("bar", 2),
+                                                        new Entry<>("foo", 1))),
                          collision.remove("baz", 0, objectEquals(), 0));
 
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2),
-                                                           new Entry<>("foo", 1))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2),
+                                                        new Entry<>("foo", 1))),
                          collision.remove("missing", 0, objectEquals(), 0));
 
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                           new Entry<>("bar", 2),
-                                                           new Entry<>("foo", 1))),
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                        new Entry<>("bar", 2),
+                                                        new Entry<>("foo", 1))),
                          collision.remove("foo", 0, (x, y) -> false, 0));
 
             assertEquals(collision, collision.remove("foo", -1, objectEquals(), 0));
@@ -159,15 +160,15 @@ public class HAMTTest {
 
         @Test
         public void equalsAndHashCode() {
-            assertEquals(new Collision<>(0, StrictStack.empty()), new Collision<>(0, StrictStack.empty()));
-            assertNotEquals(new Collision<>(0, StrictStack.empty()),
-                            new Collision<>(1, StrictStack.empty()));
-            assertEquals(new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))),
-                         new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))));
-            assertNotEquals(new Collision<>(0, StrictStack.empty()),
-                            new Collision<>(0, StrictStack.of(new Entry<>("foo", 1))));
+            assertEquals(new Collision<>(0, strictStack()), new Collision<>(0, strictStack()));
+            assertNotEquals(new Collision<>(0, strictStack()),
+                            new Collision<>(1, strictStack()));
+            assertEquals(new Collision<>(0, strictStack(new Entry<>("foo", 1))),
+                         new Collision<>(0, strictStack(new Entry<>("foo", 1))));
+            assertNotEquals(new Collision<>(0, strictStack()),
+                            new Collision<>(0, strictStack(new Entry<>("foo", 1))));
 
-            assertNotEquals(new Collision<>(0, StrictStack.empty()), new Object());
+            assertNotEquals(new Collision<>(0, strictStack()), new Object());
         }
     }
 
@@ -183,8 +184,8 @@ public class HAMTTest {
             assertThat(new Node<>(0, new Object[]{
                                new Entry<>("foo", 1),
                                new Node<>(0, new Object[]{new Entry<>("bar", 2)}),
-                               new Collision<>(0, StrictStack.of(new Entry<>("baz", 3),
-                                                                 new Entry<>("quux", 4)))}),
+                               new Collision<>(0, strictStack(new Entry<>("baz", 3),
+                                                              new Entry<>("quux", 4)))}),
                        iterates(tuple("foo", 1),
                                 tuple("bar", 2),
                                 tuple("baz", 3),
@@ -247,7 +248,7 @@ public class HAMTTest {
                                                                     new Node<>(1, new Object[]{
                                                                             new Collision<>(
                                                                                     0b10000_00001_00001,
-                                                                                    StrictStack.of(
+                                                                                    strictStack(
                                                                                             new Entry<>(baz, "baz"),
                                                                                             new Entry<>(quux, "quux")))
                                                                     })

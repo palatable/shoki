@@ -38,7 +38,7 @@ public final class Shoki {
      * Due to the {@link StrictStack#cons(Object) lifo} nature of {@link StrictStack}, this method makes an effort to
      * iterate the elements of the input {@link Iterable} in reverse, if a known type representing that capability has
      * been advertised by the {@link Iterable}. If no reverse iteration strategy can be deduced from the input
-     * {@link Iterable}, the elements will be {@link StrictStack#cons(Object) cons'ed} onto the {@link StrictStack} in
+     * {@link Iterable}, the elements will be {@link StrictStack#cons(Object) consed} onto the {@link StrictStack} in
      * one pass and the {@link StrictStack} will be {@link StrictStack#reverse() reversed} before being returned.
      *
      * @param javaIterable the input {@link Iterable}
@@ -46,12 +46,14 @@ public final class Shoki {
      * @return the populated {@link StrictStack}
      */
     public static <A> StrictStack<A> strictStack(Iterable<A> javaIterable) {
+        StrictStack<A> emptyStack = StrictStack.strictStack();
+
         if (javaIterable instanceof Deque<?>)
-            return foldLeft(StrictStack::cons, StrictStack.empty(), ((Deque<A>) javaIterable)::descendingIterator);
+            return foldLeft(StrictStack::cons, emptyStack, ((Deque<A>) javaIterable)::descendingIterator);
 
         if (javaIterable instanceof List<?>) {
             List<A> javaList = (List<A>) javaIterable;
-            return foldLeft(StrictStack::cons, StrictStack.empty(),
+            return foldLeft(StrictStack::cons, emptyStack,
                             javaList instanceof RandomAccess
                             ? map(javaList::get, takeWhile(gte(0), iterate(i -> i - 1, javaList.size() - 1)))
                             : () -> {
@@ -70,7 +72,7 @@ public final class Shoki {
                             });
         }
 
-        return foldLeft(StrictStack::cons, StrictStack.<A>empty(), javaIterable).reverse();
+        return foldLeft(StrictStack::cons, emptyStack, javaIterable).reverse();
     }
 
     /**
@@ -81,7 +83,7 @@ public final class Shoki {
      * @return the populated {@link StrictQueue}
      */
     public static <A> StrictQueue<A> strictQueue(Iterable<A> javaIterable) {
-        return foldLeft(StrictQueue::snoc, StrictQueue.empty(), javaIterable);
+        return foldLeft(StrictQueue::snoc, StrictQueue.strictQueue(), javaIterable);
     }
 
     /**
@@ -95,7 +97,7 @@ public final class Shoki {
      * @return the populated {@link HashMap}
      */
     public static <K, V> HashMap<K, V> hashMap(java.util.Map<K, V> javaMap) {
-        return foldLeft(curried(hm -> into(hm::put)), HashMap.empty(), javaMap.entrySet());
+        return foldLeft(curried(hm -> into(hm::put)), HashMap.hashMap(), javaMap.entrySet());
     }
 
     /**
@@ -108,7 +110,7 @@ public final class Shoki {
      * @return the populated {@link HashSet}
      */
     public static <A> HashSet<A> hashSet(Iterable<A> javaIterable) {
-        return foldLeft(HashSet::add, HashSet.empty(), javaIterable);
+        return foldLeft(HashSet::add, HashSet.hashSet(), javaIterable);
     }
 
     /**
@@ -126,7 +128,7 @@ public final class Shoki {
     public static <A> HashMultiSet<A> hashMultiSet(java.util.Map<A, Integer> javaMap) {
         return foldLeft(curried(hms -> into((a, k) -> atLeastZero(k).match(constantly(hms),
                                                                            nonZeroK -> hms.inc(a, nonZeroK)))),
-                        HashMultiSet.empty(),
+                        HashMultiSet.hashMultiSet(),
                         javaMap.entrySet());
     }
 
@@ -140,6 +142,6 @@ public final class Shoki {
      * @return the populated {@link HashMultiSet}
      */
     public static <A> HashMultiSet<A> hashMultiSet(Iterable<A> javaIterable) {
-        return foldLeft(HashMultiSet::inc, HashMultiSet.empty(), javaIterable);
+        return foldLeft(HashMultiSet::inc, HashMultiSet.hashMultiSet(), javaIterable);
     }
 }

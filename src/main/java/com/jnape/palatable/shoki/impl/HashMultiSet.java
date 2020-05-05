@@ -2,7 +2,6 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
-import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
@@ -19,13 +18,11 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
-import static java.util.Arrays.asList;
 
 /**
  * A {@link MultiSet} that stores elements internally in a {@link HashMap}, supporting the same time/space performance
@@ -36,7 +33,7 @@ import static java.util.Arrays.asList;
  */
 public final class HashMultiSet<A> implements MultiSet<A> {
 
-    private static final HashMultiSet<?> EMPTY_OBJECT_DEFAULTS = new HashMultiSet<>(HashMap.empty());
+    private static final HashMultiSet<?> EMPTY_OBJECT_DEFAULTS = new HashMultiSet<>(hashMap());
 
     private final HashMap<A, NonZero> multiplicityMap;
 
@@ -257,63 +254,41 @@ public final class HashMultiSet<A> implements MultiSet<A> {
     }
 
     /**
-     * Create an empty {@link HashMultiSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm}.
-     * <code>O(1)</code>.
+     * Create a {@link HashMultiSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm},
+     * populated by zero or more given entries. <code>O(n)</code>.
      *
      * @param equivalenceRelation the {@link EquivalenceRelation}
      * @param hashingAlgorithm    the {@link HashingAlgorithm}
+     * @param as                  the elements
      * @param <A>                 the element type
-     * @return the empty {@link HashMultiSet}
-     */
-    public static <A> HashMultiSet<A> empty(EquivalenceRelation<A> equivalenceRelation,
-                                            HashingAlgorithm<A> hashingAlgorithm) {
-        return new HashMultiSet<>(HashMap.empty(equivalenceRelation, hashingAlgorithm)
-        );
-    }
-
-    /**
-     * The empty singleton {@link HashMultiSet} using {@link Objects#equals(Object, Object) Object equality} and
-     * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively. <code>O(1)</code>.
-     *
-     * @param <A> the element type
-     * @return the empty {@link HashMultiSet}
-     */
-    @SuppressWarnings("unchecked")
-    public static <A> HashMultiSet<A> empty() {
-        return (HashMultiSet<A>) EMPTY_OBJECT_DEFAULTS;
-    }
-
-    /**
-     * Create a new {@link HashMultiSet} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * populated by one or more given entries. <code>O(n)</code>.
-     *
-     * @param equivalenceRelation the {@link EquivalenceRelation}
-     * @param hashingAlgorithm    the {@link HashingAlgorithm}
-     * @param a                   the first element
-     * @param as                  the rest of the elements
-     * @param <A>                 the element type
-     * @return the populated {@link HashMultiSet}
+     * @return the {@link HashMultiSet}
      */
     @SafeVarargs
-    public static <A> HashMultiSet<A> of(EquivalenceRelation<A> equivalenceRelation,
-                                         HashingAlgorithm<A> hashingAlgorithm,
-                                         A a, A... as) {
-        return foldLeft(HashMultiSet::inc, empty(equivalenceRelation, hashingAlgorithm), Cons.cons(a, asList(as)));
+    public static <A> HashMultiSet<A> hashMultiSet(EquivalenceRelation<A> equivalenceRelation,
+                                                   HashingAlgorithm<A> hashingAlgorithm,
+                                                   A... as) {
+        return hashMultiSet(new HashMultiSet<>(hashMap(equivalenceRelation, hashingAlgorithm)), as);
+    }
+
+    private static <A> HashMultiSet<A> hashMultiSet(HashMultiSet<A> hashMultiSet, A[] as) {
+        for (A a : as)
+            hashMultiSet = hashMultiSet.inc(a);
+        return hashMultiSet;
     }
 
     /**
-     * Create a new {@link HashMultiSet} using {@link Objects#equals(Object, Object) Object equality} and
+     * Create a {@link HashMultiSet} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, populated by one or more given entries. <code>O(n)</code>.
+     * respectively, populated by zero or more given entries. <code>O(n)</code>.
      *
-     * @param a   the first element
-     * @param as  the rest of the elements
+     * @param as  the elements
      * @param <A> the element type
-     * @return the populated {@link HashMultiSet}
+     * @return the {@link HashMultiSet}
      */
     @SafeVarargs
-    public static <A> HashMultiSet<A> of(A a, A... as) {
-        return of(objectEquals(), objectHashCode(), a, as);
+    public static <A> HashMultiSet<A> hashMultiSet(A... as) {
+        @SuppressWarnings("unchecked")
+        HashMultiSet<A> emptyObjectDefaults = (HashMultiSet<A>) EMPTY_OBJECT_DEFAULTS;
+        return hashMultiSet(emptyObjectDefaults, as);
     }
 }

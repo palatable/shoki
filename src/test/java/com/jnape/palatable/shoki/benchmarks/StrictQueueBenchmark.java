@@ -24,6 +24,7 @@ import static com.jnape.palatable.shoki.benchmarks.QueueOps.snocRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.QueueOps.snocRangeShoki;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeShoki;
+import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -44,12 +45,12 @@ public class StrictQueueBenchmark {
 
         @Benchmark
         public Queue<?, Integer> snoc() {
-            return snocRangeShoki(StrictQueue.empty(), K100);
+            return snocRangeShoki(strictQueue(), K100);
         }
 
         @Benchmark
         public Stack<?, Integer> cons() {
-            return consRangeShoki(StrictQueue.empty(), K100);
+            return consRangeShoki(strictQueue(), K100);
         }
 
         @Benchmark
@@ -83,14 +84,13 @@ public class StrictQueueBenchmark {
 
             @Setup(Level.Invocation)
             public void doSetup() {
-                strictQueue = StrictQueue.empty();
+                strictQueue = strictQueue();
                 for (int i = 0; i < K100; i++) {
                     strictQueue = strictQueue.cons(i);
                 }
             }
         }
     }
-
 
     public static class Java {
 

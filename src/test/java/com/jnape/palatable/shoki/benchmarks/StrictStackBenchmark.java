@@ -19,6 +19,7 @@ import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeShoki;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -39,7 +40,7 @@ public class StrictStackBenchmark {
 
         @Benchmark
         public Stack<?, Integer> cons() {
-            return consRangeShoki(StrictStack.empty(), K100);
+            return consRangeShoki(strictStack(), K100);
         }
 
         @Benchmark
@@ -73,7 +74,7 @@ public class StrictStackBenchmark {
 
             @Setup(Level.Invocation)
             public void doSetup() {
-                strictStack = StrictStack.empty();
+                strictStack = strictStack();
                 for (int i = 0; i < K100; i++) {
                     strictStack = strictStack.cons(i);
                 }

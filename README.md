@@ -114,7 +114,7 @@ import com.jnape.palatable.shoki.impl.StrictStack;
 public class Example {
 
     public static void main(String[] args) {
-        StrictStack<String> empty     = StrictStack.empty();
+        StrictStack<String> empty     = StrictStack.strictStack();
         boolean             _true     = empty.isEmpty();
         Maybe<String>       nothing   = empty.head();
         StrictStack<String> alsoEmpty = empty.tail();
@@ -130,7 +130,7 @@ public class Example {
         Maybe<String>       justBaz = baz.head();
 
         StrictStack<String> bazBarFooBaz = baz.consAll(fooBarBaz);
-        boolean             __true       = bazBarFooBaz.equals(StrictStack.of("baz", "foo", "bar", "baz"));
+        boolean             __true       = bazBarFooBaz.equals(StrictStack.strictStack("baz", "bar", "foo", "baz"));
     }
 }
 ```
@@ -147,7 +147,7 @@ import com.jnape.palatable.shoki.impl.StrictQueue;
 public class Example {
 
     public static void main(String[] args) {
-        StrictQueue<String> empty     = StrictQueue.empty();
+        StrictQueue<String> empty     = StrictQueue.strictQueue();
         boolean             _true     = empty.isEmpty();
         Maybe<String>       nothing   = empty.head();
         StrictQueue<String> alsoEmpty = empty.tail();
@@ -165,7 +165,7 @@ public class Example {
 
         StrictQueue<String> bazFooBarBaz = baz.snocAll(fooBarBaz);
         StrictQueue<String> bazBarFooBaz = baz.consAll(fooBarBaz);
-        boolean             __true       = bazFooBarBaz.equals(StrictQueue.of("baz", "foo", "bar", "baz"));
+        boolean             __true       = bazFooBarBaz.equals(StrictQueue.strictQueue("baz", "foo", "bar", "baz"));
     }
 }
 ```
@@ -190,7 +190,7 @@ public class Example {
 
     public static void main(String[] args) {
         // same as HashMap.empty()
-        HashMap<Integer, String> empty = HashMap.empty(objectEquals(), objectHashCode());
+        HashMap<Integer, String> empty = HashMap.hashMap(objectEquals(), objectHashCode());
 
         boolean                        _true     = empty.isEmpty();
         Maybe<Tuple2<Integer, String>> nothing   = empty.head();
@@ -236,7 +236,7 @@ public class Example {
 
     public static void main(String[] args) {
         // same as HashSet.empty()
-        HashSet<Integer> empty = HashSet.empty(objectEquals(), objectHashCode());
+        HashSet<Integer> empty = HashSet.hashSet(objectEquals(), objectHashCode());
 
         boolean          _true     = empty.isEmpty();
         Maybe<Integer>   nothing   = empty.head();
@@ -256,10 +256,10 @@ public class Example {
         HashSet<Integer> _2    = _12.tail();
         Maybe<Integer>   just2 = _2.head();
 
-        HashSet<Integer> _01234 = _012.union(HashSet.of(2, 3, 4));
-        HashSet<Integer> _01    = _012.difference(HashSet.of(2, 3, 4));
-        HashSet<Integer> _0134  = _012.symmetricDifference(HashSet.of(2, 3, 4));
-        HashSet<Integer> __2    = _012.intersection(HashSet.of(2, 3, 4));
+        HashSet<Integer> _01234 = _012.union(HashSet.hashSet(2, 3, 4));
+        HashSet<Integer> _01    = _012.difference(HashSet.hashSet(2, 3, 4));
+        HashSet<Integer> _0134  = _012.symmetricDifference(HashSet.hashSet(2, 3, 4));
+        HashSet<Integer> __2    = _012.intersection(HashSet.hashSet(2, 3, 4));
     }
 }
 ```
@@ -284,7 +284,7 @@ public class Example {
 
     public static void main(String[] args) {
         // same as HashMultiSet.empty()
-        HashMultiSet<Integer> empty = HashMultiSet.empty(objectEquals(), objectHashCode());
+        HashMultiSet<Integer> empty = HashMultiSet.hashMultiSet(objectEquals(), objectHashCode());
 
         boolean                         _true     = empty.isEmpty();
         Maybe<Tuple2<Integer, NonZero>> nothing   = empty.head();
@@ -306,7 +306,7 @@ public class Example {
         HashMultiSet<Integer>           _2x1     = _1x2_2x1.tail();
         Maybe<Tuple2<Integer, NonZero>> just_2x1 = _2x1.head();
 
-        HashMultiSet<Integer> _2x1_3x1_4x1         = HashMultiSet.of(2, 3, 4);
+        HashMultiSet<Integer> _2x1_3x1_4x1         = HashMultiSet.hashMultiSet(2, 3, 4);
         HashMultiSet<Integer> _0x1_1x2_2x1_3x1_4x1 = _0x1_1x2_2x1.union(_2x1_3x1_4x1);
         HashMultiSet<Integer> _0x1_1x2             = _0x1_1x2_2x1.difference(_2x1_3x1_4x1);
         HashMultiSet<Integer> _0x1_1x2_3x1_4x1     = _0x1_1x2_2x1.symmetricDifference(_2x1_3x1_4x1);

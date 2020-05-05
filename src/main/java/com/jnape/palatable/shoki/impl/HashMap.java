@@ -21,7 +21,6 @@ import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Size.size;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Cons.cons;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -31,9 +30,11 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.sameEntries;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
+import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
+import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static java.lang.String.format;
 import static java.lang.String.join;
-import static java.util.Arrays.asList;
 
 /**
  * A <a href="https://lampwww.epfl.ch/papers/idealhashtrees.pdf" target="_new">hash array mapped trie</a>
@@ -114,7 +115,8 @@ import static java.util.Arrays.asList;
  */
 public final class HashMap<K, V> implements Map<Natural, K, V> {
 
-    private static final HashMap<?, ?> EMPTY_OBJECT_DEFAULTS = empty(objectEquals(), objectHashCode());
+    private static final HashMap<?, ?> EMPTY_OBJECT_DEFAULTS =
+            new HashMap<>(objectEquals(), objectHashCode(), rootNode());
 
     private final EquivalenceRelation<K> keyEqRel;
     private final HashingAlgorithm<K>    keyHashAlg;
@@ -170,7 +172,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     @Override
     public HashMap<K, V> remove(K key) {
         HAMT<K, V> removed = hamt.remove(key, keyHashAlg.apply(key), keyEqRel, 0);
-        return new HashMap<>(keyEqRel, keyHashAlg, removed != null ? removed : HAMT.Node.rootNode());
+        return new HashMap<>(keyEqRel, keyHashAlg, removed != null ? removed : rootNode());
     }
 
     /**
@@ -189,7 +191,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public HashSet<K> keys() {
-        return foldLeft((keys, kv) -> keys.add(kv._1()), HashSet.empty(keyEqRel, keyHashAlg), this);
+        return foldLeft((keys, kv) -> keys.add(kv._1()), hashSet(keyEqRel, keyHashAlg), this);
     }
 
     /**
@@ -198,7 +200,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public StrictQueue<V> values() {
-        return foldLeft((values, kv) -> values.snoc(kv._2()), StrictQueue.empty(), this);
+        return foldLeft((values, kv) -> values.snoc(kv._2()), strictQueue(), this);
     }
 
     /**
@@ -324,68 +326,43 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     }
 
     /**
-     * Create an empty {@link HashMap} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm} for its
-     * keys.
+     * Create a {@link HashMap} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm} for its
+     * keys, populated by zero or more given entries.
      *
      * @param keyEquivalenceRelation the {@link EquivalenceRelation}
      * @param keyHashingAlgorithm    the {@link HashingAlgorithm}
+     * @param entries                the entries
      * @param <K>                    the key type
      * @param <V>                    the value type
-     * @return the empty {@link HashMap}
-     */
-    public static <K, V> HashMap<K, V> empty(EquivalenceRelation<K> keyEquivalenceRelation,
-                                             HashingAlgorithm<K> keyHashingAlgorithm) {
-        return new HashMap<>(keyEquivalenceRelation, keyHashingAlgorithm, HAMT.Node.rootNode());
-    }
-
-    /**
-     * The empty singleton {@link HashMap} using {@link Objects#equals(Object, Object) Object equality} and
-     * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, for its keys.
-     *
-     * @param <K> the key type
-     * @param <V> the value type
-     * @return the empty {@link HashMap}
-     */
-    @SuppressWarnings("unchecked")
-    public static <K, V> HashMap<K, V> empty() {
-        return (HashMap<K, V>) EMPTY_OBJECT_DEFAULTS;
-    }
-
-    /**
-     * Create a new {@link HashMap} using the given {@link EquivalenceRelation} and {@link HashingAlgorithm} for its
-     * keys, populated by one or more given entries.
-     *
-     * @param keyEquivalenceRelation the {@link EquivalenceRelation}
-     * @param keyHashingAlgorithm    the {@link HashingAlgorithm}
-     * @param entry                  the first entry
-     * @param entries                the rest of the entries
-     * @param <K>                    the key type
-     * @param <V>                    the value type
-     * @return the populated {@link HashMap}
+     * @return the {@link HashMap}
      */
     @SafeVarargs
-    public static <K, V> HashMap<K, V> of(EquivalenceRelation<K> keyEquivalenceRelation,
-                                          HashingAlgorithm<K> keyHashingAlgorithm,
-                                          Tuple2<K, V> entry, Tuple2<K, V>... entries) {
-        return foldLeft(curried(m -> into(m::put)),
-                        empty(keyEquivalenceRelation, keyHashingAlgorithm),
-                        cons(entry, asList(entries)));
+    public static <K, V> HashMap<K, V> hashMap(EquivalenceRelation<K> keyEquivalenceRelation,
+                                               HashingAlgorithm<K> keyHashingAlgorithm,
+                                               Tuple2<K, V>... entries) {
+        return hashMap(new HashMap<>(keyEquivalenceRelation, keyHashingAlgorithm, rootNode()), entries);
     }
 
     /**
-     * Create a new {@link HashMap} using {@link Objects#equals(Object, Object) Object equality} and
+     * Create a {@link HashMap} using {@link Objects#equals(Object, Object) Object equality} and
      * {@link Objects#hashCode(Object) Object hashCode} as the {@link EquivalenceRelation} and {@link HashingAlgorithm},
-     * respectively, for its keys, populated by one or more given entries.
+     * respectively, for its keys, populated by zero or more given entries.
      *
-     * @param entry   the first entry
-     * @param entries the rest of the entries
+     * @param entries the entries
      * @param <K>     the key type
      * @param <V>     the value type
-     * @return the populated {@link HashMap}
+     * @return the {@link HashMap}
      */
     @SafeVarargs
-    public static <K, V> HashMap<K, V> of(Tuple2<K, V> entry, Tuple2<K, V>... entries) {
-        return of(objectEquals(), objectHashCode(), entry, entries);
+    public static <K, V> HashMap<K, V> hashMap(Tuple2<K, V>... entries) {
+        @SuppressWarnings("unchecked") HashMap<K, V> empty = (HashMap<K, V>) EMPTY_OBJECT_DEFAULTS;
+        return hashMap(empty, entries);
+    }
+
+    @SafeVarargs
+    private static <K, V> HashMap<K, V> hashMap(HashMap<K, V> hashMap, Tuple2<K, V>... entries) {
+        for (Tuple2<K, V> entry : entries)
+            hashMap = entry.into(hashMap::put);
+        return hashMap;
     }
 }

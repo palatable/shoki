@@ -46,7 +46,7 @@ public class HashMapBenchmark {
 
         @Benchmark
         public HashMap<Integer, Unit> putNoCollisions() {
-            HashMap<Integer, Unit> hashMap = HashMap.empty();
+            HashMap<Integer, Unit> hashMap = HashMap.hashMap();
             for (int i = 0; i < K100; i++) {
                 hashMap = hashMap.put(i, UNIT);
             }
@@ -56,7 +56,7 @@ public class HashMapBenchmark {
         @Benchmark
         @OperationsPerInvocation(N_COLLISIONS)
         public HashMap<Collision, Unit> putFullCollisions() {
-            HashMap<Collision, Unit> hashMap = HashMap.empty();
+            HashMap<Collision, Unit> hashMap = HashMap.hashMap();
             for (int i = 0; i < N_COLLISIONS; i++) {
                 hashMap = hashMap.put(new Collision(i), UNIT);
             }
@@ -93,7 +93,7 @@ public class HashMapBenchmark {
 
             @Setup(Level.Invocation)
             public void doSetup() {
-                hashMap = HashMap.empty();
+                hashMap = HashMap.hashMap();
                 for (int i = 0; i < K100; i++) {
                     hashMap = hashMap.put(i, UNIT);
                 }
@@ -106,7 +106,7 @@ public class HashMapBenchmark {
 
             @Setup(Level.Invocation)
             public void doSetup() {
-                hashMap = HashMap.empty();
+                hashMap = HashMap.hashMap();
                 for (int i = 0; i < N_COLLISIONS; i++) {
                     hashMap = hashMap.put(new Collision(i), UNIT);
                 }

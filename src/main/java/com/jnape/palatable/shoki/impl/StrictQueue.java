@@ -1,7 +1,6 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.lambda.functions.builtin.fn2.Cons;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Queue;
@@ -13,13 +12,12 @@ import java.util.NoSuchElementException;
 
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
-import static java.util.Arrays.asList;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.Collections.emptyIterator;
 
 /**
@@ -61,8 +59,8 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     public abstract StrictQueue<A> snoc(A a);
 
     /**
-     * The remaining elements after removing the head of this {@link StrictQueue}, or {@link StrictQueue#empty()}
-     * if there are no elements. Amortized <code>O(1)</code>.
+     * The remaining elements after removing the head of this {@link StrictQueue}, or an empty {@link StrictQueue} if
+     * there are no elements. Amortized <code>O(1)</code>.
      *
      * @return the tail of this {@link StrictQueue}
      */
@@ -129,27 +127,20 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     }
 
     /**
-     * The empty singleton instance of this {@link StrictQueue}. <code>O(1)</code>.
+     * Create a {@link StrictQueue} of zero or more elements, with the elements queued for removal from left to right.
+     * <code>O(n)</code>.
      *
-     * @param <A> the {@link StrictQueue} element type
-     * @return an empty queue
-     */
-    @SuppressWarnings("unchecked")
-    public static <A> StrictQueue<A> empty() {
-        return (StrictQueue<A>) Empty.INSTANCE;
-    }
-
-    /**
-     * Convenience static factory method to construct an {@link StrictQueue} from varargs elements. <code>O(n)</code>.
-     *
-     * @param a   the first element to {@link StrictQueue#snoc(Object) snoc}
-     * @param as  the remaining elements to {@link StrictQueue#snoc(Object) snoc} from front to back
-     * @param <A> the {@link StrictQueue} element type
-     * @return the new {@link StrictQueue}
+     * @param as  the elements to {@link StrictQueue#snoc(Object) snoc} from front to back
+     * @param <A> the element type
+     * @return the {@link StrictQueue}
      */
     @SafeVarargs
-    public static <A> StrictQueue<A> of(A a, A... as) {
-        return foldLeft(StrictQueue::snoc, StrictQueue.empty(), Cons.cons(a, asList(as)));
+    public static <A> StrictQueue<A> strictQueue(A... as) {
+        @SuppressWarnings("unchecked")
+        StrictQueue<A> empty = (StrictQueue<A>) Empty.INSTANCE;
+        return as.length == 0
+               ? empty
+               : new NonEmpty<>(strictStack(as), strictStack());
     }
 
     private static final class Empty<A> extends StrictQueue<A> {
@@ -175,7 +166,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
 
         @Override
         public StrictQueue<A> cons(A a) {
-            return new NonEmpty<>(StrictStack.<A>empty().cons(a), StrictStack.empty());
+            return new NonEmpty<>(strictStack(a), strictStack());
         }
 
         @Override
@@ -235,8 +226,8 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
                 return new NonEmpty<>(outgoingTail, incoming);
 
             return incoming.isEmpty()
-                   ? StrictQueue.empty()
-                   : new NonEmpty<>(incoming.reverse(), StrictStack.empty());
+                   ? strictQueue()
+                   : new NonEmpty<>(incoming.reverse(), strictStack());
         }
 
         @Override

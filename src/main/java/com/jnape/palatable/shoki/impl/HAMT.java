@@ -20,6 +20,7 @@ import static com.jnape.palatable.shoki.impl.Bitmap32.bitIsSet;
 import static com.jnape.palatable.shoki.impl.Bitmap32.lowerBits;
 import static com.jnape.palatable.shoki.impl.Bitmap32.setBit;
 import static com.jnape.palatable.shoki.impl.Bitmap32.unsetBit;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.lang.Integer.bitCount;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -157,7 +158,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                 return new Entry<>(newKey, newValue);
 
             if (shift > 30)
-                return new Collision<>(keyHash, StrictStack.of(this, new Entry<>(newKey, newValue)));
+                return new Collision<>(keyHash, strictStack(this, new Entry<>(newKey, newValue)));
 
             Integer existingKeyHash = keyHashAlg.apply(k);
             return Node.<K, V>rootNode()
@@ -209,7 +210,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         public HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<K> keyEqRel,
                               HashingAlgorithm<K> keyHashAlg, int shift) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                     StrictStack.of(new Entry<>(key, value)),
+                                                     strictStack(new Entry<>(key, value)),
                                                      kvPairs));
         }
 
@@ -231,7 +232,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                 return this;
 
             StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                           StrictStack.empty(),
+                                                           strictStack(),
                                                            kvPairs);
             return eq(withoutKey.sizeInfo().getSize(), one())
                    ? withoutKey.iterator().next()

@@ -12,7 +12,7 @@ import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
-import static com.jnape.palatable.shoki.impl.HashMultiSet.empty;
+import static com.jnape.palatable.shoki.impl.HashMultiSet.hashMultiSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.hamcrest.CoreMatchers.not;
 import static org.junit.Assert.assertEquals;
@@ -25,37 +25,37 @@ public class MultiSetTest {
     public static final class DefaultMethods {
         @Test
         public void removeAll() {
-            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).remove("foo").isEmpty());
+            assertTrue(DefaultMethodsMultiSet.<String>delegate(hashMultiSet()).remove("foo").isEmpty());
             assertEquals(zero(),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).remove("foo")
+                         DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).remove("foo")
                                  .get("foo"));
             assertEquals(known(one()),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).remove("foo")
+                         DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).remove("foo")
                                  .sizeInfo());
         }
 
         @Test
         public void removeOne() {
-            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty()).dec("foo").isEmpty());
+            assertTrue(DefaultMethodsMultiSet.<String>delegate(hashMultiSet()).dec("foo").isEmpty());
             assertEquals(one(),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "foo")).dec("foo").get("foo"));
+                         DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "foo")).dec("foo").get("foo"));
             assertEquals(known(abs(2)),
-                         DefaultMethodsMultiSet.delegate(HashMultiSet.of("foo", "bar", "foo")).dec("foo")
+                         DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).dec("foo")
                                  .sizeInfo());
         }
 
         @Test
         public void addOne() {
-            assertEquals(one(), DefaultMethodsMultiSet.delegate(HashMultiSet.<String>empty()).inc("foo").get("foo"));
+            assertEquals(one(), DefaultMethodsMultiSet.delegate(HashMultiSet.<String>hashMultiSet()).inc("foo").get("foo"));
         }
 
         @Test
         public void addAll() {
-            assertTrue(DefaultMethodsMultiSet.<String>delegate(empty())
-                               .sum(empty()).isEmpty());
+            assertTrue(DefaultMethodsMultiSet.<String>delegate(hashMultiSet())
+                               .sum(hashMultiSet()).isEmpty());
 
-            MultiSet<String> addAll = DefaultMethodsMultiSet.<String>delegate(empty())
-                    .sum(HashMultiSet.of("foo", "foo", "bar"));
+            MultiSet<String> addAll = DefaultMethodsMultiSet.<String>delegate(hashMultiSet())
+                    .sum(hashMultiSet("foo", "foo", "bar"));
             assertEquals(abs(2), addAll.get("foo"));
             assertEquals(abs(1), addAll.get("bar"));
             assertEquals(known(abs(3)), addAll.sizeInfo());
@@ -63,8 +63,8 @@ public class MultiSetTest {
 
         @Test
         public void merge() {
-            MultiSet<String> merge = DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b"))
-                    .merge(DefaultMethodsMultiSet.delegate(HashMultiSet.of("b", "c")), Natural::plus);
+            MultiSet<String> merge = DefaultMethodsMultiSet.delegate(hashMultiSet("a", "b"))
+                    .merge(DefaultMethodsMultiSet.delegate(hashMultiSet("b", "c")), Natural::plus);
             assertEquals(one(), merge.get("a"));
             assertEquals(abs(2), merge.get("b"));
             assertEquals(one(), merge.get("c"));
@@ -73,8 +73,8 @@ public class MultiSetTest {
 
         @Test
         public void union() {
-            DefaultMethodsMultiSet<String> first  = DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a", "b"));
-            DefaultMethodsMultiSet<String> second = DefaultMethodsMultiSet.delegate(HashMultiSet.of("b", "c"));
+            DefaultMethodsMultiSet<String> first  = DefaultMethodsMultiSet.delegate(hashMultiSet("a", "a", "b"));
+            DefaultMethodsMultiSet<String> second = DefaultMethodsMultiSet.delegate(hashMultiSet("b", "c"));
             MultiSet<String> union = first
                     .union(second);
 
@@ -85,19 +85,19 @@ public class MultiSetTest {
 
             assertThat(first.union(first),
                        equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(first.union(empty()),
+            assertThat(first.union(hashMultiSet()),
                        equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(second.union(second),
                        equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(second.union(empty()),
+            assertThat(second.union(hashMultiSet()),
                        equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
 
         @Test
         public void intersection() {
-            DefaultMethodsMultiSet<String> first = DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b", "b", "c"));
+            DefaultMethodsMultiSet<String> first = DefaultMethodsMultiSet.delegate(hashMultiSet("a", "b", "b", "c"));
             DefaultMethodsMultiSet<String> second = DefaultMethodsMultiSet
-                    .delegate(HashMultiSet.of("b", "b", "c", "c"));
+                    .delegate(hashMultiSet("b", "b", "c", "c"));
             MultiSet<String> union = first
                     .intersection(second);
 
@@ -108,46 +108,46 @@ public class MultiSetTest {
 
             assertThat(first.intersection(first),
                        equivalentTo(first, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(first.intersection(empty()),
-                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(first.intersection(hashMultiSet()),
+                       equivalentTo(hashMultiSet(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
             assertThat(second.intersection(second),
                        equivalentTo(second, MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(second.intersection(empty()),
-                       equivalentTo(empty(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
+            assertThat(second.intersection(hashMultiSet()),
+                       equivalentTo(hashMultiSet(), MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
 
         @Test
         public void inclusion() {
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.empty()).inclusion(HashMultiSet.empty()));
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")).inclusion(HashMultiSet.empty()));
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")).inclusion(HashMultiSet.of("a")));
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a")).inclusion(HashMultiSet.of("a", "a")));
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b")).inclusion(HashMultiSet.of("a")));
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b")).inclusion(HashMultiSet.of("a", "b")));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet()).inclusion(hashMultiSet()));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a")).inclusion(hashMultiSet()));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a")).inclusion(hashMultiSet("a")));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "a")).inclusion(hashMultiSet("a", "a")));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "b")).inclusion(hashMultiSet("a")));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "b")).inclusion(hashMultiSet("a", "b")));
 
-            assertFalse(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")).inclusion(HashMultiSet.of("a", "a")));
-            assertFalse(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")).inclusion(HashMultiSet.of("b")));
+            assertFalse(DefaultMethodsMultiSet.delegate(hashMultiSet("a")).inclusion(hashMultiSet("a", "a")));
+            assertFalse(DefaultMethodsMultiSet.delegate(hashMultiSet("a")).inclusion(hashMultiSet("b")));
         }
 
         @Test
         public void contains() {
-            assertTrue(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")).contains("a"));
-            assertFalse(DefaultMethodsMultiSet.delegate(HashMultiSet.empty()).contains("a"));
+            assertTrue(DefaultMethodsMultiSet.delegate(hashMultiSet("a")).contains("a"));
+            assertFalse(DefaultMethodsMultiSet.delegate(hashMultiSet()).contains("a"));
         }
 
         @Test
         public void symmetricDifference() {
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "b", "c"))
-                               .symmetricDifference(HashMultiSet.of("b")),
-                       equivalentTo(HashMultiSet.of("a", "c"),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "b", "c"))
+                               .symmetricDifference(hashMultiSet("b")),
+                       equivalentTo(hashMultiSet("a", "c"),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a", "a"))
-                               .symmetricDifference(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.of("a", "a"),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "a", "a"))
+                               .symmetricDifference(hashMultiSet("a")),
+                       equivalentTo(hashMultiSet("a", "a"),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a"))
-                               .symmetricDifference(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.empty(),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet("a"))
+                               .symmetricDifference(hashMultiSet("a")),
+                       equivalentTo(hashMultiSet(),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
     }
@@ -156,22 +156,22 @@ public class MultiSetTest {
 
         @Test
         public void sameElements() {
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.empty()),
-                       equivalentTo(HashMultiSet.empty(),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet()),
+                       equivalentTo(hashMultiSet(),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a")),
-                       equivalentTo(HashMultiSet.of("a"),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet("a")),
+                       equivalentTo(hashMultiSet("a"),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of("a", "a")),
-                       not(equivalentTo(HashMultiSet.of("a"),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet("a", "a")),
+                       not(equivalentTo(hashMultiSet("a"),
                                         MultiSet.EquivalenceRelations.sameElementsSameMultiplicity())));
-            assertThat(DefaultMethodsMultiSet.delegate(HashMultiSet.of(cmpEqBy(String::length)::apply,
-                                                                       fn1(String::length)
-                                                                               .fmap(integer -> Integer
-                                                                                       .hashCode(
-                                                                                               integer))::apply,
-                                                                       "a", "a")),
-                       equivalentTo(HashMultiSet.of("b", "b"),
+            assertThat(DefaultMethodsMultiSet.delegate(hashMultiSet(cmpEqBy(String::length)::apply,
+                                                                    fn1(String::length)
+                                                                            .fmap(integer -> Integer
+                                                                                    .hashCode(
+                                                                                            integer))::apply,
+                                                                    "a", "a")),
+                       equivalentTo(hashMultiSet("b", "b"),
                                     MultiSet.EquivalenceRelations.sameElementsSameMultiplicity()));
         }
     }

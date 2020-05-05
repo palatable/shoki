@@ -16,6 +16,7 @@ import org.openjdk.jmh.runner.RunnerException;
 
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
+import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -36,7 +37,7 @@ public class HashSetBenchmark {
 
         @Benchmark
         public HashSet<Integer> add() {
-            HashSet<Integer> hashSet = HashSet.empty();
+            HashSet<Integer> hashSet = hashSet();
             for (int i = 0; i < K100; i++) {
                 hashSet = hashSet.add(i);
             }
@@ -67,7 +68,7 @@ public class HashSetBenchmark {
 
             @Setup(Level.Trial)
             public void doSetup() {
-                hashSet = HashSet.empty();
+                hashSet = hashSet();
                 for (int i = 0; i < K100; i++) {
                     hashSet = hashSet.add(i);
                 }

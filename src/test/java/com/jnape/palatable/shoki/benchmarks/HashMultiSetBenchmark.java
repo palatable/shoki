@@ -35,7 +35,7 @@ public class HashMultiSetBenchmark {
 
         @Benchmark
         public HashMultiSet<Integer> inc() {
-            HashMultiSet<Integer> hashMultiSet = HashMultiSet.empty();
+            HashMultiSet<Integer> hashMultiSet = HashMultiSet.hashMultiSet();
             for (int i = 0; i < K100; i++) {
                 hashMultiSet = hashMultiSet.inc(i);
             }
@@ -66,7 +66,7 @@ public class HashMultiSetBenchmark {
 
             @Setup(Level.Trial)
             public void doSetup() {
-                hashMultiSet = HashMultiSet.empty();
+                hashMultiSet = HashMultiSet.hashMultiSet();
                 for (int i = 0; i < K100; i++) {
                     hashMultiSet = hashMultiSet.inc(i);
                 }

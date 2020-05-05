@@ -34,9 +34,9 @@ public class ShokiTest {
 
     @Test
     public void strictStack() {
-        assertEquals(StrictStack.empty(), Shoki.strictStack(emptyList()));
+        assertEquals(StrictStack.strictStack(), Shoki.strictStack(emptyList()));
 
-        StrictStack<Integer> stackOneThroughFive = StrictStack.of(1, 2, 3, 4, 5);
+        StrictStack<Integer> stackOneThroughFive = StrictStack.strictStack(1, 2, 3, 4, 5);
         List<Integer>        listOneThroughFive  = asList(1, 2, 3, 4, 5);
 
         AtomicBoolean descendingIteratorUsed = new AtomicBoolean();
@@ -90,40 +90,40 @@ public class ShokiTest {
 
     @Test
     public void strictQueue() {
-        assertEquals(StrictQueue.empty(), Shoki.strictQueue(emptyList()));
+        assertEquals(StrictQueue.strictQueue(), Shoki.strictQueue(emptyList()));
 
         Collection<Integer> javaCollection = asList(1, 2, 3, 4, 5);
-        assertEquals(StrictQueue.of(1, 2, 3, 4, 5), Shoki.strictQueue(javaCollection));
+        assertEquals(StrictQueue.strictQueue(1, 2, 3, 4, 5), Shoki.strictQueue(javaCollection));
     }
 
     @Test
     public void hashMap() {
-        assertEquals(HashMap.empty(), Shoki.hashMap(emptyMap()));
+        assertEquals(HashMap.hashMap(), Shoki.hashMap(emptyMap()));
 
         java.util.Map<String, Integer> javaMap = toMap(java.util.HashMap::new,
                                                        asList(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
-        assertEquals(HashMap.of(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)), Shoki.hashMap(javaMap));
+        assertEquals(HashMap.hashMap(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)), Shoki.hashMap(javaMap));
     }
 
     @Test
     public void hashSet() {
-        assertEquals(HashSet.empty(), Shoki.hashSet(emptyList()));
+        assertEquals(HashSet.hashSet(), Shoki.hashSet(emptyList()));
         List<Integer> javaCollection = asList(1, 2, 3);
-        assertEquals(HashSet.of(1, 2, 3), Shoki.hashSet(javaCollection));
+        assertEquals(HashSet.hashSet(1, 2, 3), Shoki.hashSet(javaCollection));
     }
 
     @Test
     public void hashMultiSet() {
-        assertEquals(HashMultiSet.empty(), Shoki.hashMultiSet(emptyMap()));
-        assertEquals(HashMultiSet.empty(), Shoki.hashMultiSet(emptyList()));
+        assertEquals(HashMultiSet.hashMultiSet(), Shoki.hashMultiSet(emptyMap()));
+        assertEquals(HashMultiSet.hashMultiSet(), Shoki.hashMultiSet(emptyList()));
 
         List<Integer> javaCollection = asList(1, 2, 2, 3, 3, 3);
-        assertEquals(HashMultiSet.of(1, 2, 2, 3, 3, 3), Shoki.hashMultiSet(javaCollection));
+        assertEquals(HashMultiSet.hashMultiSet(1, 2, 2, 3, 3, 3), Shoki.hashMultiSet(javaCollection));
 
         Map<String, Integer> javaMap = toMap(java.util.HashMap::new,
                                              asList(tuple("foo", 1), tuple("bar", -2),
                                                     tuple("baz", 3), tuple("quux", 0)));
-        assertEquals(HashMultiSet.<String>empty()
+        assertEquals(HashMultiSet.<String>hashMultiSet()
                              .inc("foo", one())
                              .inc("baz", atLeastOne(3)),
                      Shoki.hashMultiSet(javaMap));

@@ -10,13 +10,10 @@ import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.adt.Try.success;
-import static com.jnape.palatable.lambda.adt.Try.trying;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
-import static java.lang.Math.addExact;
 import static java.lang.Math.min;
 import static java.math.BigInteger.ZERO;
 
@@ -450,10 +447,15 @@ public abstract class Natural extends Number
 
             @Override
             public NonZero plus(Natural addend) {
-                return Try.<NonZero>trying(() -> new I(addExact(value, addend.intValue())))
-                        .catchError(__ -> trying(() -> new L(addExact(value, addend.longValue()))))
-                        .catchError(__ -> success(new B(bigIntegerValue().add(addend.bigIntegerValue()))))
-                        .orThrow();
+                int intSum = value + addend.intValue();
+                if (intSum > 0)
+                    return new I(intSum);
+
+                long longSum = value + addend.longValue();
+                if (longSum > 0)
+                    return new L(longSum);
+
+                return new B(bigIntegerValue().add(addend.bigIntegerValue()));
             }
 
             @Override
@@ -492,9 +494,11 @@ public abstract class Natural extends Number
 
             @Override
             public NonZero plus(Natural addend) {
-                return Try.<NonZero>trying(() -> new L(addExact(value, addend.longValue())))
-                        .catchError(__ -> success(new B(bigIntegerValue().add(addend.bigIntegerValue()))))
-                        .orThrow();
+                long longSum = value + addend.longValue();
+                if (longSum > 0)
+                    return new L(longSum);
+
+                return new B(bigIntegerValue().add(addend.bigIntegerValue()));
             }
 
             @Override

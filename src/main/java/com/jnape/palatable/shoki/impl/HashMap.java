@@ -20,7 +20,6 @@ import static com.jnape.palatable.lambda.adt.Try.trying;
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
-import static com.jnape.palatable.lambda.functions.builtin.fn1.Size.size;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -28,7 +27,7 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.sameEntries;
-import static com.jnape.palatable.shoki.api.Natural.abs;
+import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
@@ -262,7 +261,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
             synchronized (this) {
                 size = this.size;
                 if (size == null) {
-                    this.size = size = abs(size(this));
+                    this.size = size = foldLeft((s, __) -> s.inc(), (Natural) zero(), this);
                 }
             }
         }

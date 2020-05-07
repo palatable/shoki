@@ -73,9 +73,7 @@ public abstract class Natural extends Number
      * @param addend the {@link Natural} addend
      * @return the {@link NonZero} sum
      */
-    public final NonZero plus(NonZero addend) {
-        return match(constantly(addend), augend -> augend.plus((Natural) addend));
-    }
+    public abstract NonZero plus(NonZero addend);
 
     /**
      * {@link Natural#plus(Natural) Add} {@link Natural#one() one} to this {@link Natural}.
@@ -331,6 +329,11 @@ public abstract class Natural extends Number
         }
 
         @Override
+        public NonZero plus(NonZero addend) {
+            return addend;
+        }
+
+        @Override
         public Natural plus(Natural addend) {
             return addend;
         }
@@ -391,6 +394,11 @@ public abstract class Natural extends Number
 
         @Override
         public abstract NonZero plus(Natural addend);
+
+        @Override
+        public NonZero plus(NonZero addend) {
+            return plus((Natural) addend);
+        }
 
         @Override
         public NonZero minus(Zero subtrahend) {

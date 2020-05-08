@@ -105,16 +105,18 @@ least it offer an intuition about the way in which the design is being approache
 #### `StrictStack<A>`
 
 A `StrictStack<A>` is a strictly-evaluated `Stack<Natural, A>` that offers worst-case `O(1)` space/time for `cons`,
-`head`, `tail`.  
+`head`, and `tail`.  
 
 ```java
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.impl.StrictStack;
 
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
+
 public class Example {
 
     public static void main(String[] args) {
-        StrictStack<String> empty     = StrictStack.strictStack();
+        StrictStack<String> empty     = strictStack();
         boolean             _true     = empty.isEmpty();
         Maybe<String>       nothing   = empty.head();
         StrictStack<String> alsoEmpty = empty.tail();
@@ -130,7 +132,7 @@ public class Example {
         Maybe<String>       justBaz = baz.head();
 
         StrictStack<String> bazBarFooBaz = baz.consAll(fooBarBaz);
-        boolean             __true       = bazBarFooBaz.equals(StrictStack.strictStack("baz", "bar", "foo", "baz"));
+        boolean             __true       = bazBarFooBaz.equals(strictStack("baz", "bar", "foo", "baz"));
     }
 }
 ```
@@ -144,10 +146,12 @@ space/time for `cons`, `snoc`, and `head`, and amortized `O(1)` for `tail`.
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 
+import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
+
 public class Example {
 
     public static void main(String[] args) {
-        StrictQueue<String> empty     = StrictQueue.strictQueue();
+        StrictQueue<String> empty     = strictQueue();
         boolean             _true     = empty.isEmpty();
         Maybe<String>       nothing   = empty.head();
         StrictQueue<String> alsoEmpty = empty.tail();
@@ -165,7 +169,7 @@ public class Example {
 
         StrictQueue<String> bazFooBarBaz = baz.snocAll(fooBarBaz);
         StrictQueue<String> bazBarFooBaz = baz.consAll(fooBarBaz);
-        boolean             __true       = bazFooBarBaz.equals(StrictQueue.strictQueue("baz", "foo", "bar", "baz"));
+        boolean             __true       = bazFooBarBaz.equals(strictQueue("baz", "foo", "bar", "baz"));
     }
 }
 ```
@@ -185,12 +189,13 @@ import com.jnape.palatable.shoki.impl.StrictQueue;
 
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 
 public class Example {
 
     public static void main(String[] args) {
-        // same as HashMap.empty()
-        HashMap<Integer, String> empty = HashMap.hashMap(objectEquals(), objectHashCode());
+        // same as hashMap()
+        HashMap<Integer, String> empty = hashMap(objectEquals(), objectHashCode());
 
         boolean                        _true     = empty.isEmpty();
         Maybe<Tuple2<Integer, String>> nothing   = empty.head();
@@ -231,12 +236,13 @@ import com.jnape.palatable.shoki.impl.HashSet;
 
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 
 public class Example {
 
     public static void main(String[] args) {
-        // same as HashSet.empty()
-        HashSet<Integer> empty = HashSet.hashSet(objectEquals(), objectHashCode());
+        // same as hashSet()
+        HashSet<Integer> empty = hashSet(objectEquals(), objectHashCode());
 
         boolean          _true     = empty.isEmpty();
         Maybe<Integer>   nothing   = empty.head();
@@ -256,10 +262,10 @@ public class Example {
         HashSet<Integer> _2    = _12.tail();
         Maybe<Integer>   just2 = _2.head();
 
-        HashSet<Integer> _01234 = _012.union(HashSet.hashSet(2, 3, 4));
-        HashSet<Integer> _01    = _012.difference(HashSet.hashSet(2, 3, 4));
-        HashSet<Integer> _0134  = _012.symmetricDifference(HashSet.hashSet(2, 3, 4));
-        HashSet<Integer> __2    = _012.intersection(HashSet.hashSet(2, 3, 4));
+        HashSet<Integer> _01234 = _012.union(hashSet(2, 3, 4));
+        HashSet<Integer> _01    = _012.difference(hashSet(2, 3, 4));
+        HashSet<Integer> _0134  = _012.symmetricDifference(hashSet(2, 3, 4));
+        HashSet<Integer> __2    = _012.intersection(hashSet(2, 3, 4));
     }
 }
 ```
@@ -279,12 +285,13 @@ import com.jnape.palatable.shoki.impl.HashSet;
 
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.impl.HashMultiSet.hashMultiSet;
 
 public class Example {
 
     public static void main(String[] args) {
-        // same as HashMultiSet.empty()
-        HashMultiSet<Integer> empty = HashMultiSet.hashMultiSet(objectEquals(), objectHashCode());
+        // same as hashMultiSet()
+        HashMultiSet<Integer> empty = hashMultiSet(objectEquals(), objectHashCode());
 
         boolean                         _true     = empty.isEmpty();
         Maybe<Tuple2<Integer, NonZero>> nothing   = empty.head();
@@ -306,7 +313,7 @@ public class Example {
         HashMultiSet<Integer>           _2x1     = _1x2_2x1.tail();
         Maybe<Tuple2<Integer, NonZero>> just_2x1 = _2x1.head();
 
-        HashMultiSet<Integer> _2x1_3x1_4x1         = HashMultiSet.hashMultiSet(2, 3, 4);
+        HashMultiSet<Integer> _2x1_3x1_4x1         = hashMultiSet(2, 3, 4);
         HashMultiSet<Integer> _0x1_1x2_2x1_3x1_4x1 = _0x1_1x2_2x1.union(_2x1_3x1_4x1);
         HashMultiSet<Integer> _0x1_1x2             = _0x1_1x2_2x1.difference(_2x1_3x1_4x1);
         HashMultiSet<Integer> _0x1_1x2_3x1_4x1     = _0x1_1x2_2x1.symmetricDifference(_2x1_3x1_4x1);

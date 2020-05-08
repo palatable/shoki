@@ -9,7 +9,6 @@ import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -18,9 +17,12 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Size.size;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
+import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 
 /**
@@ -231,7 +233,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
                 synchronized (this) {
                     hashCode = this.hashCode;
                     if (hashCode == null) {
-                        this.hashCode = hashCode = foldLeft((hc, a) -> hc * 31 + Objects.hashCode(a), 0, this);
+                        this.hashCode = hashCode = hash(this, elementsInOrder(objectHashCode()));
                     }
                 }
             }

@@ -32,4 +32,16 @@ public interface HashingAlgorithm<A> extends Fn1<A, Integer> {
     static <A> HashingAlgorithm<A> identityHashCode() {
         return System::identityHashCode;
     }
+
+    /**
+     * Compute the hash of <code>a</code> in terms of the given {@link HashingAlgorithm hashingAlgorithm}.
+     *
+     * @param <A>              the value type
+     * @param a                the value
+     * @param hashingAlgorithm the {@link HashingAlgorithm}
+     * @return the hash
+     */
+    static <A> int hash(A a, HashingAlgorithm<A> hashingAlgorithm) {
+        return hashingAlgorithm.apply(a);
+    }
 }

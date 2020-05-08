@@ -13,15 +13,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
-import java.util.RandomAccess;
 
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.GTE.gte;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Iterate.iterate;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.TakeWhile.takeWhile;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.Natural.atLeastZero;
 
@@ -46,33 +41,27 @@ public final class Shoki {
      * @return the populated {@link StrictStack}
      */
     public static <A> StrictStack<A> strictStack(Iterable<A> javaIterable) {
-        StrictStack<A> emptyStack = StrictStack.strictStack();
+        Iterator<A> bestIteratorForStackConstruction =
+                javaIterable instanceof Deque<?>
+                ? ((Deque<A>) javaIterable).descendingIterator()
+                : javaIterable instanceof List<?>
+                  ? new Iterator<A>() {
+                    private final List<A> javaList = (List<A>) javaIterable;
+                    private final ListIterator<A> itr = javaList.listIterator(javaList.size());
 
-        if (javaIterable instanceof Deque<?>)
-            return foldLeft(StrictStack::cons, emptyStack, ((Deque<A>) javaIterable)::descendingIterator);
+                    @Override
+                    public boolean hasNext() {
+                        return itr.hasPrevious();
+                    }
 
-        if (javaIterable instanceof List<?>) {
-            List<A> javaList = (List<A>) javaIterable;
-            return foldLeft(StrictStack::cons, emptyStack,
-                            javaList instanceof RandomAccess
-                            ? map(javaList::get, takeWhile(gte(0), iterate(i -> i - 1, javaList.size() - 1)))
-                            : () -> {
-                                ListIterator<A> itr = javaList.listIterator(javaList.size());
-                                return new Iterator<A>() {
-                                    @Override
-                                    public boolean hasNext() {
-                                        return itr.hasPrevious();
-                                    }
+                    @Override
+                    public A next() {
+                        return itr.previous();
+                    }
+                }
+                  : foldLeft(StrictStack::cons, StrictStack.<A>strictStack(), javaIterable).iterator();
 
-                                    @Override
-                                    public A next() {
-                                        return itr.previous();
-                                    }
-                                };
-                            });
-        }
-
-        return foldLeft(StrictStack::cons, emptyStack, javaIterable).reverse();
+        return foldLeft(StrictStack::cons, StrictStack.strictStack(), () -> bestIteratorForStackConstruction);
     }
 
     /**

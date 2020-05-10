@@ -95,11 +95,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             return false;
         }
 
-        @Override
-        public int hashCode() {
-            return 31 * bitmap + java.util.Arrays.hashCode(table);
-        }
-
         private int tableIndex(int bitmapIndex) {
             return bitCount(lowerBits(bitmap, bitmapIndex));
         }
@@ -189,11 +184,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             }
             return false;
         }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(k, v);
-        }
     }
 
     final class Collision<K, V> implements HAMT<K, V> {
@@ -247,11 +237,6 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                         Objects.equals(kvPairs, collision.kvPairs);
             }
             return false;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(keyHash, kvPairs);
         }
     }
 }

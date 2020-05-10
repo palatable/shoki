@@ -59,6 +59,7 @@
         <lambda.version>5.2.0</lambda.version>
         <jmh.version>1.19</jmh.version>
         <maven-javadoc-plugin.version>3.0.1</maven-javadoc-plugin.version>
+        <traitor.version>1.4.0</traitor.version>
     </properties>
 
     <dependencies>
@@ -81,6 +82,11 @@
             <version>${lambda.version}</version>
             <type>test-jar</type>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.jnape.palatable</groupId>
+            <artifactId>traitor</artifactId>
+            <version>${traitor.version}</version>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

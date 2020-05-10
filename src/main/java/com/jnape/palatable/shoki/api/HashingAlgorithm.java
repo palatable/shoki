@@ -1,17 +1,58 @@
 package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.functions.Fn1;
+import com.jnape.palatable.lambda.functor.Applicative;
 
 import java.util.Objects;
 
 /**
- * A {@link HashingAlgorithm hashing algorithm} is an arrow <code>A -&gt; Integer</code>. Good
+ * A {@link HashingAlgorithm hashing algorithm} is an {@link Fn1 arrow} <code>A -&gt; Integer</code>. Good
  * hashing algorithms are generally fast and uniformly distribute values of type <code>A</code> across values of type
  * {@link Integer} (modulo cardinality differences where <code>A</code>'s cardinality exceeds {@link Integer}'s).
  *
  * @param <A> the type to hash
  */
 public interface HashingAlgorithm<A> extends Fn1<A, Integer> {
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default HashingAlgorithm<A> local(Fn1<? super A, ? extends A> fn) {
+        return Fn1.super.local(fn)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default HashingAlgorithm<A> censor(Fn1<? super A, ? extends A> fn) {
+        return Fn1.super.censor(fn)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default <C> HashingAlgorithm<A> discardR(Applicative<C, Fn1<A, ?>> appB) {
+        return Fn1.super.discardR(appB)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default <Z> HashingAlgorithm<Z> diMapL(Fn1<? super Z, ? extends A> fn) {
+        return Fn1.super.diMapL(fn)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default <Z> HashingAlgorithm<Z> contraMap(Fn1<? super Z, ? extends A> fn) {
+        return Fn1.super.contraMap(fn)::apply;
+    }
 
     /**
      * A {@link HashingAlgorithm} implemented in terms of {@link Objects#hashCode(Object)}.

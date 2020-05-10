@@ -7,6 +7,7 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -89,5 +90,15 @@ public class StrictQueueTest {
     public void toStringImplementation() {
         assertEquals("StrictQueue[]", strictQueue().toString());
         assertEquals("StrictQueue[1, 2, 3]", strictQueue(1, 2, 3).toString());
+    }
+
+    @Test
+    public void consAll() {
+        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(4, 5).consAll(strictStack(3, 2, 1)));
+    }
+
+    @Test
+    public void snocAll() {
+        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(1, 2).snocAll(strictStack(3, 4, 5)));
     }
 }

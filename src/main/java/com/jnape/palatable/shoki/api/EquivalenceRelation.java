@@ -1,10 +1,13 @@
 package com.jnape.palatable.shoki.api;
 
+import com.jnape.palatable.lambda.functions.Fn1;
 import com.jnape.palatable.lambda.functions.specialized.BiPredicate;
+import com.jnape.palatable.lambda.functor.Applicative;
 
 import java.util.Comparator;
 import java.util.Objects;
 
+import static com.jnape.palatable.lambda.functions.Fn2.curried;
 import static java.util.Comparator.naturalOrder;
 
 /**
@@ -22,8 +25,60 @@ import static java.util.Comparator.naturalOrder;
  */
 public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
 
-    default EquivalenceRelation<A> and(EquivalenceRelation<A> other) {
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> and(BiPredicate<? super A, ? super A> other) {
         return BiPredicate.super.and(other)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> flip() {
+        return BiPredicate.super.flip()::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default <D> EquivalenceRelation<A> discardR(Applicative<D, Fn1<A, ?>> appB) {
+        return BiPredicate.super.discardR(appB)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> or(BiPredicate<? super A, ? super A> other) {
+        return BiPredicate.super.or(other)::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> negate() {
+        return BiPredicate.super.negate()::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> local(Fn1<? super A, ? extends A> fn) {
+        return curried(BiPredicate.super.local(fn))::apply;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default EquivalenceRelation<A> censor(Fn1<? super A, ? extends A> fn) {
+        return curried(BiPredicate.super.censor(fn))::apply;
     }
 
     /**

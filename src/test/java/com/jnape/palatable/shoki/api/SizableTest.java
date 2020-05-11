@@ -16,7 +16,7 @@ public class SizableTest {
 
         @Test
         public void sameSizes() {
-            EquivalenceRelation<Sizable> sameSizes = Sizable.EquivalenceRelations.sameSizes();
+            EquivalenceRelation<Sizable> sameSizes = Sizable.EquivalenceRelations.sizeInfos();
 
             Sizable knownEmpty    = () -> known(0);
             Sizable knownNonEmpty = () -> known(1);

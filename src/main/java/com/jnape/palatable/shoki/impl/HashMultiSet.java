@@ -264,8 +264,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * @return the {@link HashMultiSet}
      */
     @SafeVarargs
-    public static <A> HashMultiSet<A> hashMultiSet(EquivalenceRelation<A> equivalenceRelation,
-                                                   HashingAlgorithm<A> hashingAlgorithm,
+    public static <A> HashMultiSet<A> hashMultiSet(EquivalenceRelation<? super A> equivalenceRelation,
+                                                   HashingAlgorithm<? super A> hashingAlgorithm,
                                                    A... as) {
         return hashMultiSet(new HashMultiSet<>(hashMap(equivalenceRelation, hashingAlgorithm)), as);
     }

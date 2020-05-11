@@ -104,8 +104,8 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
          * @return the {@link EquivalenceRelation}
          */
         public static <A, S extends Set<?, A>> EquivalenceRelation<S> sameElements() {
-            EquivalenceRelation<S> sameMembership = (xs, ys) -> and().foldMap(ys::contains, xs);
-            return Sizable.EquivalenceRelations.<S>sameSizes().and(sameMembership);
+            EquivalenceRelation<S> sameElements = (xs, ys) -> and().foldMap(ys::contains, xs);
+            return Sizable.EquivalenceRelations.<S>sizeInfos().and(sameElements);
         }
     }
 }

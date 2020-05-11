@@ -251,9 +251,9 @@ public interface MultiSet<A> extends Collection<Natural, Tuple2<A, NonZero>>, Ra
          * @param <S> the {@link MultiSet} subtype of the arguments
          * @return the {@link EquivalenceRelation}
          */
-        public static <A, S extends MultiSet<A>> EquivalenceRelation<S> sameElementsSameMultiplicity() {
-            EquivalenceRelation<S> sameMembershipMultiplicity = (xs, ys) -> and().foldMap(into(ys::contains), xs);
-            return Sizable.EquivalenceRelations.<S>sameSizes().and(sameMembershipMultiplicity);
+        public static <A, S extends MultiSet<A>> EquivalenceRelation<S> elementMultiplicity() {
+            EquivalenceRelation<S> elementMultiplicity = (xs, ys) -> and().foldMap(into(ys::contains), xs);
+            return Sizable.EquivalenceRelations.<S>sizeInfos().and(elementMultiplicity);
         }
     }
 }

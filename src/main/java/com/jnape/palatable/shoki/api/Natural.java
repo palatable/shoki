@@ -14,6 +14,8 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.GT.gt;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static java.lang.Math.min;
 import static java.math.BigInteger.ZERO;
 
@@ -409,7 +411,8 @@ public abstract class Natural extends Number
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof NonZero && Objects.equals(bigIntegerValue(), ((NonZero) other).bigIntegerValue());
+            return other instanceof NonZero
+                    && equivalent(objectEquals(), bigIntegerValue(), ((NonZero) other).bigIntegerValue());
         }
 
         @Override

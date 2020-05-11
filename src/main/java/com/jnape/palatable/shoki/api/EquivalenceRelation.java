@@ -85,7 +85,8 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
      * An {@link EquivalenceRelation} implemented in terms of {@link Objects#equals(Object, Object)}.
      *
      * @param <A> the type to equate
-     * @return an {@link EquivalenceRelation} implemented in terms of {@link Objects#equals(Object, Object)}
+     * @return the {@link EquivalenceRelation}
+     * @see Objects#equals(Object, Object)
      */
     static <A> EquivalenceRelation<A> objectEquals() {
         return Objects::equals;
@@ -95,7 +96,7 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
      * An {@link EquivalenceRelation} implemented in terms of reference equality (<code>==</code>).
      *
      * @param <A> the type to equate
-     * @return an {@link EquivalenceRelation} implemented in terms of reference equality (<code>==</code>)
+     * @return the {@link EquivalenceRelation}
      */
     static <A> EquivalenceRelation<A> referenceEquals() {
         return (x, y) -> x == y;
@@ -107,8 +108,8 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
      *
      * @param comparator the {@link Comparator}
      * @param <A>        the type to equate
-     * @return an {@link EquivalenceRelation} implemented in terms of the given {@link Comparator Comparator's}
-     * {@link Comparator#compare(Object, Object) compare} method.
+     * @return the {@link EquivalenceRelation}
+     * @see Comparator#compare(Object, Object)
      */
     static <A> EquivalenceRelation<A> comparablyEquals(Comparator<? super A> comparator) {
         return (x, y) -> comparator.compare(x, y) == 0;
@@ -119,24 +120,45 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
      * {@link Comparable#compareTo(Object) compareTo} method.
      *
      * @param <A> the type to equate
-     * @return an {@link EquivalenceRelation} implemented in terms of the {@link Comparable} type's
-     * {@link Comparable#compareTo(Object) compareTo} method.
+     * @return the {@link EquivalenceRelation}
      */
     static <A extends Comparable<? super A>> EquivalenceRelation<A> comparablyEquals() {
         return comparablyEquals(naturalOrder());
+    }
+
+
+    /**
+     * An {@link EquivalenceRelation} implemented in terms of {@link java.util.Arrays#equals(Object[], Object[])}.
+     *
+     * @param <A> the array component type
+     * @return the {@link EquivalenceRelation}
+     * @see java.util.Arrays#equals(Object[], Object[])
+     */
+    static <A> EquivalenceRelation<A[]> arraysEquals() {
+        return java.util.Arrays::equals;
+    }
+
+    /**
+     * An {@link EquivalenceRelation} implemented in terms of {@link java.util.Arrays#deepEquals(Object[], Object[])}.
+     *
+     * @return the {@link EquivalenceRelation}
+     * @see java.util.Arrays#deepEquals(Object[], Object[])
+     */
+    static EquivalenceRelation<Object[]> arraysDeepEquals() {
+        return java.util.Arrays::deepEquals;
     }
 
     /**
      * Contextualized equality given an {@link EquivalenceRelation} and two values <code>x</code> and <code>y</code>
      * that it compares.
      *
-     * @param <A> the value type
-     * @param x   the first value to compare for equality
-     * @param y   the second value to compare for equality
-     * @param eq  the {@link EquivalenceRelation}
+     * @param <A>                 the value type
+     * @param equivalenceRelation the {@link EquivalenceRelation}
+     * @param x                   the first value to compare for equality
+     * @param y                   the second value to compare for equality
      * @return true if the values are equal according to the {@link EquivalenceRelation}; false otherwise
      */
-    static <A> boolean equivalent(A x, A y, EquivalenceRelation<? super A> eq) {
-        return eq.apply(x, y);
+    static <A> boolean equivalent(EquivalenceRelation<? super A> equivalenceRelation, A x, A y) {
+        return equivalenceRelation.apply(x, y);
     }
 }

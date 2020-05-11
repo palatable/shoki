@@ -294,7 +294,7 @@ public class HashMapTest {
         assertEquals(hashMap().hashCode(), hashMap().hashCode());
         assertEquals(hashMap().put(1, 1).hashCode(), hashMap().put(1, 1).hashCode());
 
-        assertNotEquals(hashMap().hashCode(), hashMap().put(1, 1).hashCode());
+        assertNotEquals(hashMap().hashCode(), hashMap().put(0, 1).hashCode());
         assertNotEquals(hashMap().put(1, 1).hashCode(), hashMap().put(1, 2).hashCode());
 
         assertEquals(hashMap().put(0, 1).put(32, 2).remove(32).hashCode(), hashMap().put(0, 1).hashCode());

@@ -19,7 +19,7 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
+import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 
@@ -106,7 +106,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     @Override
     public final boolean equals(Object other) {
         return other instanceof StrictStack<?> &&
-                equivalent(this, downcast(other), sameElementsSameOrder(objectEquals()));
+                equivalent(elementsInOrder(objectEquals()), this, downcast(other));
     }
 
     /**
@@ -231,7 +231,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
                 synchronized (this) {
                     hashCode = this.hashCode;
                     if (hashCode == null) {
-                        this.hashCode = hashCode = hash(this, elementsInOrder(objectHashCode()));
+                        this.hashCode = hashCode = hash(elementsInOrder(objectHashCode()), this);
                     }
                 }
             }

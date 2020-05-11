@@ -4,8 +4,6 @@ import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static org.junit.Assert.assertEquals;
@@ -77,13 +75,15 @@ public class StrictQueueTest {
     }
 
     @Test
-    public void stackSafeEqualsAndHashCode() {
-        StrictQueue<Integer> xs = foldLeft(StrictQueue::cons, strictQueue(), replicate(10_000, 1));
-        StrictQueue<Integer> ys = foldLeft(StrictQueue::cons, strictQueue(), replicate(10_000, 1));
-        assertEquals(xs, ys);
-        assertEquals(xs.hashCode(), ys.hashCode());
+    public void equalsAndHashCode() {
         assertEquals(strictQueue(), strictQueue());
+        assertEquals(strictQueue(1, 2, 3), strictQueue(1, 2, 3));
         assertNotEquals(strictQueue(1), strictQueue(2));
+        assertNotEquals(strictQueue(1), new Object());
+
+        assertEquals(strictQueue().hashCode(), strictQueue().hashCode());
+        assertEquals(strictQueue(1, 2, 3).hashCode(), strictQueue(1, 2, 3).hashCode());
+        assertNotEquals(strictQueue(1, 2, 3).hashCode(), strictQueue(3, 2, 1).hashCode());
     }
 
     @Test

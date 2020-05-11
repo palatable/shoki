@@ -188,8 +188,8 @@ public final class HashSet<A> implements Set<Natural, A> {
      * @return the {@link HashSet}
      */
     @SafeVarargs
-    public static <A> HashSet<A> hashSet(EquivalenceRelation<A> equivalenceRelation,
-                                         HashingAlgorithm<A> hashingAlgorithm,
+    public static <A> HashSet<A> hashSet(EquivalenceRelation<? super A> equivalenceRelation,
+                                         HashingAlgorithm<? super A> hashingAlgorithm,
                                          A... as) {
         return new HashSet<>(backingHashMap(hashMap(equivalenceRelation, hashingAlgorithm), as));
     }

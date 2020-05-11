@@ -21,7 +21,7 @@ public class OrderedCollectionTest {
         @Test
         public void sameElementsSameOrder() {
             EquivalenceRelation<? super OrderedCollection<?, Integer>> sameElementsSameOrder =
-                    OrderedCollection.EquivalenceRelations.sameElementsSameOrder(objectEquals());
+                    OrderedCollection.EquivalenceRelations.elementsInOrder(objectEquals());
 
             OrderedCollection<?, Integer> stack = strictStack(1, 2, 3);
             OrderedCollection<?, Integer> queue = strictQueue(1, 2, 3);

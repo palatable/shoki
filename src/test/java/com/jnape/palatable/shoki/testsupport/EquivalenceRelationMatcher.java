@@ -8,7 +8,7 @@ import static java.lang.String.format;
 
 /**
  * A {@link org.hamcrest.Matcher matcher} that matches successfully if an expected value and actual value are
- * {@link EquivalenceRelation#equivalent(Object, Object, EquivalenceRelation) equivalent} in terms of the provided
+ * {@link EquivalenceRelation#equivalent(EquivalenceRelation, Object, Object) equivalent} in terms of the provided
  * {@link EquivalenceRelation}.
  *
  * @param <A> the value type

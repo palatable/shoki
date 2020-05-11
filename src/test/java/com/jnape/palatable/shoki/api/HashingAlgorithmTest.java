@@ -48,9 +48,23 @@ public class HashingAlgorithmTest {
     }
 
     @Test
+    public void arraysHashCode() {
+        HashingAlgorithm<Integer[]> arraysHashCode = HashingAlgorithm.arraysHashCode();
+        Integer[]                   ints           = {1, 2, 3};
+        assertEquals((Integer) java.util.Arrays.hashCode(ints), arraysHashCode.apply(ints));
+    }
+
+    @Test
+    public void arraysDeepHashCode() {
+        HashingAlgorithm<Object[]> arraysDeepHashCode = HashingAlgorithm.arraysDeepHashCode();
+        Object[]                   nested             = {1, new Object[]{"foo"}, 3};
+        assertEquals((Integer) java.util.Arrays.deepHashCode(nested), arraysDeepHashCode.apply(nested));
+    }
+
+    @Test
     public void hashing() {
-        assertEquals(0, hash(0, HashingAlgorithm.objectHashCode()));
-        assertEquals(1, hash(1, HashingAlgorithm.objectHashCode()));
+        assertEquals(0, hash(HashingAlgorithm.objectHashCode(), 0));
+        assertEquals(1, hash(HashingAlgorithm.objectHashCode(), 1));
     }
 
     @Test

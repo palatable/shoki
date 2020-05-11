@@ -5,6 +5,9 @@ import com.jnape.palatable.lambda.functions.Fn1;
 
 import java.util.Objects;
 
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+
 /**
  * Algebraic data type representing the possible constructions of a {@link SizeInfo}.
  *
@@ -64,7 +67,7 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
 
         @Override
         public boolean equals(Object other) {
-            return other instanceof Known && Objects.equals(this.size, ((Known<?>) other).size);
+            return other instanceof Known && equivalent(objectEquals(), size, ((Known<?>) other).size);
         }
 
         @Override

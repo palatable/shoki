@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki.api;
 
-import java.util.Objects;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
+import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 
 /**
  * A generic interface representing a type that can provide information about its size.
@@ -31,8 +32,8 @@ public interface Sizable {
          * @param <S> the {@link Sizable} subtype of the arguments
          * @return the {@link EquivalenceRelation}
          */
-        public static <S extends Sizable> EquivalenceRelation<S> sameSizes() {
-            return (xs, ys) -> Objects.equals(xs.sizeInfo(), ys.sizeInfo());
+        public static <S extends Sizable> EquivalenceRelation<S> sizeInfos() {
+            return (xs, ys) -> equivalent(objectEquals(), xs.sizeInfo(), ys.sizeInfo());
         }
     }
 }

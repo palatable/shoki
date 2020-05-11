@@ -56,6 +56,11 @@ public class StrictStackTest {
     }
 
     @Test
+    public void consAll() {
+        assertEquals(strictStack(1, 2, 3), strictStack(3).consAll(strictStack(2, 1)));
+    }
+
+    @Test
     public void structureIsShared() {
         StrictStack<Integer> tail        = strictStack(3, 2);
         StrictStack<Integer> strictStack = tail.cons(1);

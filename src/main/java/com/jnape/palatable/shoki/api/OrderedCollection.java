@@ -44,10 +44,10 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
          * @param <OC>         the {@link OrderedCollection} subtype of the arguments
          * @return the {@link EquivalenceRelation}
          */
-        public static <A, OC extends OrderedCollection<?, A>> EquivalenceRelation<OC> sameElementsSameOrder(
+        public static <A, OC extends OrderedCollection<?, A>> EquivalenceRelation<OC> elementsInOrder(
                 EquivalenceRelation<? super A> elementEqRel) {
-            EquivalenceRelation<OC> sameElementsInOrder = (xs, ys) -> and().reduceLeft(zipWith(elementEqRel, xs, ys));
-            return Sizable.EquivalenceRelations.<OC>sameSizes().and(sameElementsInOrder);
+            EquivalenceRelation<OC> elementsInOrder = (xs, ys) -> and().reduceLeft(zipWith(elementEqRel, xs, ys));
+            return Sizable.EquivalenceRelations.<OC>sizeInfos().and(elementsInOrder);
         }
     }
 
@@ -69,7 +69,7 @@ public interface OrderedCollection<Size extends Number, A> extends Collection<Si
          */
         public static <A, OC extends OrderedCollection<?, A>> HashingAlgorithm<OC> elementsInOrder(
                 HashingAlgorithm<? super A> elementHashAlg) {
-            return xs -> foldLeft((hash, x) -> (hash * 31) + elementHashAlg.apply(x), 1, xs);
+            return xs -> foldLeft((hash, x) -> (hash * 31) + elementHashAlg.apply(x), 0, xs);
         }
     }
 }

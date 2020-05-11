@@ -14,8 +14,10 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.arraysHashCode;
+import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.sameElementsSameOrder;
+import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.Collections.emptyIterator;
@@ -95,7 +97,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
     @Override
     public boolean equals(Object other) {
         return other instanceof StrictQueue<?> &&
-                equivalent(this, downcast(other), sameElementsSameOrder(objectEquals()));
+                equivalent(elementsInOrder(objectEquals()), this, downcast(other));
     }
 
     /**
@@ -266,7 +268,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
                 synchronized (this) {
                     hashCode = this.hashCode;
                     if (hashCode == null) {
-                        this.hashCode = hashCode = 31 * outgoing.hashCode() + incoming.hashCode();
+                        this.hashCode = hashCode = hash(arraysHashCode(), new StrictStack[]{outgoing, incoming});
                     }
                 }
             }

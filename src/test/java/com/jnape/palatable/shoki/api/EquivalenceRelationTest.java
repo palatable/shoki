@@ -54,9 +54,25 @@ public class EquivalenceRelationTest {
     }
 
     @Test
+    public void arraysEquals() {
+        EquivalenceRelation<Integer[]> arraysEquals = EquivalenceRelation.arraysEquals();
+        assertThat(new Integer[]{1, 2, 3}, equivalentTo(new Integer[]{1, 2, 3}, arraysEquals));
+        assertThat(new Integer[]{1, 2, 3}, not(equivalentTo(new Integer[]{2, 1, 3}, arraysEquals)));
+    }
+
+    @Test
+    public void arraysDeepEquals() {
+        EquivalenceRelation<Object[]> arraysDeepEquals = EquivalenceRelation.arraysDeepEquals();
+        assertThat(new Object[]{1, new Object[]{"foo"}, 3},
+                   equivalentTo(new Object[]{1, new Object[]{"foo"}, 3}, arraysDeepEquals));
+        assertThat(new Object[]{1, new Object[]{"foo"}, 3},
+                   not(equivalentTo(new Object[]{new Object[]{1}, "foo", 3}, arraysDeepEquals)));
+    }
+
+    @Test
     public void equivalence() {
-        assertTrue(equivalent(1, 1, EquivalenceRelation.objectEquals()));
-        assertFalse(equivalent(1, 2, EquivalenceRelation.objectEquals()));
+        assertTrue(equivalent(EquivalenceRelation.objectEquals(), 1, 1));
+        assertFalse(equivalent(EquivalenceRelation.objectEquals(), 1, 2));
     }
 
     @Test

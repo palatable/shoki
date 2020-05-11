@@ -74,15 +74,35 @@ public interface HashingAlgorithm<A> extends Fn1<A, Integer> {
         return System::identityHashCode;
     }
 
+
+    /**
+     * A {@link HashingAlgorithm} implemented in terms of {@link java.util.Arrays#hashCode(Object[])}.
+     *
+     * @param <A> the array component type
+     * @return a {@link HashingAlgorithm} implemented in terms of {@link java.util.Arrays#hashCode(Object[])}.
+     */
+    static <A> HashingAlgorithm<A[]> arraysHashCode() {
+        return java.util.Arrays::hashCode;
+    }
+
+    /**
+     * A {@link HashingAlgorithm} implemented in terms of {@link java.util.Arrays#deepHashCode(Object[])}.
+     *
+     * @return a {@link HashingAlgorithm} implemented in terms of {@link java.util.Arrays#deepHashCode(Object[])}.
+     */
+    static HashingAlgorithm<Object[]> arraysDeepHashCode() {
+        return java.util.Arrays::deepHashCode;
+    }
+
     /**
      * Compute the hash of <code>a</code> in terms of the given {@link HashingAlgorithm hashingAlgorithm}.
      *
      * @param <A>              the value type
-     * @param a                the value
      * @param hashingAlgorithm the {@link HashingAlgorithm}
+     * @param a                the value
      * @return the hash
      */
-    static <A> int hash(A a, HashingAlgorithm<A> hashingAlgorithm) {
+    static <A> int hash(HashingAlgorithm<? super A> hashingAlgorithm, A a) {
         return hashingAlgorithm.apply(a);
     }
 }

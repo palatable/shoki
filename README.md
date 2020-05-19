@@ -1,8 +1,8 @@
 Shōki (正気)
 ======
 [![Build Status](https://travis-ci.org/palatable/shoki.svg)](https://travis-ci.org/palatable/shoki)
-[![Shōki](https://img.shields.io/maven-metadata/v?metadataUrl=https%3A%2F%2Foss.sonatype.org%2Fcontent%2Frepositories%2Fsnapshots%2Fcom%2Fjnape%2Fpalatable%2Fshoki%2Fmaven-metadata.xml)](https://oss.sonatype.org/content/repositories/snapshots/com/jnape/palatable/shoki/)
-<!--[![Shōki](https://img.shields.io/maven-central/v/com.jnape.palatable/shoki.svg)](http://search.maven.org/#search%7Cga%7C1%7Ccom.jnape.palatable.shoki)-->
+[![Shōki](https://img.shields.io/maven-central/v/com.jnape.palatable/shoki.svg)](http://search.maven.org/#search%7Cga%7C1%7Ccom.jnape.palatable.shoki)
+[![Shōki](https://img.shields.io/maven-metadata/v?color=aaa&label=development&metadataUrl=https%3A%2F%2Foss.sonatype.org%2Fcontent%2Frepositories%2Fsnapshots%2Fcom%2Fjnape%2Fpalatable%2Fshoki%2Fmaven-metadata.xml)](https://oss.sonatype.org/content/repositories/snapshots/com/jnape/palatable/shoki/)
 
 Purely functional, persistent data structures for the JVM.
 

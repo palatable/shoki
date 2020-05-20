@@ -5,6 +5,7 @@ import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 
 import static com.jnape.palatable.lambda.functions.Fn2.curried;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -58,6 +59,34 @@ public interface Map<Size extends Number, K, V> extends
 
     /**
      * {@inheritDoc}
+     * If <code>key</code> is associated to a value inside this {@link Map}, retrieve {@link Maybe#just(Object) just}
+     * the value it maps to; otherwise, return {@link Maybe#nothing() nothing}.
+     *
+     * @see Map#put(Object, Object)
+     * @see Map#remove(Object)
+     */
+    @Override
+    Maybe<V> get(K k);
+
+    /**
+     * {@inheritDoc}
+     * <code>True</code> if <code>key</code> is associated to a value in this {@link Map}; <code>false</code> otherwise.
+     */
+    @Override
+    default boolean contains(K k) {
+        return get(k).match(constantly(false), constantly(true));
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    default boolean isEmpty() {
+        return Collection.super.isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
      *
      * @return the head key/value {@link Tuple2 pair}
      */
@@ -106,7 +135,7 @@ public interface Map<Size extends Number, K, V> extends
 
         /**
          * An {@link EquivalenceRelation} between two {@link Map}s that holds if, and only if, both {@link Map}s have
-         * equivalent {@link SizeInfo}s and contain the same entries. <code>O(n)</code>.
+         * equivalent {@link SizeInfo}s and contain the same entries.
          *
          * @param valueEqRel the {@link EquivalenceRelation} to use to compare entry values
          * @param <K>        the key type

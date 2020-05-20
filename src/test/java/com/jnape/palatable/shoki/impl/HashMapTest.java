@@ -278,6 +278,8 @@ public class HashMapTest {
         assertNotEquals(hashMap(), hashMap().put(1, 1));
         assertNotEquals(hashMap().put(1, 1), hashMap().put(1, 2));
         assertNotEquals(hashMap().put(1, 1), hashMap().put(2, 1));
+        assertNotEquals(hashMap(), new Object());
+        assertNotEquals(hashMap(tuple(1, 2)), hashMap(tuple("foo", "bar")));
 
         assertEquals(HashMap.<Integer, Boolean>hashMap()
                              .put(0, true)

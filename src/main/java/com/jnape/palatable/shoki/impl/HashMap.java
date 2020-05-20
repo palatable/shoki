@@ -235,7 +235,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     /**
      * {@inheritDoc}
-     * Amortized <code>O(o)</code>.
+     * <code>O(o)</code>.
      */
     @Override
     public HashMap<K, V> merge(Map<Natural, K, V> other, Semigroup<V> semigroup) {
@@ -244,7 +244,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
 
     /**
      * {@inheritDoc}
-     * Amortized <code>O(o)</code>.
+     * <code>O(o)</code>.
      */
     @Override
     public HashMap<K, V> removeAll(Set<Natural, K> keys) {

@@ -1,6 +1,6 @@
 package com.jnape.palatable.shoki.benchmarks;
 
-import com.jnape.palatable.shoki.impl.HashSet;
+import com.jnape.palatable.shoki.impl.TreeSet;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -16,11 +16,11 @@ import org.openjdk.jmh.runner.RunnerException;
 
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
-import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
+import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
-public class HashSetBenchmark {
+public class TreeSetBenchmark {
 
     public static void main(String[] args) throws RunnerException {
         Shoki.main(args);
@@ -36,8 +36,8 @@ public class HashSetBenchmark {
     public static class Shoki {
 
         @Benchmark
-        public HashSet<Integer> add() {
-            HashSet<Integer> hashSet = hashSet();
+        public TreeSet<Integer> add() {
+            TreeSet<Integer> hashSet = treeSet();
             for (int i = 0; i < K100; i++) {
                 hashSet = hashSet.add(i);
             }
@@ -45,8 +45,8 @@ public class HashSetBenchmark {
         }
 
         @Benchmark
-        public HashSet<Integer> remove(State state) {
-            HashSet<Integer> hashSet = state.hashSet;
+        public TreeSet<Integer> remove(State state) {
+            TreeSet<Integer> hashSet = state.treeSet;
             for (int i = 0; i < K100; i++) {
                 hashSet = hashSet.remove(i);
             }
@@ -55,22 +55,22 @@ public class HashSetBenchmark {
 
         @Benchmark
         public void iteration(State state, Blackhole bh) {
-            state.hashSet.forEach(bh::consume);
+            state.treeSet.forEach(bh::consume);
         }
 
         public static void main(String[] args) throws RunnerException {
-            runBenchmarks(HashSetBenchmark.Shoki.class);
+            runBenchmarks(TreeSetBenchmark.Shoki.class);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Benchmark)
         public static class State {
-            HashSet<Integer> hashSet;
+            TreeSet<Integer> treeSet;
 
             @Setup(Level.Trial)
             public void doSetup() {
-                hashSet = hashSet();
+                treeSet = treeSet();
                 for (int i = 0; i < K100; i++) {
-                    hashSet = hashSet.add(i);
+                    treeSet = treeSet.add(i);
                 }
             }
         }
@@ -79,8 +79,7 @@ public class HashSetBenchmark {
     public static class Java {
 
         public static void main(String[] args) throws RunnerException {
-            HashSet.main(args);
-            LinkedHashSet.main(args);
+            TreeSet.main(args);
         }
 
         @BenchmarkMode(Throughput)
@@ -89,42 +88,21 @@ public class HashSetBenchmark {
         @Measurement(iterations = 5, time = 1)
         @Fork(5)
         @OperationsPerInvocation(K100)
-        public static class HashSet {
+        public static class TreeSet {
 
             @Benchmark
-            public java.util.HashSet<Integer> add() {
-                java.util.HashSet<Integer> hashSet = new java.util.HashSet<>();
+            public java.util.TreeSet<Integer> add() {
+                java.util.TreeSet<Integer> treeSet = new java.util.TreeSet<>();
                 for (int i = 0; i < K100; i++) {
-                    hashSet.add(i);
+                    treeSet.add(i);
                 }
-                return hashSet;
+                return treeSet;
             }
 
             public static void main(String[] args) throws RunnerException {
-                runBenchmarks(HashSetBenchmark.Java.HashSet.class);
-            }
-        }
-
-        @BenchmarkMode(Throughput)
-        @OutputTimeUnit(MICROSECONDS)
-        @Warmup(iterations = 5, time = 1)
-        @Measurement(iterations = 5, time = 1)
-        @Fork(5)
-        @OperationsPerInvocation(K100)
-        public static class LinkedHashSet {
-
-            @Benchmark
-            public java.util.LinkedHashSet<Integer> add() {
-                java.util.LinkedHashSet<Integer> linkedHashSet = new java.util.LinkedHashSet<>();
-                for (int i = 0; i < K100; i++) {
-                    linkedHashSet.add(i);
-                }
-                return linkedHashSet;
-            }
-
-            public static void main(String[] args) throws RunnerException {
-                runBenchmarks(HashSetBenchmark.Java.LinkedHashSet.class);
+                runBenchmarks(TreeSetBenchmark.Java.TreeSet.class);
             }
         }
     }
+
 }

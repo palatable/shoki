@@ -1,78 +1,78 @@
 [
     {
-        "jmhVersion" : "1.19",
-        "benchmark" : "com.jnape.palatable.shoki.benchmarks.HashSetBenchmark.Java.HashSet.add",
-        "mode" : "thrpt",
-        "threads" : 4,
-        "forks" : 5,
-        "jvm" : "/Library/Java/JavaVirtualMachines/jdk1.8.0_152.jdk/Contents/Home/jre/bin/java",
-        "jvmArgs" : [
-            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=58966:/Applications/IntelliJ IDEA.app/Contents/bin",
+        "jmhVersion": "1.19",
+        "benchmark": "com.jnape.palatable.shoki.benchmarks.HashSetBenchmark.Java.HashSet.add",
+        "mode": "thrpt",
+        "threads": 8,
+        "forks": 5,
+        "jvm": "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre/bin/java",
+        "jvmArgs": [
+            "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=58223:/Applications/IntelliJ IDEA.app/Contents/bin",
             "-Dfile.encoding=UTF-8"
         ],
-        "jdkVersion" : "1.8.0_152",
-        "vmVersion" : "25.152-b16",
-        "warmupIterations" : 5,
-        "warmupTime" : "1 s",
-        "warmupBatchSize" : 1,
-        "measurementIterations" : 5,
-        "measurementTime" : "1 s",
-        "measurementBatchSize" : 1,
-        "primaryMetric" : {
-            "score" : 91.85272522966915,
-            "scoreError" : 11.61545634223022,
-            "scoreConfidence" : [
-                80.23726888743893,
-                103.46818157189936
+        "jdkVersion": "1.8.0_252",
+        "vmVersion": "25.252-b09",
+        "warmupIterations": 5,
+        "warmupTime": "1 s",
+        "warmupBatchSize": 1,
+        "measurementIterations": 5,
+        "measurementTime": "1 s",
+        "measurementBatchSize": 1,
+        "primaryMetric": {
+            "score": 108.67889103046433,
+            "scoreError": 5.651189152974954,
+            "scoreConfidence": [
+                103.02770187748938,
+                114.33008018343928
             ],
-            "scorePercentiles" : {
-                "0.0" : 47.78024857506666,
-                "50.0" : 92.87262360962714,
-                "90.0" : 110.6170747908648,
-                "95.0" : 111.16911645462017,
-                "99.0" : 111.16962655237958,
-                "99.9" : 111.16962655237958,
-                "99.99" : 111.16962655237958,
-                "99.999" : 111.16962655237958,
-                "99.9999" : 111.16962655237958,
-                "100.0" : 111.16962655237958
+            "scorePercentiles": {
+                "0.0": 80.6220361824614,
+                "50.0": 110.76484012705241,
+                "90.0": 115.17825677358506,
+                "95.0": 116.48997558606173,
+                "99.0": 116.89743900637316,
+                "99.9": 116.89743900637316,
+                "99.99": 116.89743900637316,
+                "99.999": 116.89743900637316,
+                "99.9999": 116.89743900637316,
+                "100.0": 116.89743900637316
             },
             "scoreUnit" : "ops/us",
             "rawData" : [
                 [
-                    107.92548298070258,
-                    111.16792622651485,
-                    111.16962655237958,
-                    110.24984050043145,
-                    107.79426979552396
+                    111.44590200365786,
+                    107.54108459330774,
+                    111.58621493209301,
+                    110.01175210319614,
+                    109.14947685316008
                 ],
                 [
-                    104.23916288875459,
-                    98.39796844273494,
-                    103.09664981313244,
-                    95.17286325358904,
-                    76.400563586609
+                    112.0382724442345,
+                    110.83915089925405,
+                    110.76484012705241,
+                    110.00396557015159,
+                    113.44718467088445
                 ],
                 [
-                    73.19884038153207,
-                    86.13463342170374,
-                    89.8438116316067,
-                    77.66487396220927,
-                    47.78024857506666
+                    113.4287795381783,
+                    114.9376095524184,
+                    113.33474983516172,
+                    116.89743900637316,
+                    114.91700248330949
                 ],
                 [
-                    84.16616342607261,
-                    92.64043791381184,
-                    106.17991449398565,
-                    77.46759479078037,
-                    83.61941292942785
+                    113.92443919571633,
+                    115.53922760533507,
+                    100.95372124232048,
+                    80.6220361824614,
+                    98.38658819150508
                 ],
                 [
-                    72.1077053420891,
-                    89.63081236592811,
-                    92.87262360962714,
-                    94.03844231371068,
-                    103.35826154380437
+                    104.64771028968397,
+                    105.93868877798725,
+                    101.2873490756447,
+                    106.24052915649075,
+                    109.08856143203062
                 ]
             ]
         },

@@ -5,6 +5,9 @@ import com.jnape.palatable.shoki.impl.HashMultiSet;
 import com.jnape.palatable.shoki.impl.HashSet;
 import com.jnape.palatable.shoki.impl.StrictQueue;
 import com.jnape.palatable.shoki.impl.StrictStack;
+import com.jnape.palatable.shoki.impl.TreeMap;
+import com.jnape.palatable.shoki.impl.TreeMultiSet;
+import com.jnape.palatable.shoki.impl.TreeSet;
 import org.junit.Test;
 
 import java.util.ArrayDeque;
@@ -21,6 +24,8 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptyMap;
+import static java.util.Comparator.naturalOrder;
+import static java.util.Comparator.reverseOrder;
 import static org.junit.Assert.assertEquals;
 
 public class ShokiTest {
@@ -76,5 +81,88 @@ public class ShokiTest {
                              .inc("foo", one())
                              .inc("baz", atLeastOne(3)),
                      Shoki.hashMultiSet(javaMap));
+    }
+
+    @Test
+    public void treeMap() {
+        assertEquals(TreeMap.treeMap(), Shoki.<Integer, Integer>treeMap(emptyMap()));
+
+        java.util.Map<String, Integer> javaHashMap = toMap(java.util.HashMap::new,
+                                                           asList(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
+        assertEquals(TreeMap.treeMap(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)),
+                     Shoki.treeMap(javaHashMap));
+
+        java.util.Map<String, Integer> javaTreeMapWithoutComparator =
+                toMap(java.util.TreeMap::new, asList(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
+        assertEquals(TreeMap.treeMap(naturalOrder(), tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)),
+                     Shoki.treeMap(javaTreeMapWithoutComparator));
+
+        java.util.Map<String, Integer> javaTreeMapWithComparator =
+                toMap(() -> new java.util.TreeMap<>(reverseOrder()),
+                      asList(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
+        assertEquals(TreeMap.treeMap(reverseOrder(), tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)),
+                     Shoki.treeMap(javaTreeMapWithComparator));
+
+        assertEquals(TreeMap.treeMap(naturalOrder(), tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)),
+                     Shoki.treeMap(naturalOrder(), javaTreeMapWithComparator));
+    }
+
+    @Test
+    public void treeSet() {
+        assertEquals(TreeSet.treeSet(), Shoki.<Integer>treeSet(emptyList()));
+        List<Integer> javaCollection = asList(1, 2, 3);
+        assertEquals(TreeSet.treeSet(1, 2, 3), Shoki.treeSet(javaCollection));
+
+        java.util.TreeSet<Integer> javaTreeSetWithoutComparator = new java.util.TreeSet<>(asList(1, 2, 3));
+        assertEquals(TreeSet.treeSet(naturalOrder(), 1, 2, 3), Shoki.treeSet(javaTreeSetWithoutComparator));
+
+        java.util.TreeSet<Integer> javaTreeSetWithComparator = new java.util.TreeSet<Integer>(reverseOrder()) {{
+            addAll(asList(1, 2, 3));
+        }};
+        assertEquals(TreeSet.treeSet(reverseOrder(), 1, 2, 3), Shoki.treeSet(javaTreeSetWithComparator));
+
+        assertEquals(TreeSet.treeSet(naturalOrder(), 1, 2, 3),
+                     Shoki.treeSet(naturalOrder(), javaTreeSetWithComparator));
+    }
+
+    @Test
+    public void treeMultiSet() {
+        assertEquals(TreeMultiSet.treeMultiSet(), Shoki.<Integer>treeMultiSet(emptyMap()));
+        assertEquals(TreeMultiSet.treeMultiSet(), Shoki.<Integer>treeMultiSet(emptyList()));
+
+        Map<String, Integer> javaMapWithoutComparable = toMap(java.util.HashMap::new,
+                                                              asList(tuple("foo", 1), tuple("bar", -2),
+                                                                     tuple("baz", 3), tuple("quux", 0)));
+        assertEquals(TreeMultiSet.<String>treeMultiSet()
+                             .inc("foo", one())
+                             .inc("baz", atLeastOne(3)),
+                     Shoki.treeMultiSet(javaMapWithoutComparable));
+
+        Map<String, Integer> javaMapWithComparable = toMap(() -> new java.util.TreeMap<>(reverseOrder()),
+                                                           asList(tuple("foo", 1), tuple("bar", -2),
+                                                                  tuple("baz", 3), tuple("quux", 0)));
+
+        assertEquals(TreeMultiSet.<String>treeMultiSet(reverseOrder())
+                             .inc("foo", one())
+                             .inc("baz", atLeastOne(3)),
+                     Shoki.treeMultiSet(javaMapWithComparable));
+
+        assertEquals(TreeMultiSet.<String>treeMultiSet(naturalOrder())
+                             .inc("foo", one())
+                             .inc("baz", atLeastOne(3)),
+                     Shoki.treeMultiSet(naturalOrder(), javaMapWithComparable));
+
+        Iterable<Integer> javaIterableWithoutComparable = asList(1, 2, 2, 3, 3, 3);
+        assertEquals(TreeMultiSet.treeMultiSet(naturalOrder(), 1, 2, 2, 3, 3, 3),
+                     Shoki.treeMultiSet(javaIterableWithoutComparable));
+
+        Iterable<Integer> javaIterableWithComparable = new java.util.TreeSet<Integer>(reverseOrder()) {{
+            addAll(asList(1, 2, 3));
+        }};
+        assertEquals(TreeMultiSet.treeMultiSet(reverseOrder(), 1, 2, 3),
+                     Shoki.treeMultiSet(javaIterableWithComparable));
+
+        assertEquals(TreeMultiSet.treeMultiSet(naturalOrder(), 1, 2, 3),
+                     Shoki.treeMultiSet(naturalOrder(), javaIterableWithComparable));
     }
 }

@@ -119,7 +119,6 @@ public class HashMapBenchmark {
         public static void main(String[] args) throws RunnerException {
             HashMap.main(args);
             LinkedHashMap.main(args);
-            TreeMap.main(args);
         }
 
         @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -262,58 +261,6 @@ public class HashMapBenchmark {
 
             public static void main(String[] args) throws RunnerException {
                 runBenchmarks(HashMapBenchmark.Java.LinkedHashMap.class);
-            }
-        }
-
-        @BenchmarkMode(Throughput)
-        @OutputTimeUnit(MICROSECONDS)
-        @Warmup(iterations = 5, time = 1)
-        @Measurement(iterations = 5, time = 1)
-        @Fork(5)
-        @OperationsPerInvocation(K100)
-        public static class TreeMap {
-
-            @Benchmark
-            public java.util.TreeMap<Integer, Unit> putNoCollisions() {
-                java.util.TreeMap<Integer, Unit> treeMap = new java.util.TreeMap<>();
-                for (int i = 0; i < K100; i++) {
-                    treeMap.put(i, UNIT);
-                }
-                return treeMap;
-            }
-
-            @Benchmark
-            @OperationsPerInvocation(N_COLLISIONS)
-            public java.util.TreeMap<Collision, Unit> putFullCollisions() {
-                java.util.TreeMap<Collision, Unit> treeMap = new java.util.TreeMap<>();
-                for (int i = 0; i < N_COLLISIONS; i++) {
-                    treeMap.put(new Collision(i), UNIT);
-                }
-                return treeMap;
-            }
-
-            @Benchmark
-            public void getNoCollisions(NoCollisionsState state, Blackhole bh) {
-                for (int i = 0; i < K100; i++) {
-                    bh.consume(state.treeMap.get(i));
-                }
-            }
-
-            @Benchmark
-            @OperationsPerInvocation(N_COLLISIONS)
-            public void getFullCollisions(FullCollisionsState state, Blackhole bh) {
-                for (int i = 0; i < N_COLLISIONS; i++) {
-                    bh.consume(state.treeMap.get(new Collision(i)));
-                }
-            }
-
-            @Benchmark
-            public void iteration(NoCollisionsState state, Blackhole bh) {
-                state.treeMap.entrySet().forEach(bh::consume);
-            }
-
-            public static void main(String[] args) throws RunnerException {
-                runBenchmarks(HashMapBenchmark.Java.TreeMap.class);
             }
         }
     }

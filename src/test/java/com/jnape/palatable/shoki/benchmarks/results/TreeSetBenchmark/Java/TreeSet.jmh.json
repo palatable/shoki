@@ -1,0 +1,84 @@
+[
+  {
+    "jmhVersion": "1.19",
+    "benchmark": "com.jnape.palatable.shoki.benchmarks.TreeSetBenchmark.Java.TreeSet.add",
+    "mode": "thrpt",
+    "threads": 8,
+    "forks": 5,
+    "jvm": "/Library/Java/JavaVirtualMachines/adoptopenjdk-8.jdk/Contents/Home/jre/bin/java",
+    "jvmArgs": [
+      "-javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=58055:/Applications/IntelliJ IDEA.app/Contents/bin",
+      "-Dfile.encoding=UTF-8"
+    ],
+    "jdkVersion": "1.8.0_252",
+    "vmVersion": "25.252-b09",
+    "warmupIterations": 5,
+    "warmupTime": "1 s",
+    "warmupBatchSize": 1,
+    "measurementIterations": 5,
+    "measurementTime": "1 s",
+    "measurementBatchSize": 1,
+    "primaryMetric": {
+      "score": 27.09359607321217,
+      "scoreError": 3.207811932208942,
+      "scoreConfidence": [
+        23.885784141003228,
+        30.30140800542111
+      ],
+      "scorePercentiles": {
+        "0.0": 18.10381763513703,
+        "50.0": 29.8696290671419,
+        "90.0": 31.011879816078633,
+        "95.0": 31.16803420529086,
+        "99.0": 31.204217288633327,
+        "99.9": 31.204217288633327,
+        "99.99": 31.204217288633327,
+        "99.999": 31.204217288633327,
+        "99.9999": 31.204217288633327,
+        "100.0": 31.204217288633327
+      },
+      "scoreUnit": "ops/us",
+      "rawData": [
+        [
+          29.8696290671419,
+          28.411657544881454,
+          18.571182944571703,
+          22.39488687566886,
+          30.264622321674054
+        ],
+        [
+          31.083607010825098,
+          30.362191099123454,
+          31.204217288633327,
+          30.05805503380846,
+          30.964061686247653
+        ],
+        [
+          23.104652643493036,
+          26.64350077451419,
+          25.553467712691948,
+          18.10381763513703,
+          27.056129049442895
+        ],
+        [
+          30.739214098941385,
+          30.01351475408868,
+          30.074226878728467,
+          30.1982483169272,
+          29.91696684986609
+        ],
+        [
+          22.39793235330641,
+          22.69346957042967,
+          19.62576713922069,
+          27.221902270571,
+          30.812980910369642
+        ]
+      ]
+    },
+    "secondaryMetrics": {
+    }
+  }
+]
+
+

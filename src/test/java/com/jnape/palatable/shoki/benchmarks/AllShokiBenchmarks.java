@@ -13,5 +13,8 @@ public final class AllShokiBenchmarks {
         HashMapBenchmark.Shoki.main(args);
         HashSetBenchmark.Shoki.main(args);
         HashMultiSetBenchmark.Shoki.main(args);
+        TreeMapBenchmark.Shoki.main(args);
+        TreeSetBenchmark.Shoki.main(args);
+        TreeMultiSetBenchmark.Shoki.main(args);
     }
 }

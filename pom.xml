@@ -85,6 +85,7 @@
             <groupId>com.jnape.palatable</groupId>
             <artifactId>traitor</artifactId>
             <version>${traitor.version}</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openjdk.jmh</groupId>

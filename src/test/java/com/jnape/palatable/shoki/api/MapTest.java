@@ -17,12 +17,23 @@ import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static com.jnape.palatable.shoki.testsupport.HashingAlgorithmMatcher.hashesEquivalentlyTo;
 import static org.hamcrest.CoreMatchers.not;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Enclosed.class)
 public class MapTest {
 
     public static final class DefaultMethods {
+
+        @Test
+        public void contains() {
+            DefaultMethodsMap<Natural, String, Integer> empty = DefaultMethodsMap.delegate(hashMap());
+
+            assertFalse(empty.contains("foo"));
+            assertTrue(empty.put("foo", 1).contains("foo"));
+            assertFalse(empty.put("foo", 1).contains("bar"));
+        }
 
         @Test
         public void putAllWithSemigroup() {

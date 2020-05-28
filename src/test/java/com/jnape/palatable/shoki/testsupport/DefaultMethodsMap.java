@@ -90,14 +90,6 @@ public final class DefaultMethodsMap<Size extends Number, K, V> implements Map<S
      * {@inheritDoc}
      */
     @Override
-    public boolean contains(K k) {
-        return delegate.contains(k);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public String toString() {
         return "DefaultMethodsMap{" +
                 "delegate=" + delegate +

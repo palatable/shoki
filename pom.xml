@@ -100,6 +100,18 @@
             <version>${jmh.version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>dev.marksman</groupId>
+            <artifactId>gauntlet</artifactId>
+            <version>0.3.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>dev.marksman</groupId>
+            <artifactId>gauntlet-hamcrest</artifactId>
+            <version>0.3.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>

@@ -107,7 +107,7 @@ public class MultiSetTests extends GauntletApiBase {
     }
 
     private static Arbitrary<NonZero> positiveNaturals(NonZero upperBound) {
-        return ints(inclusive(1, upperBound.intValue())).convert(Natural::atLeastOne, Natural::intValue);
+        return naturals(upperBound).convert(Natural::inc, nz -> nz);
     }
 
     private static <A> Arbitrary<MultiSet<A>> multiSets(MultiSet<A> ms, Arbitrary<A> elements) {

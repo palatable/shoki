@@ -3,7 +3,7 @@ package com.jnape.palatable.shoki.api;
 import com.jnape.palatable.lambda.adt.Maybe;
 
 /**
- * An interface offering a mechanism for looking up {@link Maybe} a value of type <code>A</code> for an index of type
+ * An interface offering a mechanism for looking up a value of type <code>A</code> for an index of type
  * <code>Index</code>. Generally, to implement this interface is to suggest that {@link RandomAccess#get(Object) get}
  * is "efficient", where "efficient" is loosely defined as "the fastest available mechanism for accessing a value
  * of type <code>A</code> given an index of type <code>Index</code>".

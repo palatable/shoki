@@ -43,6 +43,15 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
     }
 
     /**
+     * The {@link Comparator} used for the elements stored in this {@link TreeMultiSet}.
+     *
+     * @return the element {@link Comparator}
+     */
+    public Comparator<A> comparator() {
+        return multiplicityMap.keyComparator();
+    }
+
+    /**
      * {@inheritDoc}
      * Amortized <code>O(1)</code>.
      */

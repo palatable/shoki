@@ -89,6 +89,15 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
     }
 
     /**
+     * The {@link Comparator} used for the keys stored in this {@link TreeMap}.
+     *
+     * @return the key {@link Comparator}
+     */
+    public Comparator<K> keyComparator() {
+        return keyComparator::compare;
+    }
+
+    /**
      * {@inheritDoc}
      * <code>O(1)</code>.
      */

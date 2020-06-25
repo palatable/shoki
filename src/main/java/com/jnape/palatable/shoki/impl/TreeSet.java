@@ -34,6 +34,15 @@ public final class TreeSet<A> implements Set<Natural, A>, SortedCollection<Natur
     }
 
     /**
+     * The {@link Comparator} used for the elements stored in this {@link TreeSet}.
+     *
+     * @return the element {@link Comparator}
+     */
+    public Comparator<A> comparator() {
+        return map.keyComparator();
+    }
+
+    /**
      * {@inheritDoc}
      * <code>O(1)</code>.
      */

@@ -56,6 +56,30 @@ public abstract class Natural extends Number
     public abstract Natural minus(Zero subtrahend);
 
     /**
+     * Multiplication of two {@link Natural} numbers.
+     *
+     * @param multiplier the {@link Natural} multiplier
+     * @return the {@link Natural} product
+     */
+    public abstract Natural times(Natural multiplier);
+
+    /**
+     * Remainder of the division of this {@link Natural} dividend by a {@link NonZero non-zero Natural} divisor.
+     *
+     * @param divisor the {@link NonZero non-zero} divisor
+     * @return the {@link Natural} modulus
+     */
+    public abstract Natural modulo(NonZero divisor);
+
+    /**
+     * Specialized addition when the addend is {@link NonZero}, guaranteeing a {@link NonZero} sum.
+     *
+     * @param addend the {@link Natural} addend
+     * @return the {@link NonZero} sum
+     */
+    public abstract NonZero plus(NonZero addend);
+
+    /**
      * Subtraction of two {@link Natural} numbers. If the difference is {@link Natural}, {@link Maybe#just(Object) just}
      * return it; otherwise, the difference would be negative, so return {@link Maybe#nothing()}.
      *
@@ -66,13 +90,9 @@ public abstract class Natural extends Number
         return subtrahend.match(constantly(just(this)), this::minus);
     }
 
-    /**
-     * Specialized addition when the addend is {@link NonZero}, guaranteeing a {@link NonZero} sum.
-     *
-     * @param addend the {@link Natural} addend
-     * @return the {@link NonZero} sum
-     */
-    public abstract NonZero plus(NonZero addend);
+    public final Zero times(Zero zero) {
+        return zero;
+    }
 
     /**
      * {@link Natural#plus(Natural) Add} {@link Natural#one() one} to this {@link Natural}.
@@ -348,6 +368,16 @@ public abstract class Natural extends Number
         }
 
         @Override
+        public Zero times(Natural multiplier) {
+            return this;
+        }
+
+        @Override
+        public Zero modulo(NonZero divisor) {
+            return this;
+        }
+
+        @Override
         public BigInteger bigIntegerValue() {
             return ZERO;
         }
@@ -389,19 +419,33 @@ public abstract class Natural extends Number
         private NonZero() {
         }
 
+        public final NonZero times(NonZero multiplier) {
+            return nonZero(bigIntegerValue().multiply(multiplier.bigIntegerValue()));
+        }
+
         abstract Number value();
 
         @Override
         public abstract NonZero plus(Natural addend);
 
         @Override
-        public NonZero plus(NonZero addend) {
+        public final NonZero plus(NonZero addend) {
             return plus((Natural) addend);
         }
 
         @Override
         public NonZero minus(Zero subtrahend) {
             return this;
+        }
+
+        @Override
+        public Natural times(Natural multiplier) {
+            return multiplier instanceof Zero ? zero() : times((NonZero) multiplier);
+        }
+
+        @Override
+        public final Natural modulo(NonZero divisor) {
+            return atLeastZero(bigIntegerValue().mod(divisor.bigIntegerValue()));
         }
 
         @Override
@@ -472,6 +516,16 @@ public abstract class Natural extends Number
             }
 
             @Override
+            public byte byteValue() {
+                return (byte) min(Byte.MAX_VALUE, value);
+            }
+
+            @Override
+            public short shortValue() {
+                return (short) min(Short.MAX_VALUE, value);
+            }
+
+            @Override
             public int intValue() {
                 return value;
             }
@@ -517,6 +571,16 @@ public abstract class Natural extends Number
             }
 
             @Override
+            public byte byteValue() {
+                return (byte) min(Byte.MAX_VALUE, value);
+            }
+
+            @Override
+            public short shortValue() {
+                return (short) min(Short.MAX_VALUE, value);
+            }
+
+            @Override
             public int intValue() {
                 return (int) min(Integer.MAX_VALUE, value);
             }
@@ -553,6 +617,20 @@ public abstract class Natural extends Number
             @Override
             public BigInteger bigIntegerValue() {
                 return value;
+            }
+
+            @Override
+            public byte byteValue() {
+                return Try.trying(value::byteValueExact)
+                        .catching(ArithmeticException.class, constantly(Byte.MAX_VALUE))
+                        .orThrow();
+            }
+
+            @Override
+            public short shortValue() {
+                return Try.trying(value::shortValueExact)
+                        .catching(ArithmeticException.class, constantly(Short.MAX_VALUE))
+                        .orThrow();
             }
 
             @Override

@@ -48,6 +48,11 @@ public class NaturalTest {
         assertEquals(1L, nonZero.longValue());
         assertEquals(1F, nonZero.floatValue(), 0F);
         assertEquals(1D, nonZero.doubleValue(), 0D);
+
+        assertEquals(Byte.MAX_VALUE, Natural.abs(Byte.MAX_VALUE).inc().byteValue());
+        assertEquals(Short.MAX_VALUE, Natural.abs(Short.MAX_VALUE).inc().shortValue());
+        assertEquals(Integer.MAX_VALUE, Natural.abs(Integer.MAX_VALUE).inc().intValue());
+        assertEquals(Long.MAX_VALUE, Natural.abs(Long.MAX_VALUE).inc().longValue());
     }
 
     @Test
@@ -253,6 +258,49 @@ public class NaturalTest {
                      new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE))
                              .plus(new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)))
                              .value());
+    }
+
+    @Test
+    public void multiplication() {
+        Zero    zero    = Natural.zero();
+        NonZero nonZero = Natural.one().inc();
+        Natural unknown = one();
+
+        Zero zeroTimesZero = zero.times(zero);
+        assertEquals(zero(), zeroTimesZero);
+        Zero zeroTimesNonZero = zero.times(nonZero);
+        assertEquals(zero(), zeroTimesNonZero);
+        Zero zeroTimesUnknown = zero.times(unknown);
+        assertEquals(zero(), zeroTimesUnknown);
+
+        Zero nonZeroTimesZero = nonZero.times(zero);
+        assertEquals(zero(), nonZeroTimesZero);
+        NonZero nonZeroTimesNonZero = nonZero.times(nonZero);
+        assertEquals(Natural.abs(4), nonZeroTimesNonZero);
+        Natural nonZeroTimesUnknown = nonZero.times(unknown);
+        assertEquals(Natural.abs(2), nonZeroTimesUnknown);
+
+        Zero unknownTimesZero = unknown.times(zero);
+        assertEquals(zero(), unknownTimesZero);
+        Natural unknownTimesNonZero = unknown.times(nonZero);
+        assertEquals(Natural.abs(2), unknownTimesNonZero);
+        Natural unknownTimesUnknown = unknown.times(unknown);
+        assertEquals(one(), unknownTimesUnknown);
+    }
+
+    @Test
+    public void modulo() {
+        Zero    zero    = Natural.zero();
+        NonZero nonZero = Natural.one().inc();
+
+        Zero zeroModuloNonZero = zero.modulo(nonZero);
+        assertEquals(zero(), zeroModuloNonZero);
+
+        Natural nonZeroModuloNonZero = nonZero.modulo(nonZero);
+        assertEquals(zero, nonZeroModuloNonZero);
+
+        assertEquals(one(), one().modulo(one().inc()));
+        assertEquals(one(), Natural.atLeastOne(10).modulo(Natural.atLeastOne(3)));
     }
 
     @Test

@@ -90,8 +90,15 @@ public abstract class Natural extends Number
         return subtrahend.match(constantly(just(this)), this::minus);
     }
 
-    public final Zero times(Zero zero) {
-        return zero;
+    /**
+     * Specialized multiplication when the multiplier is {@link Zero}, guaranteeing a {@link Zero} product.
+     *
+     * @param multiplier the {@link Zero} multiplier
+     * @return the {@link Zero} product
+     */
+    @SuppressWarnings("unused")
+    public final Zero times(Zero multiplier) {
+        return zero();
     }
 
     /**

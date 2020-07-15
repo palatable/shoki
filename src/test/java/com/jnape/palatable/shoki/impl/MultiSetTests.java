@@ -70,10 +70,10 @@ public class MultiSetTests extends GauntletApiBase {
 
         Prop<MultiSet<A>> union = predicate("xs.union(xs) == xs", xs -> xs.union(xs).equals(xs));
 
-        assertThat(all(elements).satisfy(allOf(isEmpty, contains, incDec)));
-        assertThat(all(elements, positiveNaturals(atLeastOne(100))).satisfy(allOf(incTimes, incCount, remove)));
-        assertThat(all(elements.hashSet()).satisfy(unique));
-        assertThat(all(multiSets(multiSet, elements)).satisfy(allOf(difference, union)));
+        checkThat(all(elements).satisfy(allOf(isEmpty, contains, incDec)));
+        checkThat(all(elements, positiveNaturals(atLeastOne(100))).satisfy(allOf(incTimes, incCount, remove)));
+        checkThat(all(elements.hashSet()).satisfy(unique));
+        checkThat(all(multiSets(multiSet, elements)).satisfy(allOf(difference, union)));
     }
 
     public static Natural fromBits(long bits, long... more) {

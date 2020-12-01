@@ -12,6 +12,14 @@ Purely functional, persistent data structures for the JVM.
  - [Installation](#installation)
  - [Hierarchy](#hierarchy)
  - [Implementations](#implementations)
+   - [`StrictStack<A>`](#implementations-StrictStack)
+   - [`StrictQueue<A>`](#implementations-StrictQueue)
+   - [`HashMap<K, V>`](#implementations-HashMap)
+   - [`HashSet<A>`](#implementations-HashSet)
+   - [`HashMultiSet<A>`](#implementations-HashMultiSet)
+   - [`TreeMap<K, V>`](#implementations-TreeMap)
+   - [`TreeSet<A>`](#implementations-TreeSet)
+   - [`TreeMultiSet<A>`](#implementations-TreeMultiSet)
  - [License](#license)
 
 <a name="background">Background</a>
@@ -35,7 +43,7 @@ The constraints of the inputs and the outputs are also richly specified via thei
 be guaranteed to yield a value, it will return a
 [`Maybe`](https://github.com/palatable/lambda/blob/master/src/main/java/com/jnape/palatable/lambda/adt/Maybe.java)
 rather than `null` so the type-checker can remind you that you may not have received what you wanted. If a value
-fundamentally cannot be zero, it will very likely be represented by a type that does not even include a "zero" term so
+fundamentally cannot be zero, it will very likely be represented by a type that does not even include a "zero" term, so
 you don't waste mental energy writing code to handle impossible scenarios. If the total size of a collection can
 logically exceed `Integer.MAX_VALUE`, its `sizeInfo` will advertise a type that can realistically represent its size
 instead of one that might represent a negative value due to overflow.
@@ -60,14 +68,14 @@ Add the following dependency to your:
 <dependency>
     <groupId>com.jnape.palatable</groupId>
     <artifactId>shoki</artifactId>
-    <version>1.0-alpha-1</version>
+    <version>1.0-alpha-2</version>
 </dependency>
 ```
 
 `build.gradle` ([Gradle](https://docs.gradle.org/current/userguide/dependency_management.html)):
 
 ```gradle
-compile group: 'com.jnape.palatable', name: 'shoki', version: '1.0-alpha-1'
+compile group: 'com.jnape.palatable', name: 'shoki', version: '1.0-alpha-2'
 ```
 
 <a name="hierarchy">Hierarchy</a>
@@ -89,6 +97,8 @@ its orthogonal capabilities and constraints.
 
 - `Collection<Size extends Number, A>`: a `Sequence<A>` that supports `SizeInfo` yielding a `Known<Size>`
 - `OrderedCollection<Size extends Number, A>`: a `Collection<Size, A>` that offers a `reverse()` method
+- `SortedCollection<Size extends Number, A, Ordering>`: an `OrderedCollection<Size, A>` that offers `Maybe<A> min()`,
+  `Maybe<A> max`, and `SortedCollection<Size, A, Ordering> sort(Comparator<? super Ordering> comparator)` methods
 - `Stack<Size extends Number, A>`: an `OrderedCollection<Size, A>` with a method `Stack<Size, A> cons(A)` that adds an
   element to the top of the `Stack<Size, A>`  
 - `Queue<Size extends Number, A>`: an `OrderedCollection<Size, A>` with a method `Queue<Size, A> snoc(A)` that adds an
@@ -98,12 +108,12 @@ its orthogonal capabilities and constraints.
 - `Map<Size extends Number, K, V>`: a `Collection<Size, Tuple2<K, V>>` that supports `RandomAccess<K, Maybe<V>>`
 
 _Shōki_ is still very much in alpha development, so these specific interfaces are subject to change, but they should at
-least it offer an intuition about the way in which the design is being approached. 
+least offer an intuition about the way in which the design is being approached. 
 
-<a name="examples">Implementations</a>
+<a name="implementations">Implementations</a>
 ------------
 
-#### `StrictStack<A>`
+#### <a name="implementations-StrictStack">`StrictStack<A>`</a>
 
 A `StrictStack<A>` is a strictly-evaluated `Stack<Natural, A>` that offers worst-case `O(1)` space/time for `cons`,
 `head`, and `tail`.  
@@ -138,7 +148,7 @@ public class Example {
 }
 ```
 
-#### `StrictQueue<A>`
+#### <a name="implementations-StrictQueue">`StrictQueue<A>`</a>
 
 A `StrictQueue<A>` is a strictly-evaluated `Queue<Natural, A>` and `Stack<Natural, A>` that offers worst-case `O(1)`
 space/time for `cons`, `snoc`, and `head`, and amortized `O(1)` for `tail`.
@@ -175,7 +185,7 @@ public class Example {
 }
 ```
 
-#### `HashMap<K, V>`
+#### <a name="implementations-HashMap">`HashMap<K, V>`</a>
 
 A `HashMap<K, V>` is an [ideal hash tree](https://lampwww.epfl.ch/papers/idealhashtrees.pdf) implementation of a
 `Map<Natural, K, V>` that offers amortized `O(1)` space/time for `get`, `put`, `remove`, and `contains`, and supports
@@ -226,7 +236,7 @@ public class Example {
 }
 ```
 
-#### `HashSet<A>`
+#### <a name="implementations-HashSet">`HashSet<A>`</a>
 
 A `HashSet<A>` is a `Set<Natural, A>` that is backed by a `HashMap<A, Unit>` and offers similar space/time
 complexities. Like `HashMap`, a `HashSet` supports custom `EquivalenceRelation<K>`s and `HashingAlgorithm<K>`s.
@@ -256,7 +266,6 @@ public class Example {
         boolean          __true  = _012.contains(0);
         boolean          __false = _012.contains(-1);
 
-
         HashSet<Integer> _12   = _012.tail();
         Maybe<Integer>   just1 = _12.head();
 
@@ -271,7 +280,7 @@ public class Example {
 }
 ```
 
-#### `HashMultiSet<A>`
+#### <a name="implementations-HashMultiSet">`HashMultiSet<A>`</a>
 
 A `HashMultiSet<A>` is a `MultiSet<A>` that is backed by a `HashMap<A, Natural.NonZero>` and offers similar space/time
 complexities. Like `HashMap`, a `HashMultiSet` supports custom `EquivalenceRelation<K>`s and `HashingAlgorithm<K>`s.
@@ -322,6 +331,161 @@ public class Example {
         HashMultiSet<Integer> _0x1_1x2_2x2_3x1_4x1 = _0x1_1x2_2x1.sum(_2x1_3x1_4x1);
 
         HashSet<Integer> _012 = _0x1_1x2_2x1.unique();
+    }
+}
+```
+
+#### <a name="implementations-TreeMap">`TreeMap<K, V>`</a>
+
+A `TreeMap<K, V>` is a [red-black tree](https://www.cs.tufts.edu/~nr/cs257/archive/chris-okasaki/redblack99.pdf)
+implementation of a `Map<Natural, K, V>` that is also a `SortedCollection<Natural, Tuple2<K, V>, K>` offering amortized
+`O(log(n))` space/time for `get`, `put`, `remove`, and `contains`, and supports custom `Comparator<K>`s.
+
+```java
+import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.shoki.impl.StrictQueue;
+import com.jnape.palatable.shoki.impl.TreeMap;
+import com.jnape.palatable.shoki.impl.TreeSet;
+
+import static com.jnape.palatable.shoki.impl.TreeMap.treeMap;
+import static java.util.Comparator.naturalOrder;
+
+public class Example {
+
+    public static void main(String[] args) {
+        // same as treeMap()
+        TreeMap<Integer, String> empty = treeMap(naturalOrder());
+
+        boolean                        _true     = empty.isEmpty();
+        Maybe<Tuple2<Integer, String>> nothing   = empty.head();
+        TreeMap<Integer, String>       alsoEmpty = empty.tail();
+
+        TreeMap<Integer, String>       fooBarBaz     = empty.put(0, "foo").put(1, "bar").put(2, "baz");
+        boolean                        _false        = fooBarBaz.isEmpty();
+        Maybe<Tuple2<Integer, String>> just0Foo      = fooBarBaz.head();
+        Maybe<Tuple2<Integer, String>> alsoJust0Foo  = fooBarBaz.min();
+        Maybe<Tuple2<Integer, String>> just2Baz      = fooBarBaz.max();
+        TreeMap<Integer, String>       alsoFooBarBaz = empty.put(2, "baz").put(1, "bar").put(0, "foo");
+        boolean                        __true        = fooBarBaz.contains(0);
+        boolean                        __false       = fooBarBaz.contains(-1);
+
+        // This TreeSet uses the same Comparator
+        TreeSet<Integer> keys = fooBarBaz.keys(); // TreeSet[0, 1, 2]
+
+        StrictQueue<String> values = fooBarBaz.values(); // StrictQueue["foo", "bar", "baz"]
+
+        TreeMap<Integer, String>       barBaz   = fooBarBaz.tail();
+        Maybe<Tuple2<Integer, String>> just1Bar = barBaz.head();
+
+        TreeMap<Integer, String>       baz          = barBaz.tail();
+        Maybe<Tuple2<Integer, String>> alsoJust2Baz = baz.head();
+
+        // TreeMap[(2=bazbaz)]
+        TreeMap<Integer, String> _2bazbaz = baz.merge(baz, (s1, s2) -> s1 + s2);
+    }
+}
+```
+
+#### <a name="implementations-TreeSet">`TreeSet<A>`</a>
+
+A `TreeSet<A>` is a `Set<Natural, A>` that is also a `SortedCollection<Natural, A>` and is backed by a
+`TreeMap<A, Unit>`, offering similar space/time complexities. Like `TreeMap`, a `TreeSet` supports custom
+`Comparator<K>`s.
+
+```java
+import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.shoki.impl.TreeSet;
+
+import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
+import static java.util.Comparator.naturalOrder;
+
+public class Example {
+
+    public static void main(String[] args) {
+        // same as treeSet()
+        TreeSet<Integer> empty = treeSet(naturalOrder());
+
+        boolean          _true     = empty.isEmpty();
+        Maybe<Integer>   nothing   = empty.head();
+        TreeSet<Integer> alsoEmpty = empty.tail();
+
+        TreeSet<Integer> _012      = empty.add(0).add(1).add(2);
+        boolean          _false    = _012.isEmpty();
+        Maybe<Integer>   just0     = _012.head();
+        Maybe<Integer>   alsoJust0 = _012.min();
+        Maybe<Integer>   just2     = _012.max();
+        TreeSet<Integer> also012   = empty.add(2).add(1).add(0);
+        boolean          __true    = _012.contains(0);
+        boolean          __false   = _012.contains(-1);
+
+        TreeSet<Integer> _12   = _012.tail();
+        Maybe<Integer>   just1 = _12.head();
+
+        TreeSet<Integer> _2        = _12.tail();
+        Maybe<Integer>   alsoJust2 = _2.head();
+
+        TreeSet<Integer> _01234 = _012.union(treeSet(2, 3, 4));
+        TreeSet<Integer> _01    = _012.difference(treeSet(2, 3, 4));
+        TreeSet<Integer> _0134  = _012.symmetricDifference(treeSet(2, 3, 4));
+        TreeSet<Integer> __2    = _012.intersection(treeSet(2, 3, 4));
+    }
+}
+```
+
+#### <a name="implementations-TreeMultiSet">`TreeMultiSet<A>`</a>
+
+A `TreeMultiSet<A>` is a `MultiSet<A>` that is also a `SortedCollection<Natural, Tuple2<A, NonZero>, A>`, and is backed
+by a `TreeMap<A, Natural.NonZero>`, offering similar space/time complexities. Like `TreeMap`, a `TreeMultiSet` supports
+custom `Comparator<K>`s.
+
+```java
+import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.shoki.api.Natural;
+import com.jnape.palatable.shoki.api.Natural.NonZero;
+import com.jnape.palatable.shoki.impl.TreeMultiSet;
+import com.jnape.palatable.shoki.impl.TreeSet;
+
+import static com.jnape.palatable.shoki.impl.TreeMultiSet.treeMultiSet;
+import static java.util.Comparator.naturalOrder;
+
+public class Example {
+
+    public static void main(String[] args) {
+        // same as treeMultiSet()
+        TreeMultiSet<Integer> empty = treeMultiSet(naturalOrder());
+
+        boolean                         _true     = empty.isEmpty();
+        Maybe<Tuple2<Integer, NonZero>> nothing   = empty.head();
+        TreeMultiSet<Integer>           alsoEmpty = empty.tail();
+
+        TreeMultiSet<Integer>           _0x1_1x2_2x1     = empty.inc(0).inc(1).inc(2).inc(1);
+        boolean                         _false           = _0x1_1x2_2x1.isEmpty();
+        Maybe<Tuple2<Integer, NonZero>> just0x1          = _0x1_1x2_2x1.head();
+        Maybe<Tuple2<Integer, NonZero>> alsoJust0x1      = _0x1_1x2_2x1.min();
+        Maybe<Tuple2<Integer, NonZero>> just2x1          = _0x1_1x2_2x1.max();
+        TreeMultiSet<Integer>           also_0x1_1x2_2x1 = empty.inc(1).inc(2).inc(1).inc(0);
+        boolean                         __true           = _0x1_1x2_2x1.contains(0);
+        boolean                         __false          = _0x1_1x2_2x1.contains(-1);
+
+        Natural one = _0x1_1x2_2x1.get(0);
+        Natural two = _0x1_1x2_2x1.get(1);
+
+        TreeMultiSet<Integer>           _1x2_2x1 = _0x1_1x2_2x1.tail();
+        Maybe<Tuple2<Integer, NonZero>> just_1x2 = _1x2_2x1.head();
+
+        TreeMultiSet<Integer>           _2x1     = _1x2_2x1.tail();
+        Maybe<Tuple2<Integer, NonZero>> just_2x1 = _2x1.head();
+
+        TreeMultiSet<Integer> _2x1_3x1_4x1         = treeMultiSet(2, 3, 4);
+        TreeMultiSet<Integer> _0x1_1x2_2x1_3x1_4x1 = _0x1_1x2_2x1.union(_2x1_3x1_4x1);
+        TreeMultiSet<Integer> _0x1_1x2             = _0x1_1x2_2x1.difference(_2x1_3x1_4x1);
+        TreeMultiSet<Integer> _0x1_1x2_3x1_4x1     = _0x1_1x2_2x1.symmetricDifference(_2x1_3x1_4x1);
+        TreeMultiSet<Integer> __2x1                = _0x1_1x2_2x1.intersection(_2x1_3x1_4x1);
+        TreeMultiSet<Integer> _0x1_1x2_2x2_3x1_4x1 = _0x1_1x2_2x1.sum(_2x1_3x1_4x1);
+
+        TreeSet<Integer> _012 = _0x1_1x2_2x1.unique();
     }
 }
 ```

@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
+import static com.jnape.palatable.lambda.adt.product.Product2.product;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.ToMap.toMap;
 import static com.jnape.palatable.shoki.api.Natural.atLeastOne;
 import static com.jnape.palatable.shoki.api.Natural.one;
@@ -57,6 +58,12 @@ public class ShokiTest {
         java.util.Map<String, Integer> javaMap = toMap(java.util.HashMap::new,
                                                        asList(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)));
         assertEquals(HashMap.hashMap(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)), Shoki.hashMap(javaMap));
+    }
+
+    @Test
+    public void hashMapFromEntries() {
+        assertEquals(HashMap.hashMap(tuple("foo", 1), tuple("bar", 2), tuple("baz", 3)),
+                     Shoki.hashMap(asList(product("foo", 1), product("bar", 2), product("baz", 3))));
     }
 
     @Test

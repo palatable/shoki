@@ -16,6 +16,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Map;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -93,7 +94,21 @@ public final class Shoki {
      * @return the populated {@link HashMap}
      */
     public static <K, V> HashMap<K, V> hashMap(java.util.Map<K, V> javaMap) {
-        return foldLeft(curried(hm -> into(hm::put)), HashMap.hashMap(), javaMap.entrySet());
+        return hashMap(javaMap.entrySet());
+    }
+
+    /**
+     * Construct a {@link HashMap} from an input {@link Iterable} of {@link java.util.Map.Entry entries}, using
+     * {@link Objects#equals(Object, Object) Object equality} and {@link Objects#hashCode(Object) Object hashCode} as
+     * the {@link EquivalenceRelation} and {@link HashingAlgorithm}, respectively, for its keys.
+     *
+     * @param javaIterableOfEntries the {@link Iterable} of {@link java.util.Map.Entry entries}
+     * @param <K>                   the key type
+     * @param <V>                   the value type
+     * @return the populated {@link HashMap}
+     */
+    public static <K, V> HashMap<K, V> hashMap(Iterable<? extends Map.Entry<K, V>> javaIterableOfEntries) {
+        return foldLeft(curried(hm -> into(hm::put)), HashMap.hashMap(), javaIterableOfEntries);
     }
 
     /**

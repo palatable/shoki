@@ -579,17 +579,17 @@ public abstract class Natural extends Number
 
             @Override
             public byte byteValue() {
-                return (byte) min(Byte.MAX_VALUE, value);
+                return Byte.MAX_VALUE;
             }
 
             @Override
             public short shortValue() {
-                return (short) min(Short.MAX_VALUE, value);
+                return Short.MAX_VALUE;
             }
 
             @Override
             public int intValue() {
-                return (int) min(Integer.MAX_VALUE, value);
+                return Integer.MAX_VALUE;
             }
 
             @Override
@@ -628,30 +628,22 @@ public abstract class Natural extends Number
 
             @Override
             public byte byteValue() {
-                return Try.trying(value::byteValueExact)
-                        .catching(ArithmeticException.class, constantly(Byte.MAX_VALUE))
-                        .orThrow();
+                return Byte.MAX_VALUE;
             }
 
             @Override
             public short shortValue() {
-                return Try.trying(value::shortValueExact)
-                        .catching(ArithmeticException.class, constantly(Short.MAX_VALUE))
-                        .orThrow();
+                return Short.MAX_VALUE;
             }
 
             @Override
             public int intValue() {
-                return Try.trying(value::intValueExact)
-                        .catching(ArithmeticException.class, constantly(Integer.MAX_VALUE))
-                        .orThrow();
+                return Integer.MAX_VALUE;
             }
 
             @Override
             public long longValue() {
-                return Try.trying(value::longValueExact)
-                        .catching(ArithmeticException.class, constantly(Long.MAX_VALUE))
-                        .orThrow();
+                return Long.MAX_VALUE;
             }
 
             @Override

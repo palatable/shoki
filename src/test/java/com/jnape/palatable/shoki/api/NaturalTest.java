@@ -41,7 +41,7 @@ public class NaturalTest {
         assertEquals(0F, zero.floatValue(), 0F);
         assertEquals(0D, zero.doubleValue(), 0D);
 
-        NonZero nonZero = new NonZero.B(ONE);
+        NonZero nonZero = new NonZero.I(1);
         assertEquals((byte) 1, nonZero.byteValue());
         assertEquals((short) 1, nonZero.shortValue());
         assertEquals(1, nonZero.intValue());
@@ -89,8 +89,8 @@ public class NaturalTest {
         assertEquals(zero(), Natural.abs(ZERO.negate()));
         assertEquals(zero(), Natural.abs(BigInteger.valueOf(0L).negate()));
         assertEquals(zero(), Natural.abs(new BigInteger("0")));
-        assertEquals(new NonZero.B(ONE), Natural.abs(ONE));
-        assertEquals(new NonZero.B(ONE), Natural.abs(ONE.negate()));
+        assertEquals(new NonZero.I(1), Natural.abs(ONE));
+        assertEquals(new NonZero.I(1), Natural.abs(ONE.negate()));
 
         assertEquals(1, ((NonZero) Natural.abs(1)).value());
         assertEquals(1, ((NonZero) Natural.abs(1L)).value());
@@ -107,7 +107,7 @@ public class NaturalTest {
     @Test
     public void atLeastZero() {
         assertEquals(zero(), Natural.atLeastZero(ZERO));
-        assertEquals(new NonZero.B(ONE), Natural.atLeastZero(ONE));
+        assertEquals(new NonZero.I(1), Natural.atLeastZero(ONE));
         assertEquals(zero(), Natural.atLeastZero(ONE.negate()));
 
         assertEquals(1, ((NonZero) Natural.atLeastZero(1)).value());
@@ -125,10 +125,10 @@ public class NaturalTest {
 
     @Test
     public void atLeastOne() {
-        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ZERO));
-        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ONE));
-        assertEquals(new NonZero.B(TEN), Natural.atLeastOne(TEN));
-        assertEquals(new NonZero.B(ONE), Natural.atLeastOne(ONE.negate()));
+        assertEquals(new NonZero.I(1), Natural.atLeastOne(ZERO));
+        assertEquals(new NonZero.I(1), Natural.atLeastOne(ONE));
+        assertEquals(new NonZero.I(10), Natural.atLeastOne(TEN));
+        assertEquals(new NonZero.I(1), Natural.atLeastOne(ONE.negate()));
 
         assertEquals(2, Natural.atLeastOne(2).value());
         assertEquals(2, Natural.atLeastOne(2L).value());
@@ -319,20 +319,17 @@ public class NaturalTest {
     @Test
     public void equalsAndHashCode() {
         assertEquals(zero(), zero());
-        assertEquals(new NonZero.B(ONE), new NonZero.B(ONE));
-        assertNotEquals(zero(), new NonZero.B(ONE));
-        assertNotEquals(new NonZero.B(ONE), zero());
-        assertNotEquals(new NonZero.B(ONE), new NonZero.B(BigInteger.valueOf(2)));
-        assertNotEquals(new NonZero.B(ONE), new Object());
+        assertEquals(new NonZero.I(1), new NonZero.I(1));
+        assertNotEquals(zero(), new NonZero.I(1));
+        assertNotEquals(new NonZero.I(1), zero());
+        assertNotEquals(new NonZero.I(1), new NonZero.I(2));
+        assertNotEquals(new NonZero.I(1), new Object());
 
         assertTrue(zero().hashCode() < one().hashCode());
         assertTrue(one().hashCode() < one().plus(one()).hashCode());
         assertEquals(zero().hashCode(), zero().hashCode());
-        assertEquals(new NonZero.B(ONE).hashCode(), new NonZero.B(ONE).hashCode());
-        assertNotEquals(new NonZero.B(ONE).hashCode(), new NonZero.B(BigInteger.valueOf(2)).hashCode());
-
-        assertEquals(new NonZero.B(ONE).hashCode(), new NonZero.L(1L).hashCode());
-        assertEquals(new NonZero.L(1L).hashCode(), new NonZero.I(1).hashCode());
+        assertEquals(new NonZero.I(1).hashCode(), new NonZero.I(1).hashCode());
+        assertNotEquals(new NonZero.I(1).hashCode(), new NonZero.L(Integer.MAX_VALUE + 1L).hashCode());
     }
 
     @Test
@@ -345,6 +342,6 @@ public class NaturalTest {
     @Test
     public void toStringIsUseful() {
         assertEquals("Zero{}", zero().toString());
-        assertEquals("NonZero{value=1}", new NonZero.B(BigInteger.valueOf(1)).toString());
+        assertEquals("NonZero{value=1}", new NonZero.I(1).toString());
     }
 }

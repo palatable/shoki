@@ -1,7 +1,6 @@
 package com.jnape.palatable.shoki.benchmarks;
 
 import com.jnape.palatable.shoki.api.Natural;
-import com.jnape.palatable.shoki.impl.StrictQueue;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
 import org.openjdk.jmh.annotations.Fork;
@@ -14,13 +13,12 @@ import org.openjdk.jmh.annotations.Setup;
 import org.openjdk.jmh.annotations.Warmup;
 import org.openjdk.jmh.runner.RunnerException;
 
+import java.math.BigInteger;
 import java.util.Random;
 
-import static com.jnape.palatable.lambda.functions.builtin.fn3.Times.times;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
-import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
@@ -42,13 +40,48 @@ public class NaturalBenchmark {
     }
 
     @Benchmark
-    @OperationsPerInvocation(1_000_000)
-    public Natural plusRandom(State state) {
-        Natural nat = zero();
-        for (Natural n : state.ints) {
-            nat = nat.plus(n);
-        }
-        return nat;
+    public Natural randomIntPlusRandomInt(State state) {
+        return state.randomInt.plus(state.randomInt);
+    }
+
+    @Benchmark
+    public Natural randomIntPlusRandomLong(State state) {
+        return state.randomInt.plus(state.randomLong);
+    }
+
+    @Benchmark
+    public Natural randomIntPlusRandomBigInteger(State state) {
+        return state.randomInt.plus(state.randomBigInteger);
+    }
+
+    @Benchmark
+    public Natural randomLongPlusRandomInt(State state) {
+        return state.randomLong.plus(state.randomInt);
+    }
+
+    @Benchmark
+    public Natural randomLongPlusRandomLong(State state) {
+        return state.randomLong.plus(state.randomLong);
+    }
+
+    @Benchmark
+    public Natural randomLongPlusRandomBigInteger(State state) {
+        return state.randomLong.plus(state.randomBigInteger);
+    }
+
+    @Benchmark
+    public Natural randomBigIntegerPlusRandomInt(State state) {
+        return state.randomBigInteger.plus(state.randomInt);
+    }
+
+    @Benchmark
+    public Natural randomBigIntegerPlusRandomLong(State state) {
+        return state.randomBigInteger.plus(state.randomLong);
+    }
+
+    @Benchmark
+    public Natural randomBigIntegerPlusRandomBigInteger(State state) {
+        return state.randomBigInteger.plus(state.randomBigInteger);
     }
 
     public static void main(String[] args) throws RunnerException {
@@ -57,12 +90,16 @@ public class NaturalBenchmark {
 
     @org.openjdk.jmh.annotations.State(Scope.Benchmark)
     public static class State {
-        StrictQueue<Natural> ints;
+        Natural randomInt;
+        Natural randomLong;
+        Natural randomBigInteger;
 
         @Setup(Level.Trial)
         public void doSetup() {
             Random random = new Random();
-            ints = times(1_000_000, q -> q.cons(abs(random.nextInt())), strictQueue());
+            randomInt        = abs(random.nextInt());
+            randomLong       = abs(random.nextLong());
+            randomBigInteger = abs(Long.MAX_VALUE).plus(abs(BigInteger.valueOf(random.nextLong())));
         }
     }
 }

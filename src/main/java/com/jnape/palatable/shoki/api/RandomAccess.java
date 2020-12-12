@@ -1,7 +1,5 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.lambda.adt.Maybe;
-
 /**
  * An interface offering a mechanism for looking up a value of type <code>A</code> for an index of type
  * <code>Index</code>. Generally, to implement this interface is to suggest that {@link RandomAccess#get(Object) get}
@@ -22,7 +20,7 @@ public interface RandomAccess<Index, A> extends Membership<Index> {
      * Lookup a value for some given index in an efficient manner.
      *
      * @param index the index
-     * @return {@link Maybe} the value
+     * @return the value
      */
     A get(Index index);
 }

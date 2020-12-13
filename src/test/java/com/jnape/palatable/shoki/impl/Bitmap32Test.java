@@ -11,20 +11,6 @@ import static org.junit.Assert.assertTrue;
 public class Bitmap32Test {
 
     @Test
-    public void friendlyToString() {
-        assertEquals("0b00_00000_00000_00000_00000_00000_00000",
-                     Bitmap32.toString(0));
-        assertEquals("0b00_00000_00000_00000_00000_00000_00001",
-                     Bitmap32.toString(1));
-        assertEquals("0b11_11111_11111_11111_11111_11111_11111",
-                     Bitmap32.toString(-1));
-        assertEquals("0b10_00000_00000_00000_00000_00000_00000",
-                     Bitmap32.toString(MIN_VALUE));
-        assertEquals("0b01_11111_11111_11111_11111_11111_11111",
-                     Bitmap32.toString(MAX_VALUE));
-    }
-
-    @Test
     public void bitIsSet() {
         assertFalse(Bitmap32.bitIsSet(0, 0));
         assertTrue(Bitmap32.bitIsSet(1, 0));

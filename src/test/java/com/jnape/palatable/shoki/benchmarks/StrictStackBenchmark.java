@@ -1,6 +1,5 @@
 package com.jnape.palatable.shoki.benchmarks;
 
-import com.jnape.palatable.shoki.api.Stack;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -18,7 +17,6 @@ import org.openjdk.jmh.runner.RunnerException;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
-import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeShoki;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
@@ -38,17 +36,17 @@ public class StrictStackBenchmark {
     @OperationsPerInvocation(K100)
     public static class Shoki {
 
-        @Benchmark
-        public Stack<?, Integer> cons() {
-            return consRangeShoki(strictStack(), K100);
-        }
+//        @Benchmark
+//        public Stack<?, Integer> cons() {
+//            return consRangeShoki(strictStack(), K100);
+//        }
 
-        @Benchmark
-        public void head(State state, Blackhole bh) {
-            for (int i = 0; i < K100; i++) {
-                bh.consume(state.strictStack.head());
-            }
-        }
+//        @Benchmark
+//        public void head(State state, Blackhole bh) {
+//            for (int i = 0; i < K100; i++) {
+//                bh.consume(state.strictStack.head());
+//            }
+//        }
 
         @Benchmark
         public StrictStack<Integer> tail(State state) {
@@ -59,10 +57,10 @@ public class StrictStackBenchmark {
             return stack;
         }
 
-        @Benchmark
-        public void iteration(State state, Blackhole bh) {
-            state.strictStack.forEach(bh::consume);
-        }
+//        @Benchmark
+//        public void iteration(State state, Blackhole bh) {
+//            state.strictStack.forEach(bh::consume);
+//        }
 
         public static void main(String[] args) throws RunnerException {
             runBenchmarks(StrictStackBenchmark.Shoki.class);

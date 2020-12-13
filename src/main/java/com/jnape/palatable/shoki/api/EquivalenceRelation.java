@@ -148,6 +148,10 @@ public interface EquivalenceRelation<A> extends BiPredicate<A, A> {
         return java.util.Arrays::deepEquals;
     }
 
+    static <A> EquivalenceRelation<A> hashCodeEquals() {
+        return (x, y) -> Objects.hashCode(x) == Objects.hashCode(y);
+    }
+
     /**
      * Contextualized equality given an {@link EquivalenceRelation} and two values <code>x</code> and <code>y</code>
      * that it compares.

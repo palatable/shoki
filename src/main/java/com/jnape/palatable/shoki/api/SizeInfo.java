@@ -50,6 +50,14 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Known<?>, SizeInfo
             this.size = size;
         }
 
+        /*
+
+
+
+        Known.Immediate v Known.Deferred
+
+         */
+
         /**
          * Retrieve the known numeric size value
          *

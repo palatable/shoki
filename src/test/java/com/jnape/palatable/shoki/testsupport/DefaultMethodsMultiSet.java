@@ -5,7 +5,7 @@ import com.jnape.palatable.lambda.adt.hlist.Tuple2;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 /**
  * A minimum complete definition of a {@link MultiSet}, relying on a delegate to supply the required implementation
@@ -49,7 +49,7 @@ public final class DefaultMethodsMultiSet<A> implements MultiSet<A> {
      * {@inheritDoc}
      */
     @Override
-    public SizeInfo.Known<Natural> sizeInfo() {
+    public Finite<Natural> sizeInfo() {
         return delegate.sizeInfo();
     }
 

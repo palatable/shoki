@@ -4,7 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.SizeInfo;
-import com.jnape.palatable.shoki.api.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
 import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;

@@ -1,7 +1,7 @@
 package com.jnape.palatable.shoki.testsupport;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 
 /**
@@ -47,7 +47,7 @@ public final class DefaultMethodsStack<Size extends Number, A> implements Stack<
      * {@inheritDoc}
      */
     @Override
-    public SizeInfo.Known<Size> sizeInfo() {
+    public Finite<Size> sizeInfo() {
         return delegate.sizeInfo();
     }
 

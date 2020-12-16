@@ -8,7 +8,7 @@ import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.Once;
 import com.jnape.palatable.shoki.api.SortedCollection;
 
 import java.util.Comparator;
@@ -28,7 +28,7 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.entries;
 import static com.jnape.palatable.shoki.api.Map.HashingAlgorithms.entries;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.computedOnce;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
 import static java.lang.String.format;
@@ -79,13 +79,20 @@ import static java.util.Comparator.naturalOrder;
 public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection<Natural, Tuple2<K, V>, K> {
     private final Comparator<? super K> keyComparator;
     private final RedBlackTree<K, V>    tree;
+    private final Once<Natural>         sizeInfo;
 
-    private volatile Natural size;
     private volatile Integer hashCode;
+
+    private TreeMap(Comparator<? super K> keyComparator, RedBlackTree<K, V> tree, Once<Natural> sizeInfo) {
+        this.keyComparator = keyComparator;
+        this.tree          = tree;
+        this.sizeInfo      = sizeInfo;
+    }
 
     private TreeMap(Comparator<? super K> keyComparator, RedBlackTree<K, V> tree) {
         this.keyComparator = keyComparator;
         this.tree          = tree;
+        this.sizeInfo      = computedOnce(() -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this));
     }
 
     /**
@@ -216,7 +223,7 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public TreeMap<K, V> reverse() {
-        return new TreeMap<>(keyComparator.reversed(), tree.reverse());
+        return new TreeMap<>(keyComparator.reversed(), tree.reverse(), sizeInfo);
     }
 
     /**
@@ -247,17 +254,8 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public SizeInfo.Known<Natural> sizeInfo() {
-        Natural size = this.size;
-        if (size == null) {
-            synchronized (this) {
-                size = this.size;
-                if (size == null) {
-                    this.size = size = foldLeft((s, __) -> s.inc(), (Natural) zero(), this);
-                }
-            }
-        }
-        return known(size);
+    public Once<Natural> sizeInfo() {
+        return sizeInfo;
     }
 
     /**

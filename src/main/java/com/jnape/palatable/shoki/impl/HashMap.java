@@ -10,7 +10,7 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
 
 import java.util.Iterator;
 import java.util.Objects;

@@ -2,7 +2,7 @@ package com.jnape.palatable.shoki.testsupport;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.api.Collection;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 /**
  * A minimum complete definition of a {@link Collection}, relying on a delegate to supply the required implementation
@@ -24,7 +24,7 @@ public final class DefaultMethodsCollection<Size extends Number, A> implements C
      * {@inheritDoc}
      */
     @Override
-    public SizeInfo.Known<Size> sizeInfo() {
+    public Finite<Size> sizeInfo() {
         return delegate.sizeInfo();
     }
 

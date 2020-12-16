@@ -1,6 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.api.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 /**
  * A known-sized {@link Sequence}.
@@ -16,7 +16,7 @@ public interface Collection<Size extends Number, A> extends Sequence<A>, Sizable
      * @return the size of this collection
      */
     @Override
-    Known<Size> sizeInfo();
+    Finite<Size> sizeInfo();
 
     /**
      * {@inheritDoc}
@@ -31,6 +31,6 @@ public interface Collection<Size extends Number, A> extends Sequence<A>, Sizable
      */
     @Override
     default boolean isEmpty() {
-        return sizeInfo().getSize().intValue() == 0;
+        return sizeInfo().getOrCompute().intValue() == 0;
     }
 }

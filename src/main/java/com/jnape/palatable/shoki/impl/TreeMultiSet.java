@@ -7,7 +7,7 @@ import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
-import com.jnape.palatable.shoki.api.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.Once;
 import com.jnape.palatable.shoki.api.SortedCollection;
 
 import java.util.Comparator;
@@ -19,7 +19,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.computedOnce;
 import static com.jnape.palatable.shoki.impl.TreeMap.treeMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -35,11 +35,16 @@ import static java.util.Comparator.naturalOrder;
 public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natural, Tuple2<A, NonZero>, A> {
 
     private final TreeMap<A, NonZero> multiplicityMap;
+    private final Once<Natural>       sizeInfo;
 
-    private volatile Natural size;
+    private TreeMultiSet(TreeMap<A, NonZero> multiplicityMap, Once<Natural> sizeInfo) {
+        this.multiplicityMap = multiplicityMap;
+        this.sizeInfo        = sizeInfo;
+    }
 
     private TreeMultiSet(TreeMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
+        this.sizeInfo        = computedOnce(() -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values()));
     }
 
     /**
@@ -69,8 +74,7 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
         return multiplicityMap.get(a)
                 .fmap(n -> new TreeMultiSet<>(n.minus(k).orElse(zero())
                                                       .match(zero -> multiplicityMap.remove(a),
-                                                             difference -> multiplicityMap.put(a, difference))
-                ))
+                                                             difference -> multiplicityMap.put(a, difference))))
                 .orElse(this);
     }
 
@@ -161,7 +165,7 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      */
     @Override
     public TreeMultiSet<A> sort(Comparator<? super A> comparator) {
-        return new TreeMultiSet<>(multiplicityMap.sort(comparator));
+        return new TreeMultiSet<>(multiplicityMap.sort(comparator), sizeInfo);
     }
 
     /**
@@ -170,7 +174,7 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      */
     @Override
     public TreeMultiSet<A> reverse() {
-        return new TreeMultiSet<>(multiplicityMap.reverse());
+        return new TreeMultiSet<>(multiplicityMap.reverse(), sizeInfo);
     }
 
     /**
@@ -178,17 +182,8 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Known<Natural> sizeInfo() {
-        Natural size = this.size;
-        if (size == null) {
-            synchronized (this) {
-                size = this.size;
-                if (size == null) {
-                    this.size = size = foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values());
-                }
-            }
-        }
-        return known(size);
+    public Once<Natural> sizeInfo() {
+        return sizeInfo;
     }
 
     /**

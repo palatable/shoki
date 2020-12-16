@@ -8,7 +8,7 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
-import com.jnape.palatable.shoki.api.SizeInfo.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
 
 import java.util.Iterator;
 import java.util.Objects;

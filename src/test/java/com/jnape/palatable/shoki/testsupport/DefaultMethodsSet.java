@@ -2,7 +2,7 @@ package com.jnape.palatable.shoki.testsupport;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 /**
  * A minimum complete definition of a {@link Set}, relying on a delegate to supply the required implementation details,
@@ -38,7 +38,7 @@ public final class DefaultMethodsSet<Size extends Number, A> implements Set<Size
      * {@inheritDoc}
      */
     @Override
-    public SizeInfo.Known<Size> sizeInfo() {
+    public Finite<Size> sizeInfo() {
         return delegate.sizeInfo();
     }
 

@@ -14,8 +14,6 @@ import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.arraysHashCode;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
@@ -99,6 +97,15 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         return other instanceof StrictQueue<?> &&
                 equivalent(elementsInOrder(objectEquals()), this, downcast(other));
     }
+
+    /**
+     * {@inheritDoc}
+     * Amortized <code>O(1)</code>.
+     *
+     * @return the size
+     */
+    @Override
+    public abstract Known<Natural> sizeInfo();
 
     /**
      * {@inheritDoc}
@@ -201,9 +208,6 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         private final StrictStack<A> outgoing;
         private final StrictStack<A> incoming;
 
-        private volatile Natural size;
-        private volatile Integer hashCode;
-
         private NonEmpty(StrictStack<A> outgoing, StrictStack<A> incoming) {
             this.outgoing = outgoing;
             this.incoming = incoming;
@@ -244,16 +248,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
 
         @Override
         public Known<Natural> sizeInfo() {
-            Natural size = this.size;
-            if (size == null) {
-                synchronized (this) {
-                    size = this.size;
-                    if (size == null) {
-                        this.size = size = outgoing.sizeInfo().getSize().plus(incoming.sizeInfo().getSize());
-                    }
-                }
-            }
-            return known(size);
+            return known(incoming.sizeInfo().getSize().plus(outgoing.sizeInfo().getSize()));
         }
 
         @Override
@@ -263,16 +258,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
 
         @Override
         public int hashCode() {
-            Integer hashCode = this.hashCode;
-            if (hashCode == null) {
-                synchronized (this) {
-                    hashCode = this.hashCode;
-                    if (hashCode == null) {
-                        this.hashCode = hashCode = hash(arraysHashCode(), new StrictStack[]{outgoing, incoming});
-                    }
-                }
-            }
-            return hashCode;
+            return incoming.hashCode() * 31 + outgoing.hashCode();
         }
 
         @Override

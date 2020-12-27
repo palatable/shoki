@@ -15,7 +15,8 @@ import static com.jnape.palatable.lambda.adt.hlist.HList.tuple;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static com.jnape.palatable.shoki.impl.TreeMap.treeMap;
 import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
@@ -116,11 +117,11 @@ public class TreeMapTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(zero()), treeMap().sizeInfo());
-        assertEquals(known(one()), treeMap(tuple(1, "foo")).sizeInfo());
-        assertEquals(known(abs(2)), treeMap(tuple(1, "foo"),
-                                            tuple(2, "bar")).sizeInfo());
-        assertEquals(known(one()), treeMap(tuple(1, "foo")).put(1, "bar").sizeInfo());
+        assertEquals(finite(known(zero())), treeMap().sizeInfo());
+        assertEquals(finite(known(one())), treeMap(tuple(1, "foo")).sizeInfo());
+        assertEquals(finite(known(abs(2))), treeMap(tuple(1, "foo"),
+                                                    tuple(2, "bar")).sizeInfo());
+        assertEquals(finite(known(one())), treeMap(tuple(1, "foo")).put(1, "bar").sizeInfo());
     }
 
     @Test

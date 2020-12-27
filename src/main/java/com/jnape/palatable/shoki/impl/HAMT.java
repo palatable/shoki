@@ -225,7 +225,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
                                                            strictStack(),
                                                            kvPairs);
-            return eq(withoutKey.sizeInfo().getSize(), one())
+            return eq(withoutKey.sizeInfo().value().getOrCompute(), one())
                    ? withoutKey.iterator().next()
                    : new Collision<>(keyHash, withoutKey);
         }

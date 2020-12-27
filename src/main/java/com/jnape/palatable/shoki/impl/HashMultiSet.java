@@ -2,27 +2,32 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.Memo.updater;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
+import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A {@link MultiSet} that stores elements internally in a {@link HashMap}, supporting the same time/space performance
@@ -33,11 +38,17 @@ import static java.lang.String.join;
  */
 public final class HashMultiSet<A> implements MultiSet<A> {
 
+    private static final AtomicReferenceFieldUpdater<HashMultiSet<?>, Natural> SIZE_UPDATER =
+            newUpdater(Downcast.<Class<HashMultiSet<?>>, Class<?>>downcast(HashMultiSet.class),
+                       Natural.class,
+                       "size");
+
+
     private static final HashMultiSet<?> EMPTY_OBJECT_DEFAULTS = new HashMultiSet<>(hashMap());
 
     private final HashMap<A, NonZero> multiplicityMap;
 
-    private volatile Natural size;
+    @SuppressWarnings("unused") private volatile Natural size;
 
     private HashMultiSet(HashMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
@@ -134,17 +145,9 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Known<Natural> sizeInfo() {
-        Natural size = this.size;
-        if (size == null) {
-            synchronized (this) {
-                size = this.size;
-                if (size == null) {
-                    this.size = size = foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values());
-                }
-            }
-        }
-        return known(size);
+    public Finite<Natural> sizeInfo() {
+        return finite(computedOnce(updater(this, SIZE_UPDATER),
+                                   () -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 
     /**

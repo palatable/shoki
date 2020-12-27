@@ -8,12 +8,13 @@ import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.Once;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
 
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.adt.Maybe.maybe;
 import static com.jnape.palatable.lambda.adt.Try.trying;
@@ -27,13 +28,16 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.entries;
 import static com.jnape.palatable.shoki.api.Map.HashingAlgorithms.entries;
+import static com.jnape.palatable.shoki.api.Memo.updater;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.computedOnce;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Comparator.naturalOrder;
+import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A <a href="https://www.cs.tufts.edu/~nr/cs257/archive/chris-okasaki/redblack99.pdf">red-black tree</a>
@@ -77,22 +81,25 @@ import static java.util.Comparator.naturalOrder;
  * @param <V> the value type
  */
 public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection<Natural, Tuple2<K, V>, K> {
+    private static final AtomicReferenceFieldUpdater<TreeMap<?, ?>, Natural> SIZE_UPDATER =
+            newUpdater(Downcast.<Class<TreeMap<?, ?>>, Class<?>>downcast(TreeMap.class),
+                       Natural.class,
+                       "size");
+
+    private static final AtomicReferenceFieldUpdater<TreeMap<?, ?>, Integer> HASH_CODE_UPDATER =
+            newUpdater(Downcast.<Class<TreeMap<?, ?>>, Class<?>>downcast(TreeMap.class),
+                       Integer.class,
+                       "hashCode");
+
     private final Comparator<? super K> keyComparator;
     private final RedBlackTree<K, V>    tree;
-    private final Once<Natural>         sizeInfo;
 
-    private volatile Integer hashCode;
-
-    private TreeMap(Comparator<? super K> keyComparator, RedBlackTree<K, V> tree, Once<Natural> sizeInfo) {
-        this.keyComparator = keyComparator;
-        this.tree          = tree;
-        this.sizeInfo      = sizeInfo;
-    }
+    private volatile                             Natural size;
+    @SuppressWarnings("unused") private volatile Integer hashCode;
 
     private TreeMap(Comparator<? super K> keyComparator, RedBlackTree<K, V> tree) {
         this.keyComparator = keyComparator;
         this.tree          = tree;
-        this.sizeInfo      = computedOnce(() -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this));
     }
 
     /**
@@ -211,9 +218,11 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public TreeMap<K, V> sort(Comparator<? super K> comparator) {
-        return Objects.equals(keyComparator, comparator)
-               ? this
-               : foldLeft((m, kv) -> kv.into(m::put), treeMap(comparator), this);
+        if (Objects.equals(keyComparator, comparator))
+            return this;
+        TreeMap<K, V> sorted = foldLeft((m, kv) -> kv.into(m::put), treeMap(comparator), this);
+        sorted.size = size;
+        return sorted;
     }
 
     /**
@@ -223,7 +232,9 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public TreeMap<K, V> reverse() {
-        return new TreeMap<>(keyComparator.reversed(), tree.reverse(), sizeInfo);
+        TreeMap<K, V> reversed = new TreeMap<>(keyComparator.reversed(), tree.reverse());
+        reversed.size = size;
+        return reversed;
     }
 
     /**
@@ -254,8 +265,9 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Once<Natural> sizeInfo() {
-        return sizeInfo;
+    public Finite<Natural> sizeInfo() {
+        return finite(computedOnce(updater(this, SIZE_UPDATER),
+                                   () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
     /**
@@ -299,17 +311,10 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public int hashCode() {
-        Integer hashCode = this.hashCode;
-        if (hashCode == null) {
-            synchronized (this) {
-                hashCode = this.hashCode;
-                if (hashCode == null) {
-                    this.hashCode = hashCode = Objects.hashCode(keyComparator) * 31
-                            + hash(entries(objectHashCode(), objectHashCode()), this);
-                }
-            }
-        }
-        return hashCode;
+        return computedOnce(updater(this, HASH_CODE_UPDATER),
+                            () -> Objects.hashCode(keyComparator) * 31
+                                    + hash(entries(objectHashCode(), objectHashCode()), this))
+                .getOrCompute();
     }
 
     /**

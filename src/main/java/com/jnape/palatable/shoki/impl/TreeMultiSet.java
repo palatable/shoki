@@ -2,28 +2,33 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.Once;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
 
 import java.util.Comparator;
 import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
+import static com.jnape.palatable.shoki.api.Memo.updater;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.computedOnce;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.impl.TreeMap.treeMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
 import static java.util.Comparator.naturalOrder;
+import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A {@link MultiSet} and {@link SortedCollection} that stores elements internally in a {@link TreeMap}, supporting the
@@ -34,17 +39,17 @@ import static java.util.Comparator.naturalOrder;
  */
 public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natural, Tuple2<A, NonZero>, A> {
 
-    private final TreeMap<A, NonZero> multiplicityMap;
-    private final Once<Natural>       sizeInfo;
+    private static final AtomicReferenceFieldUpdater<TreeMultiSet<?>, Natural> SIZE_UPDATER =
+            newUpdater(Downcast.<Class<TreeMultiSet<?>>, Class<?>>downcast(TreeMultiSet.class),
+                       Natural.class,
+                       "size");
 
-    private TreeMultiSet(TreeMap<A, NonZero> multiplicityMap, Once<Natural> sizeInfo) {
-        this.multiplicityMap = multiplicityMap;
-        this.sizeInfo        = sizeInfo;
-    }
+    private final TreeMap<A, NonZero> multiplicityMap;
+
+    private volatile Natural size;
 
     private TreeMultiSet(TreeMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
-        this.sizeInfo        = computedOnce(() -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values()));
     }
 
     /**
@@ -165,7 +170,9 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      */
     @Override
     public TreeMultiSet<A> sort(Comparator<? super A> comparator) {
-        return new TreeMultiSet<>(multiplicityMap.sort(comparator), sizeInfo);
+        TreeMultiSet<A> sorted = new TreeMultiSet<>(multiplicityMap.sort(comparator));
+        sorted.size = size;
+        return sorted;
     }
 
     /**
@@ -174,7 +181,9 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      */
     @Override
     public TreeMultiSet<A> reverse() {
-        return new TreeMultiSet<>(multiplicityMap.reverse(), sizeInfo);
+        TreeMultiSet<A> reversed = new TreeMultiSet<>(multiplicityMap.reverse());
+        reversed.size = size;
+        return reversed;
     }
 
     /**
@@ -182,8 +191,9 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Once<Natural> sizeInfo() {
-        return sizeInfo;
+    public Finite<Natural> sizeInfo() {
+        return finite(computedOnce(updater(this, SIZE_UPDATER),
+                                   () -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 
     /**

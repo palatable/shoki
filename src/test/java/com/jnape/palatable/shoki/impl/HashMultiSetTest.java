@@ -11,7 +11,8 @@ import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.atLeastOne;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.HashMultiSet.hashMultiSet;
 import static java.math.BigInteger.TEN;
 import static org.junit.Assert.assertEquals;
@@ -114,10 +115,10 @@ public class HashMultiSetTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(known(zero()), EMPTY.sizeInfo());
-        assertEquals(known(one()), EMPTY.inc("foo", one()).sizeInfo());
-        assertEquals(known(abs(2)), EMPTY.inc("foo", one()).inc("foo", one()).sizeInfo());
-        assertEquals(known(abs(12)), EMPTY.inc("foo", one()).inc("bar", atLeastOne(10)).inc("foo", one()).sizeInfo());
+        assertEquals(finite(known(zero())), EMPTY.sizeInfo());
+        assertEquals(finite(known(one())), EMPTY.inc("foo", one()).sizeInfo());
+        assertEquals(finite(known(abs(2))), EMPTY.inc("foo", one()).inc("foo", one()).sizeInfo());
+        assertEquals(finite(known(abs(12))), EMPTY.inc("foo", one()).inc("bar", atLeastOne(10)).inc("foo", one()).sizeInfo());
     }
 
     @Test

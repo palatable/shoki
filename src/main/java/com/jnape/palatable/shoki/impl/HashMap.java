@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Empty;
 import com.jnape.palatable.lambda.functions.builtin.fn1.Head;
 import com.jnape.palatable.lambda.semigroup.Semigroup;
@@ -10,10 +11,11 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo;
 
 import java.util.Iterator;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.adt.Maybe.maybe;
 import static com.jnape.palatable.lambda.adt.Try.trying;
@@ -29,13 +31,16 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.entries;
 import static com.jnape.palatable.shoki.api.Map.HashingAlgorithms.entries;
+import static com.jnape.palatable.shoki.api.Memo.updater;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
 import static java.lang.String.format;
 import static java.lang.String.join;
+import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A <a href="https://lampwww.epfl.ch/papers/idealhashtrees.pdf" target="_new">hash array mapped trie</a>
@@ -116,6 +121,16 @@ import static java.lang.String.join;
  */
 public final class HashMap<K, V> implements Map<Natural, K, V> {
 
+    private static final AtomicReferenceFieldUpdater<HashMap<?, ?>, Natural> SIZE_UPDATER =
+            newUpdater(Downcast.<Class<HashMap<?, ?>>, Class<?>>downcast(HashMap.class),
+                       Natural.class,
+                       "size");
+
+    private static final AtomicReferenceFieldUpdater<HashMap<?, ?>, Integer> HASH_CODE_UPDATER =
+            newUpdater(Downcast.<Class<HashMap<?, ?>>, Class<?>>downcast(HashMap.class),
+                       Integer.class,
+                       "hashCode");
+
     private static final HashMap<?, ?> EMPTY_OBJECT_DEFAULTS =
             new HashMap<>(objectEquals(), objectHashCode(), rootNode());
 
@@ -123,8 +138,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     private final HashingAlgorithm<? super K>    keyHashAlg;
     private final HAMT<K, V>                     hamt;
 
-    private volatile Natural size;
-    private volatile Integer hashCode;
+    @SuppressWarnings("unused") private volatile Natural size;
+    @SuppressWarnings("unused") private volatile Integer hashCode;
 
     private HashMap(EquivalenceRelation<? super K> keyEqRel, HashingAlgorithm<? super K> keyHashAlg, HAMT<K, V> hamt) {
         this.keyEqRel   = keyEqRel;
@@ -257,17 +272,9 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public Known<Natural> sizeInfo() {
-        Natural size = this.size;
-        if (size == null) {
-            synchronized (this) {
-                size = this.size;
-                if (size == null) {
-                    this.size = size = foldLeft((s, __) -> s.inc(), (Natural) zero(), this);
-                }
-            }
-        }
-        return known(size);
+    public SizeInfo.Sized.Finite<Natural> sizeInfo() {
+        return finite(computedOnce(updater(this, SIZE_UPDATER),
+                                   () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
     /**
@@ -303,16 +310,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public int hashCode() {
-        Integer hashCode = this.hashCode;
-        if (hashCode == null) {
-            synchronized (this) {
-                hashCode = this.hashCode;
-                if (hashCode == null) {
-                    this.hashCode = hashCode = hash(entries(keyHashAlg, objectHashCode()), this);
-                }
-            }
-        }
-        return hashCode;
+        return computedOnce(updater(this, HASH_CODE_UPDATER), () -> hash(entries(keyHashAlg, objectHashCode()), this))
+                .getOrCompute();
     }
 
     /**

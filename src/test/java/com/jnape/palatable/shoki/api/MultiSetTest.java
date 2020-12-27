@@ -11,7 +11,8 @@ import static com.jnape.palatable.lambda.functions.builtin.fn3.CmpEqBy.cmpEqBy;
 import static com.jnape.palatable.shoki.api.Natural.abs;
 import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.HashMultiSet.hashMultiSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -29,7 +30,7 @@ public class MultiSetTest {
             assertEquals(zero(),
                          DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).remove("foo")
                                  .get("foo"));
-            assertEquals(known(one()),
+            assertEquals(finite(known(one())),
                          DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).remove("foo")
                                  .sizeInfo());
         }
@@ -39,7 +40,7 @@ public class MultiSetTest {
             assertTrue(DefaultMethodsMultiSet.<String>delegate(hashMultiSet()).dec("foo").isEmpty());
             assertEquals(one(),
                          DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "foo")).dec("foo").get("foo"));
-            assertEquals(known(abs(2)),
+            assertEquals(finite(known(abs(2))),
                          DefaultMethodsMultiSet.delegate(hashMultiSet("foo", "bar", "foo")).dec("foo")
                                  .sizeInfo());
         }
@@ -58,7 +59,7 @@ public class MultiSetTest {
                     .sum(hashMultiSet("foo", "foo", "bar"));
             assertEquals(abs(2), addAll.get("foo"));
             assertEquals(abs(1), addAll.get("bar"));
-            assertEquals(known(abs(3)), addAll.sizeInfo());
+            assertEquals(finite(known(abs(3))), addAll.sizeInfo());
         }
 
         @Test
@@ -68,7 +69,7 @@ public class MultiSetTest {
             assertEquals(one(), merge.get("a"));
             assertEquals(abs(2), merge.get("b"));
             assertEquals(one(), merge.get("c"));
-            assertEquals(known(abs(4)), merge.sizeInfo());
+            assertEquals(finite(known(abs(4))), merge.sizeInfo());
         }
 
         @Test
@@ -81,7 +82,7 @@ public class MultiSetTest {
             assertEquals(abs(2), union.get("a"));
             assertEquals(one(), union.get("b"));
             assertEquals(one(), union.get("c"));
-            assertEquals(known(abs(4)), union.sizeInfo());
+            assertEquals(finite(known(abs(4))), union.sizeInfo());
 
             assertThat(first.union(first),
                        equivalentTo(first, MultiSet.EquivalenceRelations.elementMultiplicity()));
@@ -104,7 +105,7 @@ public class MultiSetTest {
             assertEquals(zero(), union.get("a"));
             assertEquals(abs(2), union.get("b"));
             assertEquals(one(), union.get("c"));
-            assertEquals(known(abs(3)), union.sizeInfo());
+            assertEquals(finite(known(abs(3))), union.sizeInfo());
 
             assertThat(first.intersection(first),
                        equivalentTo(first, MultiSet.EquivalenceRelations.elementMultiplicity()));

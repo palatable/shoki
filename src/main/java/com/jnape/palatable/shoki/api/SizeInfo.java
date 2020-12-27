@@ -2,12 +2,8 @@ package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.lambda.adt.choice.Choice2;
 import com.jnape.palatable.lambda.adt.coproduct.CoProduct2;
-import com.jnape.palatable.lambda.functions.Fn0;
 import com.jnape.palatable.lambda.functions.Fn1;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.EveryTime;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Computed.Once;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 import java.util.Objects;
 
@@ -44,38 +40,15 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
     }
 
     /**
-     * Construct a {@link SizeInfo} with a {@link Known known} numeric size of type <code>Size</code>.
+     * Construct a {@link Finite finite} {@link SizeInfo} of type <code>Size</code> backed by the given
+     * {@link Value value}.
      *
-     * @param size   the known size
+     * @param value  the {@link Value}
      * @param <Size> the size type
-     * @return the {@link Known known} {@link SizeInfo}
+     * @return the {@link Finite} {@link SizeInfo}
      */
-    public static <Size extends Number> Known<Size> known(Size size) {
-        return new Known<>(size);
-    }
-
-    /**
-     * Construct a {@link SizeInfo} that {@link Computed computes} a numeric size of type <code>Size</code>
-     * {@link Once once} and memoizes the result thereafter.
-     *
-     * @param thunk  the computation
-     * @param <Size> the size type
-     * @return the {@link Once once-computed} {@link SizeInfo}
-     */
-    public static <Size extends Number> Once<Size> computedOnce(Fn0<Size> thunk) {
-        return new Once<>(thunk);
-    }
-
-    /**
-     * Construct a {@link SizeInfo} that {@link Computed computes} a numeric size of type <code>Size</code>
-     * {@link EveryTime every time}.
-     *
-     * @param thunk  the computation
-     * @param <Size> the size type
-     * @return the {@link EveryTime always-computed} {@link SizeInfo}
-     */
-    public static <Size extends Number> EveryTime<Size> computedEveryTime(Fn0<Size> thunk) {
-        return new EveryTime<>(thunk);
+    public static <Size extends Number> Finite<Size> finite(Value<? extends Size> value) {
+        return new Finite<>(value);
     }
 
     /**
@@ -106,25 +79,22 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
          *
          * @param <Size> the numeric size type
          */
-        public static abstract class Finite<Size extends Number> extends Sized {
-            private Finite() {
+        public static final class Finite<Size extends Number> extends Sized {
+
+            private final Value<? extends Size> value;
+
+            private Finite(Value<? extends Size> value) {
+                this.value = value;
             }
 
             /**
-             * {@link Known Get} or {@link Computed compute} the underlying size.
+             * The underlying size {@link Value}.
              *
-             * @return the underlying size
+             * @return the underlying size {@link Value}
              */
-            public abstract Size getOrCompute();
-
-            /**
-             * {@link Choice2 Choose} between the constructions of this {@link Finite} {@link SizeInfo} based on whether
-             * the size is {@link Known} or {@link Computed}.
-             *
-             * @return {@link Choice2 whether or not} this {@link Sized Sized} is {@link Known known} or
-             * {@link Computed computed}
-             */
-            public abstract Choice2<Known<Size>, Computed<Size>> availability();
+            public Value<? extends Size> value() {
+                return value;
+            }
 
             /**
              * {@inheritDoc}
@@ -136,170 +106,12 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
 
             @Override
             public final boolean equals(Object other) {
-                return other instanceof Finite<?> && Objects.equals(getOrCompute(), ((Finite<?>) other).getOrCompute());
+                return other instanceof Finite<?> && Objects.equals(value, ((Finite<?>) other).value);
             }
 
             @Override
             public final int hashCode() {
-                return getOrCompute().hashCode();
-            }
-
-            /**
-             * A {@link SizeInfo} representing a known size of some value.
-             *
-             * @param <Size> the numeric size type
-             */
-            public static final class Known<Size extends Number> extends Finite<Size> {
-                private final Size size;
-
-                private Known(Size size) {
-                    this.size = size;
-                }
-
-                /**
-                 * Retrieve the known numeric size value.
-                 *
-                 * @return the known size
-                 */
-                public Size getSize() {
-                    return size;
-                }
-
-                /**
-                 * {@inheritDoc}
-                 *
-                 * @see Known#getSize()
-                 */
-                @Override
-                public Size getOrCompute() {
-                    return getSize();
-                }
-
-                /**
-                 * {@inheritDoc}
-                 */
-                @Override
-                public Choice2<Known<Size>, Computed<Size>> availability() {
-                    return a(this);
-                }
-
-                @Override
-                public String toString() {
-                    return "SizeInfo.Finite.Known[" + size + "]";
-                }
-            }
-
-            /**
-             * A {@link SizeInfo} representing a size of some value to be computed.
-             *
-             * @param <Size> the numeric size type
-             */
-            public static abstract class Computed<Size extends Number> extends Finite<Size> {
-
-                private Computed() {
-                }
-
-                /**
-                 * {@inheritDoc}
-                 */
-                @Override
-                public final Choice2<Known<Size>, Computed<Size>> availability() {
-                    return Choice2.b(this);
-                }
-
-                /**
-                 * {@link Choice2 Choose} between the constructions of this {@link Computed computed}
-                 * {@link SizeInfo SizeInfo} based on whether the evaluation happens {@link Once once} or
-                 * {@link EveryTime every time}.
-                 *
-                 * @return {@link Choice2 whether or not} this {@link Computed Computed} is evaluates {@link Once once}
-                 * or {@link EveryTime every time}
-                 */
-                public abstract Choice2<Once<Size>, EveryTime<Size>> evaluation();
-
-                /**
-                 * A {@link SizeInfo SizeInfo} that is {@link Computed computed} once and is memoized thereafter.
-                 *
-                 * @param <Size> the numeric size type
-                 */
-                public static final class Once<Size extends Number> extends Computed<Size> {
-
-                    private volatile Fn0<Size> thunk;
-                    private volatile Size      size;
-
-                    private Once(Fn0<Size> thunk) {
-                        this.thunk = thunk;
-                    }
-
-                    /**
-                     * {@inheritDoc}
-                     * <p>
-                     * If this size is not already computed, compute and memoize it, otherwise return the memoized size.
-                     */
-                    @Override
-                    public Size getOrCompute() {
-                        Size size = this.size;
-                        if (size == null) {
-                            synchronized (this) {
-                                size = this.size;
-                                if (size == null) {
-                                    Fn0<Size> thunk = this.thunk;
-                                    this.size  = size = thunk.apply();
-                                    this.thunk = null;
-                                }
-                            }
-                        }
-                        return size;
-                    }
-
-                    /**
-                     * {@inheritDoc}
-                     */
-                    @Override
-                    public Choice2<Once<Size>, EveryTime<Size>> evaluation() {
-                        return Choice2.a(this);
-                    }
-
-                    @Override
-                    public String toString() {
-                        return "SizeInfo.Finite.Computed.Once[" + (size == null ? "…" : size) + "]";
-                    }
-                }
-
-                /**
-                 * A {@link SizeInfo SizeInfo} that is {@link Computed computed} every time it is demanded.
-                 *
-                 * @param <Size> the numeric size type
-                 */
-                public static final class EveryTime<Size extends Number> extends Computed<Size> {
-
-                    private final Fn0<Size> thunk;
-
-                    private EveryTime(Fn0<Size> thunk) {
-                        this.thunk = thunk;
-                    }
-
-                    /**
-                     * {@inheritDoc}
-                     */
-                    @Override
-                    public Size getOrCompute() {
-                        return thunk.apply();
-                    }
-
-                    /**
-                     * {@inheritDoc}
-                     */
-                    @Override
-                    public Choice2<Once<Size>, EveryTime<Size>> evaluation() {
-                        return Choice2.b(this);
-                    }
-
-                    @Override
-                    public String toString() {
-                        return "SizeInfo.Finite.Computed.Always[…]";
-                    }
-                }
+                return value.hashCode();
             }
         }
 

@@ -1,14 +1,16 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.SizeInfo;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -18,10 +20,14 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
+import static com.jnape.palatable.shoki.api.Memo.updater;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.known;
+import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A strictly-evaluated {@link Stack}.
@@ -77,7 +83,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      * The {@link SizeInfo} of this {@link StrictStack}. Amortized <code>O(1)</code>.
      */
     @Override
-    public abstract Known<Natural> sizeInfo();
+    public abstract Finite<Natural> sizeInfo();
 
     /**
      * Returns true if this {@link StrictStack} is empty; otherwise, returns false. <code>O(1)</code>.
@@ -183,11 +189,22 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     }
 
     private static final class Head<A> extends StrictStack<A> {
+
+        private static final AtomicReferenceFieldUpdater<Head<?>, Natural> SIZE_UPDATER =
+                newUpdater(Downcast.<Class<Head<?>>, Class<?>>downcast(Head.class),
+                           Natural.class,
+                           "size");
+
+        private static final AtomicReferenceFieldUpdater<Head<?>, Integer> HASH_CODE_UPDATER =
+                newUpdater(Downcast.<Class<Head<?>>, Class<?>>downcast(Head.class),
+                           Integer.class,
+                           "hashCode");
+
         private final A              head;
         private final StrictStack<A> tail;
 
-        private volatile Natural size;
-        private volatile Integer hashCode;
+        @SuppressWarnings("unused") private volatile Natural size;
+        @SuppressWarnings("unused") private volatile Integer hashCode;
 
         private Head(A head, StrictStack<A> tail) {
             this.head = head;
@@ -211,31 +228,16 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
 
         @Override
         @SuppressWarnings("DuplicatedCode")
-        public Known<Natural> sizeInfo() {
-            Natural size = this.size;
-            if (size == null) {
-                synchronized (this) {
-                    size = this.size;
-                    if (size == null) {
-                        this.size = size = foldLeft((s, __) -> s.inc(), (Natural) zero(), this);
-                    }
-                }
-            }
-            return known(size);
+        public Finite<Natural> sizeInfo() {
+            return finite(computedOnce(updater(this, SIZE_UPDATER),
+                                       () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
         }
 
         @Override
         public int hashCode() {
-            Integer hashCode = this.hashCode;
-            if (hashCode == null) {
-                synchronized (this) {
-                    hashCode = this.hashCode;
-                    if (hashCode == null) {
-                        this.hashCode = hashCode = hash(elementsInOrder(objectHashCode()), this);
-                    }
-                }
-            }
-            return hashCode;
+            return computedOnce(updater(this, HASH_CODE_UPDATER),
+                                () -> hash(elementsInOrder(objectHashCode()), this))
+                    .getOrCompute();
         }
     }
 
@@ -261,8 +263,8 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Known<Natural> sizeInfo() {
-            return known(zero());
+        public Finite<Natural> sizeInfo() {
+            return finite(known(zero()));
         }
 
         @Override

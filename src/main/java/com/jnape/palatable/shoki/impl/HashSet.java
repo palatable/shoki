@@ -7,7 +7,7 @@ import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -59,7 +59,7 @@ public final class HashSet<A> implements Set<Natural, A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Known<Natural> sizeInfo() {
+    public Finite<Natural> sizeInfo() {
         return map.sizeInfo();
     }
 

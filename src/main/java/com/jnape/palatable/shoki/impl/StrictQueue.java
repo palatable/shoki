@@ -4,7 +4,7 @@ import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Queue;
-import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite.Known;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 
 import java.util.Iterator;
@@ -16,7 +16,9 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
-import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.Value.computedEveryTime;
+import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.Collections.emptyIterator;
 
@@ -105,7 +107,7 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
      * @return the size
      */
     @Override
-    public abstract Known<Natural> sizeInfo();
+    public abstract Finite<Natural> sizeInfo();
 
     /**
      * {@inheritDoc}
@@ -184,8 +186,8 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         }
 
         @Override
-        public Known<Natural> sizeInfo() {
-            return known(zero());
+        public Finite<Natural> sizeInfo() {
+            return finite(known(zero()));
         }
 
         @Override
@@ -247,8 +249,9 @@ public abstract class StrictQueue<A> implements Queue<Natural, A>, Stack<Natural
         }
 
         @Override
-        public Known<Natural> sizeInfo() {
-            return known(incoming.sizeInfo().getSize().plus(outgoing.sizeInfo().getSize()));
+        public Finite<Natural> sizeInfo() {
+            return finite(computedEveryTime(() -> incoming.sizeInfo().value().getOrCompute()
+                    .plus(outgoing.sizeInfo().value().getOrCompute())));
         }
 
         @Override

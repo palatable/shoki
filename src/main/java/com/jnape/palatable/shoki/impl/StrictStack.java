@@ -20,7 +20,7 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
-import static com.jnape.palatable.shoki.api.Memo.updater;
+import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
@@ -229,13 +229,13 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         @Override
         @SuppressWarnings("DuplicatedCode")
         public Finite<Natural> sizeInfo() {
-            return finite(computedOnce(updater(this, SIZE_UPDATER),
+            return finite(computedOnce(volatileField(this, SIZE_UPDATER),
                                        () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
         }
 
         @Override
         public int hashCode() {
-            return computedOnce(updater(this, HASH_CODE_UPDATER),
+            return computedOnce(volatileField(this, HASH_CODE_UPDATER),
                                 () -> hash(elementsInOrder(objectHashCode()), this))
                     .getOrCompute();
         }

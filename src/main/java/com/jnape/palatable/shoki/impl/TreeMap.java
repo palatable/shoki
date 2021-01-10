@@ -28,7 +28,7 @@ import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
 import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
 import static com.jnape.palatable.shoki.api.Map.EquivalenceRelations.entries;
 import static com.jnape.palatable.shoki.api.Map.HashingAlgorithms.entries;
-import static com.jnape.palatable.shoki.api.Memo.updater;
+import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
 import static com.jnape.palatable.shoki.api.Value.computedOnce;
@@ -266,7 +266,7 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public Finite<Natural> sizeInfo() {
-        return finite(computedOnce(updater(this, SIZE_UPDATER),
+        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
                                    () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
@@ -311,7 +311,7 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
      */
     @Override
     public int hashCode() {
-        return computedOnce(updater(this, HASH_CODE_UPDATER),
+        return computedOnce(volatileField(this, HASH_CODE_UPDATER),
                             () -> Objects.hashCode(keyComparator) * 31
                                     + hash(entries(objectHashCode(), objectHashCode()), this))
                 .getOrCompute();

@@ -1,40 +1,43 @@
 package com.jnape.palatable.shoki.api;
 
+import com.jnape.palatable.lambda.adt.Maybe;
+import com.jnape.palatable.lambda.functions.Fn0;
+
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
+
+import static com.jnape.palatable.lambda.adt.Maybe.maybe;
 
 public interface Memo<A> {
 
-    A getOrElse(A ifMissing);
+    Maybe<A> get();
 
-    void set(A a);
-
-    Object lock();
-
-    static <Instance, A> Memo<A> updater(Instance instance, AtomicReferenceFieldUpdater<Instance, A> updater) {
-        return new Updater<>(instance, updater);
+    default A getOrCompute(Fn0<? extends A> thunk) {
+        return get().orElseGet(thunk::apply);
     }
 
-    final class Updater<Instance, A> implements Memo<A> {
-        private final Instance                                 instance;
-        @SuppressWarnings("AtomicFieldUpdaterNotStaticFinal")
-        private final AtomicReferenceFieldUpdater<Instance, A> updater;
+    static <Instance, A> Memo<A> volatileField(Instance instance, AtomicReferenceFieldUpdater<Instance, A> updater) {
+        final class VolatileField implements Memo<A> {
+            @Override
+            public Maybe<A> get() {
+                return maybe(updater.get(instance));
+            }
 
-        private Updater(Instance instance, AtomicReferenceFieldUpdater<Instance, A> updater) {
-            this.instance = instance;
-            this.updater  = updater;
+            @Override
+            public A getOrCompute(Fn0<? extends A> thunk) {
+                A a = updater.get(instance);
+                if (Objects.equals(null, a)) {
+                    synchronized (instance) {
+                        a = updater.get(instance);
+                        if (Objects.equals(null, a)) {
+                            updater.set(instance, a = thunk.apply());
+                        }
+                    }
+                }
+                return a;
+            }
         }
 
-        public A getOrElse(A ifMissing) {
-            A a = updater.get(instance);
-            return a == null ? ifMissing : a;
-        }
-
-        public void set(A a) {
-            updater.set(instance, a);
-        }
-
-        public Instance lock() {
-            return instance;
-        }
+        return new VolatileField();
     }
 }

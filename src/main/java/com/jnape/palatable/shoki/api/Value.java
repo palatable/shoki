@@ -8,6 +8,7 @@ import com.jnape.palatable.lambda.functions.Fn1;
 import java.util.Objects;
 
 import static com.jnape.palatable.lambda.adt.choice.Choice2.a;
+import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 
 public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Computed<A>, Value<A>> {
 
@@ -45,7 +46,7 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
      * @return the {@link Computed.Once once-computed} {@link Value}
      */
     public static <A> Computed.Once<A> computedOnce(Memo<A> memo, Fn0<A> thunk) {
-        return new Computed.Once<>(memo, thunk, null);
+        return new Computed.Once<>(memo, thunk);
     }
 
     /**
@@ -136,13 +137,11 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
         public static final class Once<A> extends Computed<A> {
 
             private final Memo<A> memo;
-            private final Fn0<A>  computeOnce;
-            private final A       unset;
+            private final Fn0<A>  thunk;
 
-            private Once(Memo<A> memo, Fn0<A> computeOnce, A unset) {
-                this.unset       = unset;
-                this.computeOnce = computeOnce;
-                this.memo        = memo;
+            private Once(Memo<A> memo, Fn0<A> thunk) {
+                this.thunk = thunk;
+                this.memo  = memo;
             }
 
             /**
@@ -152,16 +151,7 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
              */
             @Override
             public A getOrCompute() {
-                A a = memo.getOrElse(unset);
-                if (Objects.equals(unset, a)) {
-                    synchronized (memo.lock()) {
-                        a = memo.getOrElse(unset);
-                        if (Objects.equals(unset, a)) {
-                            memo.set(a = computeOnce.apply());
-                        }
-                    }
-                }
-                return a;
+                return memo.getOrCompute(thunk);
             }
 
             /**
@@ -174,8 +164,7 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
 
             @Override
             public String toString() {
-                A a = memo.getOrElse(unset);
-                return "Value.Computed.Once[" + (Objects.equals(unset, a) ? "…" : a) + "]";
+                return "Value.Computed.Once[" + (memo.get().match(constantly("…"), Object::toString)) + "]";
             }
         }
 
@@ -214,6 +203,4 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
             }
         }
     }
-
-
 }

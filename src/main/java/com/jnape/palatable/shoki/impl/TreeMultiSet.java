@@ -20,7 +20,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Id.id;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Into.into;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Map.map;
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
-import static com.jnape.palatable.shoki.api.Memo.updater;
+import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
 import static com.jnape.palatable.shoki.api.Value.computedOnce;
@@ -192,7 +192,7 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      */
     @Override
     public Finite<Natural> sizeInfo() {
-        return finite(computedOnce(updater(this, SIZE_UPDATER),
+        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
                                    () -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 

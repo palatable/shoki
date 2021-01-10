@@ -7,8 +7,13 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
+import static com.jnape.palatable.shoki.api.SizeInfo.finite;
 import static com.jnape.palatable.shoki.api.SizeInfo.infinite;
 import static com.jnape.palatable.shoki.api.SizeInfo.unsized;
+import static com.jnape.palatable.shoki.api.Value.computedEveryTime;
+import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.known;
+import static com.jnape.palatable.shoki.testsupport.Atom.atom;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 
@@ -18,9 +23,26 @@ public class SizeInfoTest {
     @RunWith(Enclosed.class)
     public static final class SizedTest {
 
-        @RunWith(Enclosed.class)
         public static final class FiniteTest {
 
+            @Test
+            public void coproduct() {
+                Sized.Finite<Integer> finite = finite(known(1));
+                assertEquals(just(finite),
+                             finite.projectA().fmap(Sized::cardinality).flatMap(CoProduct2::projectA));
+            }
+
+            @Test
+            public void string() {
+                Value.Known<Integer> knownValue = known(1);
+                assertEquals("SizeInfo.Sized.Finite[" + knownValue + "]", finite(knownValue).toString());
+
+                Value.Computed.Once<Integer> computedOnce = computedOnce(atom(), () -> 1);
+                assertEquals("SizeInfo.Sized.Finite[" + computedOnce + "]", finite(computedOnce).toString());
+
+                Value.Computed.EveryTime<Integer> computedEveryTime = computedEveryTime(() -> 1);
+                assertEquals("SizeInfo.Sized.Finite[" + computedEveryTime + "]", finite(computedEveryTime).toString());
+            }
         }
 
         public static final class InfiniteTest {

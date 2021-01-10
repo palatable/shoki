@@ -113,6 +113,11 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
             public final int hashCode() {
                 return value.hashCode();
             }
+
+            @Override
+            public String toString() {
+                return "SizeInfo.Sized.Finite[" + value + ']';
+            }
         }
 
         /**

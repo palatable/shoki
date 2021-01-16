@@ -439,6 +439,14 @@ public abstract class Natural extends Number
         private NonZero() {
         }
 
+        /**
+         * If this {@link NonZero non-zero} {@link Natural} is {@link Natural#one() one}, return it; otherwise, subtract
+         * one from it.
+         *
+         * @return this {@link NonZero non-zero} {@link Natural} minus one, or {@link Natural#one() one}
+         */
+        public abstract NonZero decOrOne();
+
         public final NonZero times(NonZero multiplier) {
             return nonZero(bigIntegerValue().multiply(multiplier.bigIntegerValue()));
         }
@@ -537,6 +545,11 @@ public abstract class Natural extends Number
             }
 
             @Override
+            public NonZero decOrOne() {
+                return value == 1 ? this : new I(value - 1);
+            }
+
+            @Override
             public BigInteger bigIntegerValue() {
                 return BigInteger.valueOf(value);
             }
@@ -581,6 +594,11 @@ public abstract class Natural extends Number
             @Override
             public NonZero decOrZero() {
                 return value == MIN_VALUE ? I.MAX : new L(value - 1);
+            }
+
+            @Override
+            public NonZero decOrOne() {
+                return decOrZero();
             }
 
             @Override
@@ -643,6 +661,11 @@ public abstract class Natural extends Number
             @Override
             public NonZero decOrZero() {
                 return value.equals(MIN_VALUE) ? L.MAX : new B(value.subtract(ONE));
+            }
+
+            @Override
+            public NonZero decOrOne() {
+                return decOrZero();
             }
 
             @Override

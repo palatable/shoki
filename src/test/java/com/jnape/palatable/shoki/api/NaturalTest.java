@@ -317,6 +317,18 @@ public class NaturalTest {
     }
 
     @Test
+    public void decOrZero() {
+        assertEquals(zero(), zero().decOrZero());
+        assertEquals(zero(), one().decOrZero());
+        assertEquals(one(), one().inc().decOrZero());
+        assertEquals(new NonZero.I(Integer.MAX_VALUE), new NonZero.L(Integer.MAX_VALUE + 1L).decOrZero());
+        assertEquals(new NonZero.L(Long.MAX_VALUE),
+                     new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)).decOrZero());
+        assertEquals(new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE)),
+                     new NonZero.B(BigInteger.valueOf(Long.MAX_VALUE).add(ONE).add(ONE)).decOrZero());
+    }
+
+    @Test
     public void equalsAndHashCode() {
         assertEquals(zero(), zero());
         assertEquals(new NonZero.I(1), new NonZero.I(1));

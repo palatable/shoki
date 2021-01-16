@@ -17,6 +17,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn2.LT.lt;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 import static java.lang.Math.min;
+import static java.math.BigInteger.ONE;
 import static java.math.BigInteger.ZERO;
 
 /**
@@ -118,6 +119,13 @@ public abstract class Natural extends Number
     public final Maybe<Natural> dec() {
         return minus(one());
     }
+
+    /**
+     * If this {@link Natural} is {@link NonZero non-zero}, subtract one from it; otherwise, return {@link Zero zero}.
+     *
+     * @return this {@link Natural} minus one, or {@link Zero zero}
+     */
+    public abstract Natural decOrZero();
 
     /**
      * {@inheritDoc}
@@ -370,6 +378,11 @@ public abstract class Natural extends Number
         }
 
         @Override
+        public Zero decOrZero() {
+            return this;
+        }
+
+        @Override
         public Maybe<Natural> minus(NonZero subtrahend) {
             return nothing();
         }
@@ -492,6 +505,7 @@ public abstract class Natural extends Number
 
         static final class I extends NonZero {
             private static final I ONE = new I(1);
+            private static final I MAX = new I(Integer.MAX_VALUE);
 
             private final int value;
 
@@ -515,6 +529,11 @@ public abstract class Natural extends Number
             @Override
             public Maybe<Natural> minus(NonZero subtrahend) {
                 return subtrahend instanceof I ? natural(value - ((I) subtrahend).value()) : nothing();
+            }
+
+            @Override
+            public Natural decOrZero() {
+                return value == 1 ? zero() : new I(value - 1);
             }
 
             @Override
@@ -550,10 +569,18 @@ public abstract class Natural extends Number
 
         static final class L extends NonZero {
 
+            private static final long MIN_VALUE = Integer.MAX_VALUE + 1L;
+            private static final L    MAX       = new L(Long.MAX_VALUE);
+
             private final long value;
 
             L(long value) {
                 this.value = value;
+            }
+
+            @Override
+            public NonZero decOrZero() {
+                return value == MIN_VALUE ? I.MAX : new L(value - 1);
             }
 
             @Override
@@ -605,10 +632,17 @@ public abstract class Natural extends Number
 
         static final class B extends NonZero {
 
+            private static final BigInteger MIN_VALUE = BigInteger.valueOf(Long.MAX_VALUE).add(ONE);
+
             private final BigInteger value;
 
             B(BigInteger value) {
                 this.value = value;
+            }
+
+            @Override
+            public NonZero decOrZero() {
+                return value.equals(MIN_VALUE) ? L.MAX : new B(value.subtract(ONE));
             }
 
             @Override

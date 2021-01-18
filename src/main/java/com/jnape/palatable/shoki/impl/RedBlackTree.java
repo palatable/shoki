@@ -12,7 +12,7 @@ import static com.jnape.palatable.shoki.impl.RedBlackTree.Color.B;
 import static com.jnape.palatable.shoki.impl.RedBlackTree.Color.BB;
 import static com.jnape.palatable.shoki.impl.RedBlackTree.Color.NB;
 import static com.jnape.palatable.shoki.impl.RedBlackTree.Color.R;
-import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
+import static com.jnape.palatable.shoki.impl.AmortizedStack.amortizedStack;
 import static java.util.Collections.emptyIterator;
 
 interface RedBlackTree<K, V> extends Iterable<Tuple2<K, V>> {
@@ -187,7 +187,7 @@ interface RedBlackTree<K, V> extends Iterable<Tuple2<K, V>> {
             public Iterator<Tuple2<K, V>> iterator() {
                 return new Iterator<Tuple2<K, V>>() {
                     private Tuple2<K, V> next;
-                    private StrictStack<Object> queuedLeavesAndNodes = strictStack(Node.this);
+                    private AmortizedStack<Object> queuedLeavesAndNodes = amortizedStack(Node.this);
 
                     @Override
                     public boolean hasNext() {

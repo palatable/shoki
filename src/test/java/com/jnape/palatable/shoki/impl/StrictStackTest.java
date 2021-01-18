@@ -2,6 +2,8 @@ package com.jnape.palatable.shoki.impl;
 
 import org.junit.Test;
 
+import java.lang.reflect.Field;
+
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
@@ -61,11 +63,20 @@ public class StrictStackTest {
     }
 
     @Test
-    public void structureIsShared() {
-        StrictStack<Integer> tail        = strictStack(3, 2);
+    public void nodeStructureIsShared() throws ReflectiveOperationException {
+        StrictStack<Integer> tail        = strictStack(2, 3);
         StrictStack<Integer> strictStack = tail.cons(1);
 
-        assertSame(strictStack.tail(), tail);
+        Class<?> headClass = Class.forName(StrictStack.class.getCanonicalName() + "$NonEmpty");
+        Field    headTail  = headClass.getDeclaredField("tail");
+        headTail.setAccessible(true);
+
+        Class<?> nodeClass = Class.forName(StrictStack.class.getCanonicalName() + "$Node");
+        Field    nodeTail  = nodeClass.getDeclaredField("tail");
+        nodeTail.setAccessible(true);
+
+        assertSame(headTail.get(tail),
+                   nodeTail.get(headTail.get(strictStack)));
     }
 
     @Test
@@ -87,4 +98,5 @@ public class StrictStackTest {
         assertEquals("StrictStack[]", strictStack().toString());
         assertEquals("StrictStack[1, 2, 3]", strictStack(1, 2, 3).toString());
     }
+
 }

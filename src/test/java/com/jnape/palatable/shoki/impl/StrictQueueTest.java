@@ -5,7 +5,7 @@ import org.junit.Test;
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
-import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
+import static com.jnape.palatable.shoki.impl.AmortizedStack.amortizedStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -94,11 +94,11 @@ public class StrictQueueTest {
 
     @Test
     public void consAll() {
-        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(4, 5).consAll(strictStack(3, 2, 1)));
+        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(4, 5).consAll(amortizedStack(3, 2, 1)));
     }
 
     @Test
     public void snocAll() {
-        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(1, 2).snocAll(strictStack(3, 4, 5)));
+        assertEquals(strictQueue(1, 2, 3, 4, 5), strictQueue(1, 2).snocAll(amortizedStack(3, 4, 5)));
     }
 }

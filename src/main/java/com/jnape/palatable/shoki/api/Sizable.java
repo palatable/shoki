@@ -2,7 +2,6 @@ package com.jnape.palatable.shoki.api;
 
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.api.SizeInfo.unsized;
 
 /**
  * A generic interface representing a type that can provide information about its size.

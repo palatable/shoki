@@ -1,16 +1,16 @@
 package com.jnape.palatable.shoki.impl;
 
 import com.jnape.palatable.lambda.adt.Maybe;
-import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
+import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
-import java.util.concurrent.atomic.AtomicReferenceFieldUpdater;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
@@ -18,22 +18,19 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Downcast.downcast
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.equivalent;
 import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.hash;
-import static com.jnape.palatable.shoki.api.HashingAlgorithm.objectHashCode;
-import static com.jnape.palatable.shoki.api.Memo.volatileField;
+import static com.jnape.palatable.shoki.api.Natural.atLeastOne;
+import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
-import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.api.Value.known;
-import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A strictly-evaluated {@link Stack}.
  *
  * @param <A> the element type
- * @see StrictQueue
+ * @see Stack
+ * @see AmortizedStack
  */
 public abstract class StrictStack<A> implements Stack<Natural, A> {
 
@@ -47,9 +44,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      * @return the new {@link StrictStack}
      */
     @Override
-    public final StrictStack<A> cons(A a) {
-        return new Head<>(a, this);
-    }
+    public abstract StrictStack<A> cons(A a);
 
     /**
      * The remaining elements after removing the head of this {@link StrictStack}, or an empty {@link StrictStack} if
@@ -80,7 +75,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     public abstract Maybe<A> head();
 
     /**
-     * The {@link SizeInfo} of this {@link StrictStack}. Amortized <code>O(1)</code>.
+     * The {@link SizeInfo} of this {@link StrictStack}. <code>O(1)</code>.
      */
     @Override
     public abstract Finite<Natural> sizeInfo();
@@ -119,27 +114,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      * {@inheritDoc}
      */
     @Override
-    public final Iterator<A> iterator() {
-        return new Iterator<A>() {
-            StrictStack<A> rest = StrictStack.this;
-
-            @Override
-            public boolean hasNext() {
-                return rest instanceof Head<?>;
-            }
-
-            @Override
-            public A next() {
-                if (!hasNext())
-                    throw new NoSuchElementException();
-
-                Head<A> head = (Head<A>) this.rest;
-                A       next = head.head;
-                rest = head.tail;
-                return next;
-            }
-        };
-    }
+    public abstract Iterator<A> iterator();
 
     /**
      * {@inheritDoc}
@@ -156,20 +131,7 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      * @return the string representation of this {@link StrictStack}
      */
     @Override
-    public final String toString() {
-        StringBuilder body = new StringBuilder("StrictStack[");
-
-        StrictStack<A> next = this;
-        while (next != Empty.INSTANCE) {
-            Head<A> head = (Head<A>) next;
-            body.append(head.head);
-            next = head.tail;
-            if (next != Empty.INSTANCE)
-                body.append(", ");
-        }
-
-        return body.append("]").toString();
-    }
+    public abstract String toString();
 
     /**
      * Create a {@link StrictStack} of zero or more elements, with the elements queued for removal from left to right.
@@ -181,64 +143,17 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
      */
     @SafeVarargs
     public static <A> StrictStack<A> strictStack(A... as) {
-        @SuppressWarnings("unchecked")
-        StrictStack<A> result = (StrictStack<A>) Empty.INSTANCE;
-        for (int i = as.length - 1; i >= 0; i--)
-             result = result.cons(as[i]);
-        return result;
-    }
+        if (as.length == 0)
+            return Empty.empty();
 
-    private static final class Head<A> extends StrictStack<A> {
-
-        private static final AtomicReferenceFieldUpdater<Head<?>, Natural> SIZE_UPDATER =
-                newUpdater(Downcast.<Class<Head<?>>, Class<?>>downcast(Head.class),
-                           Natural.class,
-                           "size");
-
-        private static final AtomicReferenceFieldUpdater<Head<?>, Integer> HASH_CODE_UPDATER =
-                newUpdater(Downcast.<Class<Head<?>>, Class<?>>downcast(Head.class),
-                           Integer.class,
-                           "hashCode");
-
-        private final A              head;
-        private final StrictStack<A> tail;
-
-        @SuppressWarnings("unused") private volatile Natural size;
-        @SuppressWarnings("unused") private volatile Integer hashCode;
-
-        private Head(A head, StrictStack<A> tail) {
-            this.head = head;
-            this.tail = tail;
+        int     hashCode = 0;
+        Node<A> tail     = null;
+        for (int i = as.length - 1; i > 0; i--) {
+            A a = as[i];
+            tail     = new Node<>(a, tail);
+            hashCode = (hashCode * 31) + a.hashCode();
         }
-
-        @Override
-        public boolean isEmpty() {
-            return false;
-        }
-
-        @Override
-        public Maybe<A> head() {
-            return just(head);
-        }
-
-        @Override
-        public StrictStack<A> tail() {
-            return tail;
-        }
-
-        @Override
-        @SuppressWarnings("DuplicatedCode")
-        public Finite<Natural> sizeInfo() {
-            return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                       () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
-        }
-
-        @Override
-        public int hashCode() {
-            return computedOnce(volatileField(this, HASH_CODE_UPDATER),
-                                () -> hash(elementsInOrder(objectHashCode()), this))
-                    .getOrCompute();
-        }
+        return new NonEmpty<>(as[0], tail, atLeastOne(as.length), hashCode);
     }
 
     private static final class Empty<A> extends StrictStack<A> {
@@ -263,6 +178,11 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         }
 
         @Override
+        public StrictStack<A> cons(A a) {
+            return new NonEmpty<>(a, null, one(), a.hashCode());
+        }
+
+        @Override
         public Finite<Natural> sizeInfo() {
             return finite(known(zero()));
         }
@@ -270,6 +190,116 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         @Override
         public int hashCode() {
             return 0;
+        }
+
+        @Override
+        public Iterator<A> iterator() {
+            return Collections.emptyIterator();
+        }
+
+        @Override
+        public String toString() {
+            return "StrictStack[]";
+        }
+
+        @SuppressWarnings("unchecked")
+        private static <A> StrictStack<A> empty() {
+            return (StrictStack<A>) Empty.INSTANCE;
+        }
+    }
+
+    private static final class NonEmpty<A> extends StrictStack<A> {
+
+        private final A       head;
+        private final Node<A> tail;
+        private final NonZero size;
+        private final Integer hashCode;
+
+        private NonEmpty(A head, Node<A> tail, NonZero size, Integer hashCode) {
+            this.head     = head;
+            this.tail     = tail;
+            this.size     = size;
+            this.hashCode = hashCode;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public Maybe<A> head() {
+            return just(head);
+        }
+
+        @Override
+        public StrictStack<A> tail() {
+            return tail == null
+                   ? Empty.empty()
+                   : new NonEmpty<>(tail.a, tail.tail, size.decOrOne(), (hashCode - head.hashCode()) / 31);
+        }
+
+        @Override
+        public StrictStack<A> cons(A newHead) {
+            return new NonEmpty<>(newHead,
+                                  new Node<>(head, tail),
+                                  size.inc(),
+                                  (hashCode * 31) + newHead.hashCode());
+        }
+
+        @Override
+        public Finite<Natural> sizeInfo() {
+            return finite(known(size));
+        }
+
+        @Override
+        public int hashCode() {
+            return hashCode;
+        }
+
+        @Override
+        public Iterator<A> iterator() {
+            return new Iterator<A>() {
+                private Node<A> node = new Node<>(head, tail);
+
+                @Override
+                public boolean hasNext() {
+                    return node != null;
+                }
+
+                @Override
+                public A next() {
+                    if (!hasNext())
+                        throw new NoSuchElementException();
+
+                    A next = node.a;
+                    node = node.tail;
+                    return next;
+                }
+            };
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder("StrictStack[").append(head);
+
+            Node<A> node = tail;
+            while (node != null) {
+                sb.append(", ").append(node.a);
+                node = node.tail;
+            }
+            return sb.append(']').toString();
+        }
+    }
+
+    private static final class Node<A> {
+
+        private final A       a;
+        private final Node<A> tail;
+
+        private Node(A a, Node<A> tail) {
+            this.a    = a;
+            this.tail = tail;
         }
     }
 }

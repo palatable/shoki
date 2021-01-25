@@ -20,7 +20,7 @@ import static com.jnape.palatable.shoki.impl.Bitmap32.bitIsSet;
 import static com.jnape.palatable.shoki.impl.Bitmap32.lowerBits;
 import static com.jnape.palatable.shoki.impl.Bitmap32.setBit;
 import static com.jnape.palatable.shoki.impl.Bitmap32.unsetBit;
-import static com.jnape.palatable.shoki.impl.AmortizedStack.amortizedStack;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.lang.Integer.bitCount;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -154,7 +154,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
                 return new Entry<>(newKey, newValue);
 
             if (shift > 30)
-                return new Collision<>(keyHash, amortizedStack(this, new Entry<>(newKey, newValue)));
+                return new Collision<>(keyHash, strictStack(this, new Entry<>(newKey, newValue)));
 
             Integer existingKeyHash = keyHashAlg.apply(k);
             return Node.<K, V>rootNode()
@@ -188,11 +188,11 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
     }
 
     final class Collision<K, V> implements HAMT<K, V> {
-        private final int                         keyHash;
-        private final AmortizedStack<Entry<K, V>> kvPairs;
+        private final int                      keyHash;
+        private final StrictStack<Entry<K, V>> kvPairs;
 
         Collision(int keyHash,
-                  AmortizedStack<Entry<K, V>> kvPairs) {
+                  StrictStack<Entry<K, V>> kvPairs) {
             this.keyHash = keyHash;
             this.kvPairs = kvPairs;
         }
@@ -201,7 +201,7 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
         public HAMT<K, V> put(K key, V value, int keyHash, EquivalenceRelation<? super K> keyEqRel,
                               HashingAlgorithm<? super K> keyHashAlg, int shift) {
             return new Collision<>(keyHash, foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                     amortizedStack(new Entry<>(key, value)),
+                                                     strictStack(new Entry<>(key, value)),
                                                      kvPairs));
         }
 
@@ -222,10 +222,10 @@ interface HAMT<K, V> extends Iterable<Tuple2<K, V>> {
             if (keyHash != this.keyHash)
                 return this;
 
-            AmortizedStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
-                                                              amortizedStack(),
-                                                              kvPairs);
-            return eq(withoutKey.sizeInfo().value().getOrCompute(), one())
+            StrictStack<Entry<K, V>> withoutKey = foldLeft(((s, kv) -> !keyEqRel.apply(key, kv._1()) ? s.cons(kv) : s),
+                                                           strictStack(),
+                                                           kvPairs);
+            return eq(withoutKey.sizeInfo().get().size(), one())
                    ? withoutKey.iterator().next()
                    : new Collision<>(keyHash, withoutKey);
         }

@@ -15,7 +15,9 @@ import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.testsupport.Atom.atom;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Enclosed.class)
 public class ValueTest {
@@ -60,6 +62,15 @@ public class ValueTest {
                         computedOnce(atom(), new AtomicInteger(0)::incrementAndGet);
                 assertEquals((Integer) 1, computedOnce.getOrCompute());
                 assertEquals((Integer) 1, computedOnce.getOrCompute());
+            }
+
+            @Test
+            public void exposesWhetherComputationHasAlreadyBeenPerformed() {
+                Computed.Once<Integer> computedOnce =
+                        computedOnce(atom(), new AtomicInteger(0)::incrementAndGet);
+                assertFalse(computedOnce.isComputed());
+                computedOnce.getOrCompute();
+                assertTrue(computedOnce.isComputed());
             }
 
             @Test

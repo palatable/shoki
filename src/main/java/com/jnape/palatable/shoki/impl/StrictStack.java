@@ -7,6 +7,7 @@ import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
+import com.jnape.palatable.shoki.api.Value.Known;
 
 import java.util.Collections;
 import java.util.Iterator;
@@ -75,10 +76,10 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
     public abstract Maybe<A> head();
 
     /**
-     * The {@link SizeInfo} of this {@link StrictStack}. <code>O(1)</code>.
+     * The {@link Known known} {@link SizeInfo} of this {@link StrictStack}. <code>O(1)</code>.
      */
     @Override
-    public abstract Finite<Natural> sizeInfo();
+    public abstract Known<Finite<Natural>> sizeInfo();
 
     /**
      * Returns true if this {@link StrictStack} is empty; otherwise, returns false. <code>O(1)</code>.
@@ -183,8 +184,8 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Finite<Natural> sizeInfo() {
-            return finite(known(zero()));
+        public Known<Finite<Natural>> sizeInfo() {
+            return known(finite(zero()));
         }
 
         @Override
@@ -248,8 +249,8 @@ public abstract class StrictStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Finite<Natural> sizeInfo() {
-            return finite(known(size));
+        public Known<Finite<Natural>> sizeInfo() {
+            return known(finite(size));
         }
 
         @Override

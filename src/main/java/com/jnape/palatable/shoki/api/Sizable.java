@@ -11,11 +11,11 @@ import static com.jnape.palatable.shoki.api.EquivalenceRelation.objectEquals;
 public interface Sizable {
 
     /**
-     * Returns a {@link SizeInfo} representing any information this type has about its size.
+     * Returns a {@link SizeInfo} {@link Value} representing any information this type has about its size.
      *
      * @return the information about this type's size
      */
-    SizeInfo sizeInfo();
+    Value<? extends SizeInfo> sizeInfo();
 
     /**
      * Common {@link EquivalenceRelation}s between {@link Sizable}s.

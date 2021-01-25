@@ -6,6 +6,7 @@ import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
+import com.jnape.palatable.shoki.api.Value;
 
 /**
  * A minimum complete definition of a {@link Map}, relying on a delegate to supply the required implementation details,
@@ -74,7 +75,7 @@ public final class DefaultMethodsMap<Size extends Number, K, V> implements Map<S
      * {@inheritDoc}
      */
     @Override
-    public Finite<Size> sizeInfo() {
+    public Value<Finite<Size>> sizeInfo() {
         return delegate.sizeInfo();
     }
 

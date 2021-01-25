@@ -13,7 +13,6 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static java.util.Collections.reverseOrder;
@@ -74,11 +73,11 @@ public class TreeSetTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(finite(known(zero())), treeSet().sizeInfo());
-        assertEquals(finite(known(one())), TreeSet.<String>treeSet().add("foo").sizeInfo());
-        assertEquals(finite(known(one())), TreeSet.<String>treeSet().add("foo").add("foo").sizeInfo());
-        assertEquals(finite(known(abs(2))), TreeSet.<String>treeSet().add("foo").add("bar").sizeInfo());
-        assertEquals(finite(known(zero())), TreeSet.<String>treeSet().add("foo").remove("foo").sizeInfo());
+        assertEquals(finite(zero()), treeSet().sizeInfo().getOrCompute());
+        assertEquals(finite(one()), TreeSet.<String>treeSet().add("foo").sizeInfo().getOrCompute());
+        assertEquals(finite(one()), TreeSet.<String>treeSet().add("foo").add("foo").sizeInfo().getOrCompute());
+        assertEquals(finite(abs(2)), TreeSet.<String>treeSet().add("foo").add("bar").sizeInfo().getOrCompute());
+        assertEquals(finite(zero()), TreeSet.<String>treeSet().add("foo").remove("foo").sizeInfo().getOrCompute());
     }
 
     @Test

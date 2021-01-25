@@ -2,7 +2,7 @@ package com.jnape.palatable.shoki.api;
 
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 
-import static com.jnape.palatable.lambda.functions.Fn0.fn0;
+import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.constantly;
 
 /**
@@ -14,12 +14,12 @@ import static com.jnape.palatable.lambda.functions.builtin.fn1.Constantly.consta
 public interface Collection<Size extends Number, A> extends Sequence<A>, Sizable {
 
     /**
-     * The {@link Finite finite} size of this collection.
+     * The {@link Value} representing the {@link Finite finite} size of this collection.
      *
      * @return the size of this collection
      */
     @Override
-    Finite<Size> sizeInfo();
+    Value<Finite<Size>> sizeInfo();
 
     /**
      * {@inheritDoc}
@@ -30,14 +30,17 @@ public interface Collection<Size extends Number, A> extends Sequence<A>, Sizable
     /**
      * {@inheritDoc}
      * <p>
-     * {@link Collection} implementations by default use {@link Collection#sizeInfo()} to determine emptiness.
+     * {@link Collection} implementations will attempt to use {@link Collection#sizeInfo()} to determine
+     * emptiness if it can be obtained in constant time; otherwise, {@link Collection#head} will be used.
      */
     @Override
     default boolean isEmpty() {
-        return sizeInfo()
-                .value()
-                .projectA()
-                .match(fn0(() -> head().match(constantly(true), constantly(false))),
-                       known -> known.get().intValue() == 0);
+        return sizeInfo().match(known -> just(known.get()),
+                                computed -> computed.evaluation().projectA()
+                                        .filter(Value.Computed.Once::isComputed)
+                                        .fmap(Value.Computed.Once::getOrCompute))
+                .fmap(Finite::size)
+                .fmap(size -> size.intValue() == 0)
+                .orElseGet(() -> head().match(constantly(true), constantly(false)));
     }
 }

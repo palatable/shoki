@@ -5,6 +5,8 @@ import org.junit.experimental.runners.Enclosed;
 import org.junit.runner.RunWith;
 
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
+import static com.jnape.palatable.shoki.api.SizeInfo.infinite;
+import static com.jnape.palatable.shoki.api.SizeInfo.unsized;
 import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.hamcrest.CoreMatchers.not;
@@ -19,9 +21,9 @@ public class SizableTest {
         public void sameSizes() {
             EquivalenceRelation<Sizable> sameSizes = Sizable.EquivalenceRelations.sizeInfos();
 
-            Sizable finite   = () -> finite(known(0));
-            Sizable infinite = SizeInfo::infinite;
-            Sizable unsized  = SizeInfo::unsized;
+            Sizable finite   = () -> known(finite(0));
+            Sizable infinite = () -> known(infinite());
+            Sizable unsized  = () -> known(unsized());
 
             assertThat(finite, equivalentTo(finite, sameSizes));
             assertThat(infinite, equivalentTo(infinite, sameSizes));

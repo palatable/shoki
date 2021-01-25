@@ -155,6 +155,15 @@ public abstract class Value<A> implements CoProduct2<Value.Known<A>, Value.Compu
             }
 
             /**
+             * Returns <code>true</code> if this {@link Once} has already been computed; <code>false</code> otherwise.
+             *
+             * @return whether or not this {@link Once} has already been computed
+             */
+            public boolean isComputed() {
+                return memo.get().match(constantly(false), constantly(true));
+            }
+
+            /**
              * {@inheritDoc}
              */
             @Override

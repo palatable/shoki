@@ -10,6 +10,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
+import com.jnape.palatable.shoki.api.Value.Computed.Once;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -81,9 +82,9 @@ import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater
  * @param <V> the value type
  */
 public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection<Natural, Tuple2<K, V>, K> {
-    private static final AtomicReferenceFieldUpdater<TreeMap<?, ?>, Natural> SIZE_UPDATER =
+    private static final AtomicReferenceFieldUpdater<TreeMap<?, ?>, Finite<Natural>> SIZE_UPDATER =
             newUpdater(Downcast.<Class<TreeMap<?, ?>>, Class<?>>downcast(TreeMap.class),
-                       Natural.class,
+                       Downcast.<Class<Finite<Natural>>, Class<?>>downcast(Finite.class),
                        "size");
 
     private static final AtomicReferenceFieldUpdater<TreeMap<?, ?>, Integer> HASH_CODE_UPDATER =
@@ -94,8 +95,8 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
     private final Comparator<? super K> keyComparator;
     private final RedBlackTree<K, V>    tree;
 
-    private volatile                             Natural size;
-    @SuppressWarnings("unused") private volatile Integer hashCode;
+    private volatile                             Finite<Natural> size;
+    @SuppressWarnings("unused") private volatile Integer         hashCode;
 
     private TreeMap(Comparator<? super K> keyComparator, RedBlackTree<K, V> tree) {
         this.keyComparator = keyComparator;
@@ -263,11 +264,13 @@ public final class TreeMap<K, V> implements Map<Natural, K, V>, SortedCollection
     /**
      * {@inheritDoc}
      * Amortized <code>O(1)</code>.
+     *
+     * @return
      */
     @Override
-    public Finite<Natural> sizeInfo() {
-        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                   () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
+    public Once<Finite<Natural>> sizeInfo() {
+        return computedOnce(volatileField(this, SIZE_UPDATER),
+                            () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
     /**

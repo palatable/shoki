@@ -28,7 +28,6 @@ import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelatio
 import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
 import static com.jnape.palatable.shoki.api.Value.computedOnce;
-import static com.jnape.palatable.shoki.api.Value.known;
 import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
@@ -84,10 +83,11 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
     public abstract Maybe<A> head();
 
     /**
-     * The {@link SizeInfo} of this {@link AmortizedStack}. Amortized <code>O(1)</code>.
+     * A {@link Computed.Once once-computed} {@link Value} representing the {@link SizeInfo} of this
+     * {@link AmortizedStack}. Amortized <code>O(1)</code>.
      */
     @Override
-    public abstract Finite<Natural> sizeInfo();
+    public abstract Computed.Once<Finite<Natural>> sizeInfo();
 
     /**
      * Returns true if this {@link AmortizedStack} is empty; otherwise, returns false. <code>O(1)</code>.
@@ -195,9 +195,9 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
 
     private static final class Head<A> extends AmortizedStack<A> {
 
-        private static final AtomicReferenceFieldUpdater<Head<?>, Natural> SIZE_UPDATER =
+        private static final AtomicReferenceFieldUpdater<Head<?>, Finite<Natural>> SIZE_UPDATER =
                 newUpdater(Downcast.<Class<Head<?>>, Class<?>>downcast(Head.class),
-                           Natural.class,
+                           Downcast.<Class<Finite<Natural>>, Class<?>>downcast(Finite.class),
                            "size");
 
         private static final AtomicReferenceFieldUpdater<Head<?>, Integer> HASH_CODE_UPDATER =
@@ -208,8 +208,8 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
         private final A                 head;
         private final AmortizedStack<A> tail;
 
-        @SuppressWarnings("unused") private volatile Natural size;
-        @SuppressWarnings("unused") private volatile Integer hashCode;
+        @SuppressWarnings("unused") private volatile Finite<Natural> size;
+        @SuppressWarnings("unused") private volatile Integer         hashCode;
 
         private Head(A head, AmortizedStack<A> tail) {
             this.head = head;
@@ -232,9 +232,9 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Finite<Natural> sizeInfo() {
-            return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                       () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
+        public Computed.Once<Finite<Natural>> sizeInfo() {
+            return computedOnce(volatileField(this, SIZE_UPDATER),
+                                () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
         }
 
         @Override
@@ -267,8 +267,8 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Finite<Natural> sizeInfo() {
-            return finite(known(zero()));
+        public Computed.Once<Finite<Natural>> sizeInfo() {
+            return computedOnce(() -> just(finite(zero())), () -> finite(zero()));
         }
 
         @Override

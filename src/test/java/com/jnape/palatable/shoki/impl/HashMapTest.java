@@ -15,7 +15,6 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
@@ -196,8 +195,8 @@ public class HashMapTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(finite(known(zero())), hashMap().sizeInfo());
-        assertEquals(finite(known(one())), hashMap().put(1, 1).sizeInfo());
+        assertEquals(finite(zero()), hashMap().sizeInfo().getOrCompute());
+        assertEquals(finite(one()), hashMap().put(1, 1).sizeInfo().getOrCompute());
         HashMap<Integer, Boolean> collisionsAndNesting =
                 HashMap.<Integer, Boolean>hashMap(objectEquals(),
                                                   StubbedHashingAlgorithm.<Integer>stubbedHashingAlgorithm()
@@ -207,8 +206,8 @@ public class HashMapTest {
                         .put(0, true)
                         .put(1, false)
                         .put(2, true);
-        assertEquals(finite(known(abs(3))), collisionsAndNesting.sizeInfo());
-        assertEquals(finite(known(zero())), hashMap().put(1, 1).remove(1).sizeInfo());
+        assertEquals(finite(abs(3)), collisionsAndNesting.sizeInfo().getOrCompute());
+        assertEquals(finite(zero()), hashMap().put(1, 1).remove(1).sizeInfo().getOrCompute());
     }
 
     @Test
@@ -357,6 +356,6 @@ public class HashMapTest {
                         tuple("foo", 3));
         assertEquals(just(3), doubleCollision.get("foo"));
         assertEquals(nothing(), doubleCollision.remove("foo").get("foo"));
-        assertEquals(finite(known(abs(2))), doubleCollision.sizeInfo());
+        assertEquals(finite(abs(2)), doubleCollision.sizeInfo().getOrCompute());
     }
 }

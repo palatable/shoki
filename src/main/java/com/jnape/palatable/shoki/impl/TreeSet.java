@@ -7,6 +7,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
+import com.jnape.palatable.shoki.api.Value.Computed.Once;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -174,7 +175,7 @@ public final class TreeSet<A> implements Set<Natural, A>, SortedCollection<Natur
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Finite<Natural> sizeInfo() {
+    public Once<Finite<Natural>> sizeInfo() {
         return map.sizeInfo();
     }
 

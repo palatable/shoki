@@ -10,6 +10,7 @@ import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
+import com.jnape.palatable.shoki.api.Value.Computed.Once;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -38,9 +39,9 @@ import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater
  */
 public final class HashMultiSet<A> implements MultiSet<A> {
 
-    private static final AtomicReferenceFieldUpdater<HashMultiSet<?>, Natural> SIZE_UPDATER =
+    private static final AtomicReferenceFieldUpdater<HashMultiSet<?>, Finite<Natural>> SIZE_UPDATER =
             newUpdater(Downcast.<Class<HashMultiSet<?>>, Class<?>>downcast(HashMultiSet.class),
-                       Natural.class,
+                       Downcast.<Class<Finite<Natural>>, Class<?>>downcast(Finite.class),
                        "size");
 
 
@@ -48,7 +49,7 @@ public final class HashMultiSet<A> implements MultiSet<A> {
 
     private final HashMap<A, NonZero> multiplicityMap;
 
-    @SuppressWarnings("unused") private volatile Natural size;
+    @SuppressWarnings("unused") private volatile Finite<Natural> size;
 
     private HashMultiSet(HashMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
@@ -145,9 +146,10 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Finite<Natural> sizeInfo() {
-        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                   () -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
+    public Once<Finite<Natural>> sizeInfo() {
+        return computedOnce(
+                volatileField(this, SIZE_UPDATER),
+                () -> finite(foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 
     /**

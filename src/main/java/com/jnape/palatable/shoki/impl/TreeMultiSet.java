@@ -10,6 +10,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
+import com.jnape.palatable.shoki.api.Value.Computed.Once;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -39,14 +40,14 @@ import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater
  */
 public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natural, Tuple2<A, NonZero>, A> {
 
-    private static final AtomicReferenceFieldUpdater<TreeMultiSet<?>, Natural> SIZE_UPDATER =
+    private static final AtomicReferenceFieldUpdater<TreeMultiSet<?>, Finite<Natural>> SIZE_UPDATER =
             newUpdater(Downcast.<Class<TreeMultiSet<?>>, Class<?>>downcast(TreeMultiSet.class),
-                       Natural.class,
+                       Downcast.<Class<Finite<Natural>>, Class<?>>downcast(Finite.class),
                        "size");
 
     private final TreeMap<A, NonZero> multiplicityMap;
 
-    private volatile Natural size;
+    private volatile Finite<Natural> size;
 
     private TreeMultiSet(TreeMap<A, NonZero> multiplicityMap) {
         this.multiplicityMap = multiplicityMap;
@@ -191,9 +192,9 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Finite<Natural> sizeInfo() {
-        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                   () -> foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
+    public Once<Finite<Natural>> sizeInfo() {
+        return computedOnce(volatileField(this, SIZE_UPDATER),
+                            () -> finite(foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 
     /**

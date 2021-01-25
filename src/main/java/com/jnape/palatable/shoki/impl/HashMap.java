@@ -11,7 +11,8 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
-import com.jnape.palatable.shoki.api.SizeInfo;
+import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
+import com.jnape.palatable.shoki.api.Value.Computed.Once;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -121,9 +122,9 @@ import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater
  */
 public final class HashMap<K, V> implements Map<Natural, K, V> {
 
-    private static final AtomicReferenceFieldUpdater<HashMap<?, ?>, Natural> SIZE_UPDATER =
+    private static final AtomicReferenceFieldUpdater<HashMap<?, ?>, Finite<Natural>> SIZE_UPDATER =
             newUpdater(Downcast.<Class<HashMap<?, ?>>, Class<?>>downcast(HashMap.class),
-                       Natural.class,
+                       Downcast.<Class<Finite<Natural>>, Class<?>>downcast(Finite.class),
                        "size");
 
     private static final AtomicReferenceFieldUpdater<HashMap<?, ?>, Integer> HASH_CODE_UPDATER =
@@ -138,8 +139,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     private final HashingAlgorithm<? super K>    keyHashAlg;
     private final HAMT<K, V>                     hamt;
 
-    @SuppressWarnings("unused") private volatile Natural size;
-    @SuppressWarnings("unused") private volatile Integer hashCode;
+    @SuppressWarnings("unused") private volatile Finite<Natural> size;
+    @SuppressWarnings("unused") private volatile Integer         hashCode;
 
     private HashMap(EquivalenceRelation<? super K> keyEqRel, HashingAlgorithm<? super K> keyHashAlg, HAMT<K, V> hamt) {
         this.keyEqRel   = keyEqRel;
@@ -269,12 +270,14 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
     /**
      * {@inheritDoc}
      * Amortized <code>O(1)</code>.
+     *
+     * @return
      */
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public SizeInfo.Sized.Finite<Natural> sizeInfo() {
-        return finite(computedOnce(volatileField(this, SIZE_UPDATER),
-                                   () -> foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
+    public Once<Finite<Natural>> sizeInfo() {
+        return computedOnce(volatileField(this, SIZE_UPDATER),
+                            () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
     /**

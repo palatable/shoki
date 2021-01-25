@@ -12,7 +12,6 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.known;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.junit.Assert.assertEquals;
@@ -72,11 +71,11 @@ public class HashSetTest {
 
     @Test
     public void sizeInfo() {
-        assertEquals(finite(known(zero())), hashSet().sizeInfo());
-        assertEquals(finite(known(one())), HashSet.<String>hashSet().add("foo").sizeInfo());
-        assertEquals(finite(known(one())), HashSet.<String>hashSet().add("foo").add("foo").sizeInfo());
-        assertEquals(finite(known(abs(2))), HashSet.<String>hashSet().add("foo").add("bar").sizeInfo());
-        assertEquals(finite(known(zero())), HashSet.<String>hashSet().add("foo").remove("foo").sizeInfo());
+        assertEquals(finite(zero()), hashSet().sizeInfo().getOrCompute());
+        assertEquals(finite(one()), HashSet.<String>hashSet().add("foo").sizeInfo().getOrCompute());
+        assertEquals(finite(one()), HashSet.<String>hashSet().add("foo").add("foo").sizeInfo().getOrCompute());
+        assertEquals(finite(abs(2)), HashSet.<String>hashSet().add("foo").add("bar").sizeInfo().getOrCompute());
+        assertEquals(finite(zero()), HashSet.<String>hashSet().add("foo").remove("foo").sizeInfo().getOrCompute());
     }
 
     @Test

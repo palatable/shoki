@@ -40,15 +40,14 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
     }
 
     /**
-     * Construct a {@link Finite finite} {@link SizeInfo} of type <code>Size</code> backed by the given
-     * {@link Value value}.
+     * Construct a {@link Finite finite} {@link SizeInfo} of the given <code>Size</code>.
      *
-     * @param value  the {@link Value}
+     * @param size   the size
      * @param <Size> the size type
      * @return the {@link Finite} {@link SizeInfo}
      */
-    public static <Size extends Number> Finite<Size> finite(Value<? extends Size> value) {
-        return new Finite<>(value);
+    public static <Size extends Number> Finite<Size> finite(Size size) {
+        return new Finite<>(size);
     }
 
     /**
@@ -81,19 +80,19 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
          */
         public static final class Finite<Size extends Number> extends Sized {
 
-            private final Value<? extends Size> value;
+            private final Size size;
 
-            private Finite(Value<? extends Size> value) {
-                this.value = value;
+            private Finite(Size size) {
+                this.size = size;
             }
 
             /**
-             * The underlying size {@link Value}.
+             * The underlying size.
              *
-             * @return the underlying size {@link Value}
+             * @return the underlying size
              */
-            public Value<? extends Size> value() {
-                return value;
+            public Size size() {
+                return size;
             }
 
             /**
@@ -106,17 +105,17 @@ public abstract class SizeInfo implements CoProduct2<SizeInfo.Sized, SizeInfo.Un
 
             @Override
             public final boolean equals(Object other) {
-                return other instanceof Finite<?> && Objects.equals(value, ((Finite<?>) other).value);
+                return other instanceof Finite<?> && Objects.equals(size, ((Finite<?>) other).size);
             }
 
             @Override
             public final int hashCode() {
-                return value.hashCode();
+                return size.hashCode();
             }
 
             @Override
             public String toString() {
-                return "SizeInfo.Sized.Finite[" + value + ']';
+                return "SizeInfo.Sized.Finite[" + size + ']';
             }
         }
 

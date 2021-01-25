@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki.testsupport;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
+import com.jnape.palatable.shoki.api.Value;
 
 /**
  * A minimum complete definition of a {@link Stack}, relying on a delegate to supply the required implementation
@@ -47,7 +48,7 @@ public final class DefaultMethodsStack<Size extends Number, A> implements Stack<
      * {@inheritDoc}
      */
     @Override
-    public Finite<Size> sizeInfo() {
+    public Value<Finite<Size>> sizeInfo() {
         return delegate.sizeInfo();
     }
 

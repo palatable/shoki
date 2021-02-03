@@ -28,11 +28,14 @@ import static java.util.Collections.emptyMap;
 import static java.util.Comparator.naturalOrder;
 import static java.util.Comparator.reverseOrder;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 
 public class ShokiTest {
 
     @Test
     public void strictStack() {
+        StrictStack<Integer> strictStack = StrictStack.strictStack(1, 2, 3);
+        assertSame(strictStack, Shoki.strictStack(strictStack));
         assertEquals(StrictStack.strictStack(),
                      Shoki.strictStack(Collections::emptyIterator));
         assertEquals(StrictStack.strictStack(1, 2, 3, 4, 5),
@@ -45,6 +48,8 @@ public class ShokiTest {
 
     @Test
     public void strictQueue() {
+        StrictQueue<Integer> strictQueue = StrictQueue.strictQueue(1, 2, 3);
+        assertSame(strictQueue, Shoki.strictQueue(strictQueue));
         assertEquals(StrictQueue.strictQueue(), Shoki.strictQueue(emptyList()));
 
         Collection<Integer> javaCollection = asList(1, 2, 3, 4, 5);
@@ -53,6 +58,9 @@ public class ShokiTest {
 
     @Test
     public void hashMap() {
+        HashMap<String, Integer> hashMap = HashMap.hashMap(tuple("foo", 1),
+                                                           tuple("bar", 2));
+        assertSame(hashMap, Shoki.hashMap(hashMap));
         assertEquals(HashMap.hashMap(), Shoki.hashMap(emptyMap()));
 
         java.util.Map<String, Integer> javaMap = toMap(java.util.HashMap::new,
@@ -68,6 +76,8 @@ public class ShokiTest {
 
     @Test
     public void hashSet() {
+        HashSet<Integer> hashSet = HashSet.hashSet(1, 2, 3);
+        assertSame(hashSet, Shoki.hashSet(hashSet));
         assertEquals(HashSet.hashSet(), Shoki.hashSet(emptyList()));
         List<Integer> javaCollection = asList(1, 2, 3);
         assertEquals(HashSet.hashSet(1, 2, 3), Shoki.hashSet(javaCollection));
@@ -115,7 +125,22 @@ public class ShokiTest {
     }
 
     @Test
+    public void treeMapFromEntriesWithComparableKeys() {
+        TreeMap<String, Integer> treeMap = TreeMap.treeMap(tuple("foo", 1),
+                                                           tuple("bar", 2));
+        assertSame(treeMap, Shoki.treeMap(treeMap));
+
+        assertEquals(TreeMap.treeMap(), Shoki.treeMap(emptyList()));
+        assertEquals(TreeMap.treeMap(naturalOrder(),
+                                     tuple("foo", 1),
+                                     tuple("bar", 2)),
+                     Shoki.treeMap(asList(tuple("foo", 1), tuple("bar", 2))));
+    }
+
+    @Test
     public void treeSet() {
+        TreeSet<Integer> treeSet = TreeSet.treeSet(1, 2, 3);
+        assertSame(treeSet, Shoki.treeSet(treeSet));
         assertEquals(TreeSet.treeSet(), Shoki.<Integer>treeSet(emptyList()));
         List<Integer> javaCollection = asList(1, 2, 3);
         assertEquals(TreeSet.treeSet(1, 2, 3), Shoki.treeSet(javaCollection));

@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki.interop;
 
+import com.jnape.palatable.lambda.functions.builtin.fn1.Downcast;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.impl.HashMap;
@@ -16,7 +17,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.SortedMap;
 import java.util.SortedSet;
@@ -49,6 +50,9 @@ public final class Shoki {
      * @return the populated {@link StrictStack}
      */
     public static <A> StrictStack<A> strictStack(Iterable<A> javaIterable) {
+        if (javaIterable instanceof StrictStack<?>)
+            return (StrictStack<A>) javaIterable;
+
         Iterator<A> bestIteratorForStackConstruction =
                 javaIterable instanceof Deque<?>
                 ? ((Deque<A>) javaIterable).descendingIterator()
@@ -80,6 +84,8 @@ public final class Shoki {
      * @return the populated {@link StrictQueue}
      */
     public static <A> StrictQueue<A> strictQueue(Iterable<A> javaIterable) {
+        if (javaIterable instanceof StrictQueue<?>)
+            return (StrictQueue<A>) javaIterable;
         return foldLeft(StrictQueue::snoc, StrictQueue.strictQueue(), javaIterable);
     }
 
@@ -98,16 +104,18 @@ public final class Shoki {
     }
 
     /**
-     * Construct a {@link HashMap} from an input {@link Iterable} of {@link java.util.Map.Entry entries}, using
+     * Construct a {@link HashMap} from an input {@link Iterable} of {@link Entry entries}, using
      * {@link Objects#equals(Object, Object) Object equality} and {@link Objects#hashCode(Object) Object hashCode} as
      * the {@link EquivalenceRelation} and {@link HashingAlgorithm}, respectively, for its keys.
      *
-     * @param javaIterableOfEntries the {@link Iterable} of {@link java.util.Map.Entry entries}
+     * @param javaIterableOfEntries the {@link Iterable} of {@link Entry entries}
      * @param <K>                   the key type
      * @param <V>                   the value type
      * @return the populated {@link HashMap}
      */
-    public static <K, V> HashMap<K, V> hashMap(Iterable<? extends Map.Entry<K, V>> javaIterableOfEntries) {
+    public static <K, V> HashMap<K, V> hashMap(Iterable<? extends Entry<K, V>> javaIterableOfEntries) {
+        if (javaIterableOfEntries instanceof HashMap<?, ?>)
+            return Downcast.<HashMap<K, V>, Iterable<? extends Entry<K, V>>>downcast(javaIterableOfEntries);
         return foldLeft(curried(hm -> into(hm::put)), HashMap.hashMap(), javaIterableOfEntries);
     }
 
@@ -145,6 +153,24 @@ public final class Shoki {
     }
 
     /**
+     * Construct a {@link TreeMap} from an input {@link Iterable} of {@link Entry entries} with {@link Comparable}
+     * keys, using {@link Comparator#naturalOrder() natural ordering} for the key comparison relation.
+     *
+     * @param javaIterableOfEntries the {@link Iterable} of {@link Entry entries}
+     * @param <K>                   the key type
+     * @param <V>                   the value type
+     * @return the populated {@link TreeMap}
+     */
+    public static <K extends Comparable<? super K>, V> TreeMap<K, V> treeMap(
+            Iterable<? extends Entry<K, V>> javaIterableOfEntries) {
+        //noinspection RedundantCast
+        if ((Iterable<?>) javaIterableOfEntries instanceof TreeMap<?, ?>)
+            return Downcast.<TreeMap<K, V>, Iterable<? extends Entry<K, V>>>downcast(javaIterableOfEntries);
+
+        return foldLeft(curried(tm -> into(tm::put)), TreeMap.treeMap(), javaIterableOfEntries);
+    }
+
+    /**
      * Construct a {@link HashSet} from an input {@link Iterable}, using
      * {@link Objects#equals(Object, Object) Object equality} and {@link Objects#hashCode(Object) Object hashCode} as
      * the {@link EquivalenceRelation} and {@link HashingAlgorithm}, respectively, for its elements.
@@ -154,6 +180,8 @@ public final class Shoki {
      * @return the populated {@link HashSet}
      */
     public static <A> HashSet<A> hashSet(Iterable<A> javaIterable) {
+        if (javaIterable instanceof HashSet<?>)
+            return (HashSet<A>) javaIterable;
         return foldLeft(HashSet::add, HashSet.hashSet(), javaIterable);
     }
 
@@ -180,6 +208,9 @@ public final class Shoki {
      * @return the populated {@link HashSet}
      */
     public static <A extends Comparable<? super A>> TreeSet<A> treeSet(Iterable<A> javaIterable) {
+        if (javaIterable instanceof TreeSet<?>)
+            return (TreeSet<A>) javaIterable;
+
         Comparator<? super A> comparator = javaIterable instanceof java.util.SortedSet<?>
                                            ? ((java.util.SortedSet<A>) javaIterable).comparator()
                                            : null;

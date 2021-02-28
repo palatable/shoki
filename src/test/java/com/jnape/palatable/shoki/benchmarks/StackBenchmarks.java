@@ -1,6 +1,7 @@
 package com.jnape.palatable.shoki.benchmarks;
 
 import com.jnape.palatable.shoki.api.Stack;
+import com.jnape.palatable.shoki.impl.AmortizedStack;
 import com.jnape.palatable.shoki.impl.StrictStack;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.BenchmarkMode;
@@ -19,66 +20,129 @@ import static com.jnape.palatable.shoki.benchmarks.Benchmark.K100;
 import static com.jnape.palatable.shoki.benchmarks.Benchmark.runBenchmarks;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeJDK;
 import static com.jnape.palatable.shoki.benchmarks.StackOps.consRangeShoki;
+import static com.jnape.palatable.shoki.impl.AmortizedStack.amortizedStack;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static java.util.concurrent.TimeUnit.MICROSECONDS;
 import static org.openjdk.jmh.annotations.Mode.Throughput;
 
-public class StrictStackBenchmark {
+public class StackBenchmarks {
 
     public static void main(String[] args) throws RunnerException {
         Shoki.main(args);
         Java.main(args);
     }
 
-    @BenchmarkMode(Throughput)
-    @OutputTimeUnit(MICROSECONDS)
-    @Warmup(iterations = 5, time = 1)
-    @Measurement(iterations = 5, time = 1)
-    @Fork(5)
-    @OperationsPerInvocation(K100)
     public static class Shoki {
 
-        @Benchmark
-        public Stack<?, Integer> cons() {
-            return consRangeShoki(strictStack(), K100);
-        }
-
-        @Benchmark
-        public void head(State state, Blackhole bh) {
-            for (int i = 0; i < K100; i++) {
-                bh.consume(state.strictStack.head());
-            }
-        }
-
-        @Benchmark
-        public StrictStack<Integer> tail(State state) {
-            StrictStack<Integer> stack = state.strictStack;
-            for (int i = 0; i < K100; i++) {
-                stack = stack.tail();
-            }
-            return stack;
-        }
-
-        @Benchmark
-        public void iteration(State state, Blackhole bh) {
-            state.strictStack.forEach(bh::consume);
-        }
-
         public static void main(String[] args) throws RunnerException {
-            runBenchmarks(StrictStackBenchmark.Shoki.class);
+            StrictStackBenchmarks.main(args);
+            AmortizedStackBenchmarks.main(args);
         }
 
-        @org.openjdk.jmh.annotations.State(Scope.Thread)
-        public static class State {
-            StrictStack<Integer> strictStack;
+        @BenchmarkMode(Throughput)
+        @OutputTimeUnit(MICROSECONDS)
+        @Warmup(iterations = 5, time = 1)
+        @Measurement(iterations = 5, time = 1)
+        @Fork(5)
+        @OperationsPerInvocation(K100)
+        public static class StrictStackBenchmarks {
 
-            @Setup(Level.Invocation)
-            public void doSetup() {
-                strictStack = strictStack();
+            @Benchmark
+            public Stack<?, Integer> cons() {
+                return consRangeShoki(strictStack(), K100);
+            }
+
+            @Benchmark
+            public void head(State state, Blackhole bh) {
                 for (int i = 0; i < K100; i++) {
-                    strictStack = strictStack.cons(i);
+                    bh.consume(state.strictStack.head());
                 }
             }
+
+            @Benchmark
+            public StrictStack<Integer> tail(State state) {
+                StrictStack<Integer> stack = state.strictStack;
+                for (int i = 0; i < K100; i++) {
+                    stack = stack.tail();
+                }
+                return stack;
+            }
+
+            @Benchmark
+            public void iteration(State state, Blackhole bh) {
+                state.strictStack.forEach(bh::consume);
+            }
+
+            public static void main(String[] args) throws RunnerException {
+                runBenchmarks(StackBenchmarks.Shoki.StrictStackBenchmarks.class);
+            }
+
+            @org.openjdk.jmh.annotations.State(Scope.Thread)
+            public static class State {
+                StrictStack<Integer> strictStack;
+
+                @Setup(Level.Invocation)
+                public void doSetup() {
+                    strictStack = strictStack();
+                    for (int i = 0; i < K100; i++) {
+                        strictStack = strictStack.cons(i);
+                    }
+                }
+            }
+
+        }
+
+        @BenchmarkMode(Throughput)
+        @OutputTimeUnit(MICROSECONDS)
+        @Warmup(iterations = 5, time = 1)
+        @Measurement(iterations = 5, time = 1)
+        @Fork(5)
+        @OperationsPerInvocation(K100)
+        public static class AmortizedStackBenchmarks {
+
+            @Benchmark
+            public Stack<?, Integer> cons() {
+                return consRangeShoki(amortizedStack(), K100);
+            }
+
+            @Benchmark
+            public void head(State state, Blackhole bh) {
+                for (int i = 0; i < K100; i++) {
+                    bh.consume(state.amortizedStack.head());
+                }
+            }
+
+            @Benchmark
+            public AmortizedStack<Integer> tail(State state) {
+                AmortizedStack<Integer> stack = state.amortizedStack;
+                for (int i = 0; i < K100; i++) {
+                    stack = stack.tail();
+                }
+                return stack;
+            }
+
+            @Benchmark
+            public void iteration(State state, Blackhole bh) {
+                state.amortizedStack.forEach(bh::consume);
+            }
+
+            public static void main(String[] args) throws RunnerException {
+                runBenchmarks(StackBenchmarks.Shoki.AmortizedStackBenchmarks.class);
+            }
+
+            @org.openjdk.jmh.annotations.State(Scope.Thread)
+            public static class State {
+                AmortizedStack<Integer> amortizedStack;
+
+                @Setup(Level.Invocation)
+                public void doSetup() {
+                    amortizedStack = amortizedStack();
+                    for (int i = 0; i < K100; i++) {
+                        amortizedStack = amortizedStack.cons(i);
+                    }
+                }
+            }
+
         }
     }
 
@@ -123,7 +187,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                runBenchmarks(StrictStackBenchmark.Java.ArrayList.class);
+                runBenchmarks(StackBenchmarks.Java.ArrayList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -174,7 +238,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                runBenchmarks(StrictStackBenchmark.Java.LinkedList.class);
+                runBenchmarks(StackBenchmarks.Java.LinkedList.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)
@@ -224,7 +288,7 @@ public class StrictStackBenchmark {
             }
 
             public static void main(String[] args) throws RunnerException {
-                runBenchmarks(StrictStackBenchmark.Java.ArrayDeque.class);
+                runBenchmarks(StackBenchmarks.Java.ArrayDeque.class);
             }
 
             @org.openjdk.jmh.annotations.State(Scope.Thread)

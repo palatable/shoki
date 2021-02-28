@@ -8,7 +8,7 @@ public final class AllShokiBenchmarks {
 
     public static void main(String[] args) throws RunnerException {
         NaturalBenchmark.main(args);
-        StrictStackBenchmark.Shoki.main(args);
+        StackBenchmarks.Shoki.main(args);
         StrictQueueBenchmark.Shoki.main(args);
         HashMapBenchmark.Shoki.main(args);
         HashSetBenchmark.Shoki.main(args);

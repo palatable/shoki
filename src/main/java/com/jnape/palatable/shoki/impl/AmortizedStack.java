@@ -8,6 +8,7 @@ import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 import com.jnape.palatable.shoki.api.Value;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce;
 import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Known;
 import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
@@ -89,7 +90,7 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
      * {@link AmortizedStack}. Amortized <code>O(1)</code>.
      */
     @Override
-    public abstract Value.ComputedAtMostOnce<Finite<Natural>> sizeInfo();
+    public abstract ComputedAtMostOnce<Finite<Natural>> sizeInfo();
 
     /**
      * Returns true if this {@link AmortizedStack} is empty; otherwise, returns false. <code>O(1)</code>.

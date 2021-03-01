@@ -31,8 +31,8 @@ import static com.jnape.palatable.shoki.api.Value.computedOnce;
 import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
- * A {@link Stack} that amortizes the cost of size and hash code computations via {@link Computed.Once once-computed}
- * {@link Value values}.
+ * A {@link Stack} that amortizes the cost of incremental computations (e.g. size and hash code) computations via
+ * {@link Computed.Once once-computed} {@link Value values}.
  *
  * @param <A> the element type
  * @see Stack

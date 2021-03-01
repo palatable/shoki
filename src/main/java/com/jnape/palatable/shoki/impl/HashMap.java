@@ -313,7 +313,8 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public int hashCode() {
-        return memoized(volatileField(this, HASH_CODE_UPDATER), () -> hash(entries(keyHashAlg, objectHashCode()), this))
+        return memoized(volatileField(this, HASH_CODE_UPDATER),
+                        () -> hash(entries(keyHashAlg, objectHashCode()), this))
                 .getOrCompute();
     }
 

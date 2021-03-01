@@ -10,7 +10,7 @@ import com.jnape.palatable.shoki.api.MultiSet;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
-import com.jnape.palatable.shoki.api.Value.Computed.Once;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -24,7 +24,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft
 import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.memoized;
 import static com.jnape.palatable.shoki.impl.HashMap.hashMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -146,8 +146,8 @@ public final class HashMultiSet<A> implements MultiSet<A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Once<Finite<Natural>> sizeInfo() {
-        return computedOnce(
+    public Memoized<Finite<Natural>> sizeInfo() {
+        return memoized(
                 volatileField(this, SIZE_UPDATER),
                 () -> finite(foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }

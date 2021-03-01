@@ -12,7 +12,7 @@ import com.jnape.palatable.shoki.api.Map;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
-import com.jnape.palatable.shoki.api.Value.Computed.Once;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -35,7 +35,7 @@ import static com.jnape.palatable.shoki.api.Map.HashingAlgorithms.entries;
 import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.memoized;
 import static com.jnape.palatable.shoki.impl.HAMT.Node.rootNode;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
 import static com.jnape.palatable.shoki.impl.StrictQueue.strictQueue;
@@ -275,9 +275,9 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     @SuppressWarnings("DuplicatedCode")
-    public Once<Finite<Natural>> sizeInfo() {
-        return computedOnce(volatileField(this, SIZE_UPDATER),
-                            () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
+    public Memoized<Finite<Natural>> sizeInfo() {
+        return memoized(volatileField(this, SIZE_UPDATER),
+                        () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
     }
 
     /**
@@ -313,7 +313,7 @@ public final class HashMap<K, V> implements Map<Natural, K, V> {
      */
     @Override
     public int hashCode() {
-        return computedOnce(volatileField(this, HASH_CODE_UPDATER), () -> hash(entries(keyHashAlg, objectHashCode()), this))
+        return memoized(volatileField(this, HASH_CODE_UPDATER), () -> hash(entries(keyHashAlg, objectHashCode()), this))
                 .getOrCompute();
     }
 

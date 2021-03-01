@@ -8,7 +8,7 @@ import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
-import com.jnape.palatable.shoki.api.Value.Computed.Once;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
 import java.util.Iterator;
 import java.util.Objects;
@@ -60,7 +60,7 @@ public final class HashSet<A> implements Set<Natural, A> {
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Once<Finite<Natural>> sizeInfo() {
+    public Memoized<Finite<Natural>> sizeInfo() {
         return map.sizeInfo();
     }
 

@@ -10,7 +10,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.SortedCollection;
-import com.jnape.palatable.shoki.api.Value.Computed.Once;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
 import java.util.Comparator;
 import java.util.Iterator;
@@ -24,7 +24,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft
 import static com.jnape.palatable.shoki.api.Memo.volatileField;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.memoized;
 import static com.jnape.palatable.shoki.impl.TreeMap.treeMap;
 import static java.lang.String.format;
 import static java.lang.String.join;
@@ -192,9 +192,9 @@ public final class TreeMultiSet<A> implements MultiSet<A>, SortedCollection<Natu
      * Amortized <code>O(1)</code>.
      */
     @Override
-    public Once<Finite<Natural>> sizeInfo() {
-        return computedOnce(volatileField(this, SIZE_UPDATER),
-                            () -> finite(foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
+    public Memoized<Finite<Natural>> sizeInfo() {
+        return memoized(volatileField(this, SIZE_UPDATER),
+                        () -> finite(foldLeft(Natural::plus, (Natural) zero(), multiplicityMap.values())));
     }
 
     /**

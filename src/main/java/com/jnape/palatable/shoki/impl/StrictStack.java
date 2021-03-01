@@ -7,7 +7,7 @@ import com.jnape.palatable.shoki.api.Natural.NonZero;
 import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
-import com.jnape.palatable.shoki.api.Value.Known;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Known;
 
 import java.util.Collections;
 import java.util.Iterator;

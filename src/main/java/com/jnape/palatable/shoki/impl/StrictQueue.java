@@ -6,7 +6,7 @@ import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Queue;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
-import com.jnape.palatable.shoki.api.Value.Known;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Known;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

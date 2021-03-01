@@ -8,7 +8,8 @@ import com.jnape.palatable.shoki.api.SizeInfo;
 import com.jnape.palatable.shoki.api.SizeInfo.Sized.Finite;
 import com.jnape.palatable.shoki.api.Stack;
 import com.jnape.palatable.shoki.api.Value;
-import com.jnape.palatable.shoki.api.Value.Computed;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Known;
+import com.jnape.palatable.shoki.api.Value.ComputedAtMostOnce.Memoized;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -27,12 +28,13 @@ import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.OrderedCollection.EquivalenceRelations.elementsInOrder;
 import static com.jnape.palatable.shoki.api.OrderedCollection.HashingAlgorithms.elementsInOrder;
 import static com.jnape.palatable.shoki.api.SizeInfo.finite;
-import static com.jnape.palatable.shoki.api.Value.computedOnce;
+import static com.jnape.palatable.shoki.api.Value.known;
+import static com.jnape.palatable.shoki.api.Value.memoized;
 import static java.util.concurrent.atomic.AtomicReferenceFieldUpdater.newUpdater;
 
 /**
  * A {@link Stack} that amortizes the cost of incremental computations (e.g. size and hash code) computations via
- * {@link Computed.Once once-computed} {@link Value values}.
+ * {@link Memoized once-computed} {@link Value values}.
  *
  * @param <A> the element type
  * @see Stack
@@ -83,11 +85,11 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
     public abstract Maybe<A> head();
 
     /**
-     * A {@link Computed.Once once-computed} {@link Value} representing the {@link SizeInfo} of this
+     * A {@link Memoized once-computed} {@link Value} representing the {@link SizeInfo} of this
      * {@link AmortizedStack}. Amortized <code>O(1)</code>.
      */
     @Override
-    public abstract Computed.Once<Finite<Natural>> sizeInfo();
+    public abstract Value.ComputedAtMostOnce<Finite<Natural>> sizeInfo();
 
     /**
      * Returns true if this {@link AmortizedStack} is empty; otherwise, returns false. <code>O(1)</code>.
@@ -232,15 +234,15 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Computed.Once<Finite<Natural>> sizeInfo() {
-            return computedOnce(volatileField(this, SIZE_UPDATER),
-                                () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
+        public Memoized<Finite<Natural>> sizeInfo() {
+            return memoized(volatileField(this, SIZE_UPDATER),
+                            () -> finite(foldLeft((s, __) -> s.inc(), (Natural) zero(), this)));
         }
 
         @Override
         public int hashCode() {
-            return computedOnce(volatileField(this, HASH_CODE_UPDATER),
-                                () -> hash(elementsInOrder(objectHashCode()), this))
+            return memoized(volatileField(this, HASH_CODE_UPDATER),
+                            () -> hash(elementsInOrder(objectHashCode()), this))
                     .getOrCompute();
         }
     }
@@ -267,8 +269,8 @@ public abstract class AmortizedStack<A> implements Stack<Natural, A> {
         }
 
         @Override
-        public Computed.Once<Finite<Natural>> sizeInfo() {
-            return computedOnce(() -> just(finite(zero())), () -> finite(zero()));
+        public Known<Finite<Natural>> sizeInfo() {
+            return known(finite(zero()));
         }
 
         @Override

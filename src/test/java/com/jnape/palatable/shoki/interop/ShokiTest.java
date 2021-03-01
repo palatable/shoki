@@ -1,5 +1,6 @@
 package com.jnape.palatable.shoki.interop;
 
+import com.jnape.palatable.shoki.impl.AmortizedStack;
 import com.jnape.palatable.shoki.impl.HashMap;
 import com.jnape.palatable.shoki.impl.HashMultiSet;
 import com.jnape.palatable.shoki.impl.HashSet;
@@ -41,6 +42,18 @@ public class ShokiTest {
                      Shoki.strictStack(asList(1, 2, 3, 4, 5)));
         assertEquals(StrictStack.strictStack(1, 2, 3, 4, 5),
                      Shoki.strictStack(new LinkedHashSet<>(asList(1, 2, 3, 4, 5))));
+    }
+
+    @Test
+    public void amortizedStack() {
+        assertEquals(AmortizedStack.amortizedStack(),
+                     Shoki.amortizedStack(Collections::emptyIterator));
+        assertEquals(AmortizedStack.amortizedStack(1, 2, 3, 4, 5),
+                     Shoki.amortizedStack(new ArrayDeque<>(asList(1, 2, 3, 4, 5))));
+        assertEquals(AmortizedStack.amortizedStack(1, 2, 3, 4, 5),
+                     Shoki.amortizedStack(asList(1, 2, 3, 4, 5)));
+        assertEquals(AmortizedStack.amortizedStack(1, 2, 3, 4, 5),
+                     Shoki.amortizedStack(new LinkedHashSet<>(asList(1, 2, 3, 4, 5))));
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.jnape.palatable.shoki.interop;
 
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
+import com.jnape.palatable.shoki.impl.AmortizedStack;
 import com.jnape.palatable.shoki.impl.HashMap;
 import com.jnape.palatable.shoki.impl.HashMultiSet;
 import com.jnape.palatable.shoki.impl.HashSet;
@@ -38,38 +39,31 @@ public final class Shoki {
     /**
      * Construct a {@link StrictStack} from an input {@link Iterable}, preserving the same ordering of elements.
      * <p>
-     * Due to the {@link StrictStack#cons(Object) lifo} nature of {@link StrictStack}, this method makes an effort to
-     * iterate the elements of the input {@link Iterable} in reverse, if a known type representing that capability has
-     * been advertised by the {@link Iterable}. If no reverse iteration strategy can be deduced from the input
-     * {@link Iterable}, the elements will be {@link StrictStack#cons(Object) consed} onto the {@link StrictStack} in
-     * one pass and the {@link StrictStack} will be {@link StrictStack#reverse() reversed} before being returned.
+     * Due to the {@link StrictStack#cons(Object) lifo} nature of {@link StrictStack}, this method makes a best effort
+     * to iterate the elements of the input {@link Iterable} in reverse, if a known type representing that capability
+     * has been advertised by the {@link Iterable}.
      *
      * @param javaIterable the input {@link Iterable}
      * @param <A>          the element type
      * @return the populated {@link StrictStack}
      */
     public static <A> StrictStack<A> strictStack(Iterable<A> javaIterable) {
-        Iterator<A> bestIteratorForStackConstruction =
-                javaIterable instanceof Deque<?>
-                ? ((Deque<A>) javaIterable).descendingIterator()
-                : javaIterable instanceof List<?>
-                  ? new Iterator<A>() {
-                    private final List<A> javaList = (List<A>) javaIterable;
-                    private final ListIterator<A> itr = javaList.listIterator(javaList.size());
+        return foldLeft(StrictStack::cons, StrictStack.strictStack(), () -> stackIterator(javaIterable));
+    }
 
-                    @Override
-                    public boolean hasNext() {
-                        return itr.hasPrevious();
-                    }
-
-                    @Override
-                    public A next() {
-                        return itr.previous();
-                    }
-                }
-                  : foldLeft(StrictStack::cons, StrictStack.<A>strictStack(), javaIterable).iterator();
-
-        return foldLeft(StrictStack::cons, StrictStack.strictStack(), () -> bestIteratorForStackConstruction);
+    /**
+     * Construct an {@link AmortizedStack} from an input {@link Iterable}, preserving the same ordering of elements.
+     * <p>
+     * Due to the {@link AmortizedStack#cons(Object) lifo} nature of {@link AmortizedStack}, this method makes a best
+     * effort to iterate the elements of the input {@link Iterable} in reverse, if a known type representing that
+     * capability has been advertised by the {@link Iterable}.
+     *
+     * @param javaIterable the input {@link Iterable}
+     * @param <A>          the element type
+     * @return the populated {@link AmortizedStack}
+     */
+    public static <A> AmortizedStack<A> amortizedStack(Iterable<A> javaIterable) {
+        return foldLeft(AmortizedStack::cons, AmortizedStack.amortizedStack(), () -> stackIterator(javaIterable));
     }
 
     /**
@@ -292,5 +286,26 @@ public final class Shoki {
                                            ? ((SortedSet<A>) javaIterable).comparator()
                                            : null;
         return treeMultiSet(comparator == null ? naturalOrder() : comparator, javaIterable);
+    }
+
+    private static <A> Iterator<A> stackIterator(Iterable<A> javaIterable) {
+        return javaIterable instanceof Deque<?>
+               ? ((Deque<A>) javaIterable).descendingIterator()
+               : javaIterable instanceof List<?>
+                 ? new Iterator<A>() {
+                   private final List<A> javaList = (List<A>) javaIterable;
+                   private final ListIterator<A> itr = javaList.listIterator(javaList.size());
+
+                   @Override
+                   public boolean hasNext() {
+                       return itr.hasPrevious();
+                   }
+
+                   @Override
+                   public A next() {
+                       return itr.previous();
+                   }
+               }
+                 : foldLeft(AmortizedStack::cons, AmortizedStack.<A>amortizedStack(), javaIterable).iterator();
     }
 }

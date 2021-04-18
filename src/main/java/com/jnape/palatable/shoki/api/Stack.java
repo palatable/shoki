@@ -1,6 +1,6 @@
 package com.jnape.palatable.shoki.api;
 
-import com.jnape.palatable.shoki.impl.StrictQueue;
+import com.jnape.palatable.shoki.impl.AmortizedStack;
 import com.jnape.palatable.shoki.impl.StrictStack;
 
 import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
@@ -11,7 +11,7 @@ import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft
  * @param <Size> the known size {@link Number} type
  * @param <A>    the element type
  * @see StrictStack
- * @see StrictQueue
+ * @see AmortizedStack
  */
 public interface Stack<Size extends Number, A> extends OrderedCollection<Size, A> {
 

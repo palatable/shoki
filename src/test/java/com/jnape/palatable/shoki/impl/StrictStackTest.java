@@ -6,8 +6,6 @@ import java.lang.reflect.Field;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -85,9 +83,9 @@ public class StrictStackTest {
     }
 
     @Test
-    public void stackSafeEqualsAndHashCode() {
-        StrictStack<Integer> xs = foldLeft(StrictStack::cons, strictStack(), replicate(10_000, 1));
-        StrictStack<Integer> ys = foldLeft(StrictStack::cons, strictStack(), replicate(10_000, 1));
+    public void equalsAndHashCode() {
+        StrictStack<Integer> xs = strictStack(1, 2, 3);
+        StrictStack<Integer> ys = strictStack(1, 2, 3);
         assertEquals(xs, ys);
         assertEquals(xs.hashCode(), ys.hashCode());
         assertEquals(strictStack(), strictStack());

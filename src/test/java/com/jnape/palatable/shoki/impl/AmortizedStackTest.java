@@ -4,8 +4,6 @@ import org.junit.Test;
 
 import static com.jnape.palatable.lambda.adt.Maybe.just;
 import static com.jnape.palatable.lambda.adt.Maybe.nothing;
-import static com.jnape.palatable.lambda.functions.builtin.fn2.Replicate.replicate;
-import static com.jnape.palatable.lambda.functions.builtin.fn3.FoldLeft.foldLeft;
 import static com.jnape.palatable.shoki.impl.AmortizedStack.amortizedStack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -74,9 +72,9 @@ public class AmortizedStackTest {
     }
 
     @Test
-    public void stackSafeEqualsAndHashCode() {
-        AmortizedStack<Integer> xs = foldLeft(AmortizedStack::cons, amortizedStack(), replicate(10_000, 1));
-        AmortizedStack<Integer> ys = foldLeft(AmortizedStack::cons, amortizedStack(), replicate(10_000, 1));
+    public void equalsAndHashCode() {
+        AmortizedStack<Integer> xs = amortizedStack(1, 2, 3);
+        AmortizedStack<Integer> ys = amortizedStack(1, 2, 3);
         assertEquals(xs, ys);
         assertEquals(xs.hashCode(), ys.hashCode());
         assertEquals(amortizedStack(), amortizedStack());

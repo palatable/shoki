@@ -5,7 +5,12 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/).
 
 ## [Unreleased]
 
-There are currently no unreleased changes.
+### Added
+- `Shoki#hashMap` overload accepting `Iterable` of `java.util.Map.Entry`
+- `Set#addAll`, a more permissive `Set#union` that accepts any shoki `Collection`
+
+### Changed
+- `Shoki`interop methods avoid unnecessary copying, where possible, via safe casts
 
 ## [1.0-alpha-2] - 2020-11-30
 ### Added

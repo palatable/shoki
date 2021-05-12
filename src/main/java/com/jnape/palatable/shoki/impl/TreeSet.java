@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.Natural;
 import com.jnape.palatable.shoki.api.Set;
 import com.jnape.palatable.shoki.api.SizeInfo.Known;
@@ -95,6 +96,15 @@ public final class TreeSet<A> implements Set<Natural, A>, SortedCollection<Natur
     @Override
     public TreeSet<A> tail() {
         return new TreeSet<>(map.tail());
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(log2n * o)</code>.
+     */
+    @Override
+    public TreeSet<A> addAll(Collection<Natural, A> collection) {
+        return (TreeSet<A>) Set.super.addAll(collection);
     }
 
     /**

@@ -13,6 +13,7 @@ import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
 import static com.jnape.palatable.shoki.impl.HashSet.hashSet;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -118,6 +119,16 @@ public class HashSetTest {
         assertEquals(identityHashSet, hashSet(referenceEquals(), identityHashCode(), 1, saboteur));
         assertNotEquals(hashSet(1, 666), identityHashSet);
         assertEquals(identityHashSet, hashSet(1, 666));
+    }
+
+    @Test
+    public void addAll() {
+        assertEquals(hashSet(), hashSet().addAll(strictStack()));
+        assertEquals(hashSet(1, 2, 3), hashSet().addAll(strictStack(1, 2, 3)));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).addAll(strictStack()));
+        assertEquals(hashSet(1, 2, 3), hashSet(1, 2, 3).addAll(strictStack(1, 2, 3)));
+        assertEquals(hashSet(1, 2, 3, 4), hashSet(1, 2, 3).addAll(strictStack(2, 3, 4)));
+        assertEquals(hashSet(1, 2, 3, 4), hashSet(2, 3, 4).addAll(strictStack(1, 2, 3)));
     }
 
     @Test

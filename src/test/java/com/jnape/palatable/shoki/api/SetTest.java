@@ -19,6 +19,21 @@ public class SetTest {
     public static final class DefaultMethods {
 
         @Test
+        public void addAll() {
+            DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(hashSet());
+            DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(hashSet(1, 2, 3));
+            DefaultMethodsSet<Natural, Integer> _234  = DefaultMethodsSet.delegate(hashSet(2, 3, 4));
+            DefaultMethodsSet<Natural, Integer> _1234 = DefaultMethodsSet.delegate(hashSet(1, 2, 3, 4));
+
+            assertThat(empty, equivalentTo(empty.addAll(empty), sameElements()));
+            assertThat(_123, equivalentTo(empty.addAll(_123), sameElements()));
+            assertThat(_123, equivalentTo(_123.addAll(empty), sameElements()));
+            assertThat(_123, equivalentTo(_123.addAll(_123), sameElements()));
+            assertThat(_1234, equivalentTo(_123.addAll(_234), sameElements()));
+            assertThat(_1234, equivalentTo(_234.addAll(_123), sameElements()));
+        }
+
+        @Test
         public void intersection() {
             DefaultMethodsSet<Natural, Integer> empty = DefaultMethodsSet.delegate(hashSet());
             DefaultMethodsSet<Natural, Integer> _123  = DefaultMethodsSet.delegate(hashSet(1, 2, 3));

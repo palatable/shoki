@@ -3,6 +3,7 @@ package com.jnape.palatable.shoki.impl;
 import com.jnape.palatable.lambda.adt.Maybe;
 import com.jnape.palatable.lambda.adt.Unit;
 import com.jnape.palatable.lambda.adt.hlist.Tuple2;
+import com.jnape.palatable.shoki.api.Collection;
 import com.jnape.palatable.shoki.api.EquivalenceRelation;
 import com.jnape.palatable.shoki.api.HashingAlgorithm;
 import com.jnape.palatable.shoki.api.Natural;
@@ -98,6 +99,15 @@ public final class HashSet<A> implements Set<Natural, A> {
     @Override
     public boolean isEmpty() {
         return map.isEmpty();
+    }
+
+    /**
+     * {@inheritDoc}
+     * <code>O(o)</code>.
+     */
+    @Override
+    public HashSet<A> addAll(Collection<Natural, A> collection) {
+        return (HashSet<A>) Set.super.addAll(collection);
     }
 
     /**

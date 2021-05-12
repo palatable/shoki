@@ -37,6 +37,17 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
     Set<Size, A> tail();
 
     /**
+     * Grant each element in <code>collection</code> membership in this <code>{@link Set}</code> and return the updated
+     * {@link Set}.
+     *
+     * @param collection the {@link Collection} to add elements from
+     * @return this {@link Set} after including all elements of collection
+     */
+    default Set<Size, A> addAll(Collection<Size, A> collection) {
+        return foldLeft(Set<Size, A>::add, this, collection);
+    }
+
+    /**
      * The <a href="https://en.wikipedia.org/wiki/Intersection_(set_theory)" target="_new">intersection</a> of two
      * {@link Set Sets} <code>xs</code> and <code>ys</code> is the {@link Set} of those elements present in both
      * <code>xs</code> and <code>ys</code>.
@@ -55,9 +66,10 @@ public interface Set<Size extends Number, A> extends Collection<Size, A>, Member
      *
      * @param other the {@link Set} to union this {@link Set} with
      * @return the union {@link Set}
+     * @see Set#addAll(Collection)
      */
     default Set<Size, A> union(Set<Size, A> other) {
-        return foldLeft(Set<Size, A>::add, this, other);
+        return addAll(other);
     }
 
     /**

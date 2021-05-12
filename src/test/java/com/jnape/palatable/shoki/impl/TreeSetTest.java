@@ -13,6 +13,7 @@ import static com.jnape.palatable.shoki.api.Natural.one;
 import static com.jnape.palatable.shoki.api.Natural.zero;
 import static com.jnape.palatable.shoki.api.Set.EquivalenceRelations.sameElements;
 import static com.jnape.palatable.shoki.api.SizeInfo.known;
+import static com.jnape.palatable.shoki.impl.StrictStack.strictStack;
 import static com.jnape.palatable.shoki.impl.TreeSet.treeSet;
 import static com.jnape.palatable.shoki.testsupport.EquivalenceRelationMatcher.equivalentTo;
 import static java.util.Collections.reverseOrder;
@@ -113,6 +114,16 @@ public class TreeSetTest {
         assertEquals(just(3), reverseTreeSet.head());
         assertEquals(just(2), reverseTreeSet.tail().head());
         assertEquals(just(1), reverseTreeSet.tail().tail().head());
+    }
+
+    @Test
+    public void addAll() {
+        assertEquals(treeSet(), treeSet().addAll(strictStack()));
+        assertEquals(treeSet(1, 2, 3), TreeSet.<Integer>treeSet().addAll(strictStack(1, 2, 3)));
+        assertEquals(treeSet(1, 2, 3), treeSet(1, 2, 3).addAll(strictStack()));
+        assertEquals(treeSet(1, 2, 3), treeSet(1, 2, 3).addAll(strictStack(1, 2, 3)));
+        assertEquals(treeSet(1, 2, 3, 4), treeSet(1, 2, 3).addAll(strictStack(2, 3, 4)));
+        assertEquals(treeSet(1, 2, 3, 4), treeSet(2, 3, 4).addAll(strictStack(1, 2, 3)));
     }
 
     @Test

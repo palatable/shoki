@@ -201,4 +201,10 @@ public class TreeMapTest {
                             tuple("e", 5),
                             tuple("f", 6)));
     }
+
+    @Test
+    public void comparatorEqualityPreserved() {
+        Comparator<Integer> comparator = naturalOrder();
+        assertEquals(comparator, treeMap(comparator).keyComparator());
+    }
 }

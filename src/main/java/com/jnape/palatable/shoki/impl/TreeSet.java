@@ -38,7 +38,7 @@ public final class TreeSet<A> implements Set<Natural, A>, SortedCollection<Natur
      *
      * @return the element {@link Comparator}
      */
-    public Comparator<A> comparator() {
+    public Comparator<? super A> comparator() {
         return map.keyComparator();
     }
 
